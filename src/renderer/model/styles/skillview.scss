@@ -1,0 +1,29 @@
+.skillview {
+
+
+  padding-bottom: 20px;
+
+
+  border-bottom: 1.5px solid #ccc;
+
+  & {
+    &:not(:last-child) {
+      margin-bottom: 20px;
+    }
+  }
+
+
+  &__goals {
+    margin-top: 20px;
+  }
+
+  p {
+    &::before {
+      content: '- '
+    }
+  }
+
+  button.add_goal {
+    margin-top: 25px;
+  }
+}

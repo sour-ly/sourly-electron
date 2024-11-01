@@ -1,0 +1,35 @@
+.goalview {
+  padding-left: 35px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  &.done {
+    text-decoration: line-through;
+    opacity: 0.2;
+  }
+
+  &:not(:first-child) {
+    margin-top: 2rem;
+  }
+
+  h2::before {
+    content: '↳ ';
+    font-size: 1.5em;
+  }
+
+  p {
+    &:not(.metric) {
+      margin: 0;
+
+      &::before {
+        content: '';
+      }
+    }
+
+    &.metric {
+
+      margin-left: 15px;
+    }
+  }
+}

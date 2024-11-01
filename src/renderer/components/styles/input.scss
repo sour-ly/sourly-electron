@@ -1,0 +1,41 @@
+.input--label {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+
+  label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+  }
+
+  textarea {
+    max-height: 4rem;
+    resize: none;
+    border-radius: .2rem;
+    border: none;
+    padding: .205rem .75rem;
+    border: 1px solid #1f1f1f;
+    outline: none;
+
+    &::focus,
+    &::active {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  input {
+    border-radius: .2rem;
+    border: none;
+    padding: .205rem .75rem;
+    border: 1px solid #1f1f1f;
+    outline: none;
+
+    &::focus,
+    &::active {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+}
