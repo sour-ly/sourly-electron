@@ -40,7 +40,7 @@ function AddSkillWrapper() {
 
   function saveSkill() {
     setSkill(o => {
-      SkillManager.getInstance().addSkill(new Skill(o.name, 0, 0));
+      SkillManager.getInstance().addSkill(new Skill(o.name));
       return o;
     });
   }
