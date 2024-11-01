@@ -5,6 +5,10 @@ const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);
 root.render(<App />);
 
+
+
+//TODO: dispose of this and create a better ipcRenderer System
+
 // calling IPC exposed from preload script
 window.electron.ipcRenderer.once('ipc-example', (arg) => {
   // eslint-disable-next-line no-console

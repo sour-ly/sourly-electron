@@ -158,7 +158,7 @@
     "react-refresh": "^0.14.0",
     "react-test-renderer": "^18.2.0",
     "rimraf": "^5.0.1",
-    "sass": "^1.67.0",
+    "sass": "^1.80.5",
     "sass-loader": "^13.3.2",
     "style-loader": "^3.3.3",
     "terser-webpack-plugin": "^5.3.9",
