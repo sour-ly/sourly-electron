@@ -8,6 +8,7 @@ import Goal from '../model/Goal';
 import PopUp, { _popup_types, PopUpWindow } from './popup/Popup';
 import { useStateUtil } from './util/state';
 import { SkillPopupWrapper } from './model/popup/SkillPopup';
+import { version } from '../main/version';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -66,11 +67,15 @@ export default function App() {
 
   const [ctx_popup, setPopUpContext] = React.useState<PopUpStates>({ open: false, context: null });
 
+  useEffect(() => {
+    window.document.title = `Sourly v${version}`;
+  }, []);
+
   return (
     <WindowContext.Provider value={{ popUp: { open: (ctx) => { setPopUpContext({ open: true, context: ctx }); return true; }, close: () => { setPopUpContext({ open: false, context: null }); return true; }, state: ctx_popup.open } }}>
       <main>
         <PopUp open={ctx_popup.open} context={ctx_popup.context} />
-        <div className="version">v{"0.0.2"}</div>
+        <div className="version">v{version}</div>
         <Router>
           <Routes>
             <Route path="/" element={<Hello />} />
