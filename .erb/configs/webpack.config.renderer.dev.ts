@@ -40,7 +40,7 @@ if (
 
 const configuration: webpack.Configuration = {
   devtool: 'inline-source-map',
-
+  stats: 'none',
   mode: 'development',
 
   target: ['web', 'electron-renderer'],
@@ -69,18 +69,36 @@ const configuration: webpack.Configuration = {
           {
             loader: 'css-loader',
             options: {
+
               modules: true,
               sourceMap: true,
+              silenceDeprecations: true,
               importLoaders: 1,
             },
           },
-          'sass-loader',
+          {
+            loader: 'sass-loader',
+
+            options: {
+              sassOptions: {
+                quietDeps: true  // suppress warnings from dependencies
+              },
+            }
+          },
         ],
         include: /\.module\.s?(c|a)ss$/,
       },
       {
         test: /\.s?css$/,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
+        use: ['style-loader', 'css-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                quietDeps: true  // suppress warnings from dependencies
+              },
+            }
+          }],
         exclude: /\.module\.s?(c|a)ss$/,
       },
       // Fonts
@@ -118,12 +136,12 @@ const configuration: webpack.Configuration = {
     ...(skipDLLs
       ? []
       : [
-          new webpack.DllReferencePlugin({
-            context: webpackPaths.dllPath,
-            manifest: require(manifest),
-            sourceType: 'var',
-          }),
-        ]),
+        new webpack.DllReferencePlugin({
+          context: webpackPaths.dllPath,
+          manifest: require(manifest),
+          sourceType: 'var',
+        }),
+      ]),
 
     new webpack.NoEmitOnErrorsPlugin(),
 

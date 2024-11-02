@@ -109,6 +109,7 @@ export default function App() {
   return (
     <WindowContext.Provider value={{ popUp: { open: (ctx) => { setPopUpContext({ open: true, context: ctx }); return true; }, close: () => { setPopUpContext({ open: false, context: null }); return true; }, state: ctx_popup.open } }}>
       <PopUp open={ctx_popup.open} context={ctx_popup.context} />
+      <div className="version">v0.0.1</div>
       <Router>
         <Routes>
           <Route path="/" element={<Hello />} />

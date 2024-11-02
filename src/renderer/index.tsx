@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client';
+import sass from 'sass';
 import App from './App';
 import IPC from './ReactIPC';
 import { Log } from '../log/log';
@@ -37,3 +38,4 @@ IPC.once('ipc-example', (...arg) => {
   console.log(arg);
 });
 IPC.sendMessage('ipc-example', 'ping');
+

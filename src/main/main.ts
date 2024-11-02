@@ -16,6 +16,7 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { SourlyStorage } from '../storage/storage';
 import { Log } from '../log/log';
+import sass from 'sass';
 
 class AppUpdater {
   constructor() {
@@ -158,3 +159,4 @@ app
     });
   })
   .catch(console.log);
+

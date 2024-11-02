@@ -6,6 +6,7 @@ import Input from "../components/Input";
 import Goal, { GoalProps } from "../../model/Goal";
 import { useEffect, useState } from "react";
 import { useStateUtil } from "../util/state";
+import ProgressBar from "../components/ProgressBar";
 
 
 const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boolean }) => {
@@ -31,12 +32,12 @@ function AddGoalWrapper({ skill }: { skill: Skill }) {
   function addGoalPopUp() {
     ctx.popUp.open({
       type: 'confirm',
-      content: <div>
+      content: <div className="popup__add">
         <h1>Add Goal</h1>
         <Input placeholder="Name" onChange={(e) => change('name', e.currentTarget.value)} />
         <Input placeholder="Description" onChange={(e) => change('description', e.currentTarget.value)} />
         <Input placeholder="Metric" onChange={(e) => change('metric', e.currentTarget.value)} />
-        <Input placeholder="Target" onChange={(e) => change('target', parseInt(e.currentTarget.value))} />
+        <Input placeholder="Goal" onChange={(e) => change('target', parseInt(e.currentTarget.value))} />
       </div>,
       options: {
         onOkay: () => {
@@ -62,11 +63,7 @@ export function SkillView({ skill }: { skill: Skill }) {
 
   return (
     <div className="skillview">
-      <h1>{skill.Name}</h1>
-      <p>Level: {skill.Level}</p>
-      <p>Experience: {skill.CurrentExperience}</p>
-      <p>Experience Required: {skill.ExperienceRequired}</p>
-      <p>Progress: {skill.Progress}</p>
+      <h1>{skill.Name}: {skill.CurrentExperience} EXP</h1>
       <div className="skillview__goals">
         {skill.Goals.sort(sort_goals_by_completion).map((goal) => {
           return <GoalView key={goal.Id} goal={goal} />
