@@ -10,6 +10,7 @@ type EventMap = {
   'experienceGained': number;
   'skillChanged': Skill;
   'goalAdded': Goal;
+  'goalUpdated': Goal;
   'goalRemoved': Goal;
 }
 
@@ -32,6 +33,9 @@ export default class Skill extends Eventful<EventMap> {
       //why? because event listeners jackass
       this.addGoal(goal);
     });
+    if (isNaN(this.currentExperience)) {
+      this.currentExperience = 0;
+    }
   }
 
   private calculateExperienceRequired(level: number) {
@@ -40,7 +44,13 @@ export default class Skill extends Eventful<EventMap> {
 
   private listenToGoal(goal: Goal) {
     goal.on('completed', (goal) => {
-      this.addExperience(25);
+      this.addExperience(goal.Reward);
+    });
+    goal.on('goalProgressChanged', (args) => {
+      const { amount, goal } = args;
+      if (amount > 0) {
+        this.addExperience(amount * (goal.Reward * .05));
+      }
     });
   }
 
@@ -53,7 +63,12 @@ export default class Skill extends Eventful<EventMap> {
   }
 
   private addExperience(experience: number) {
+    if (isNaN(experience)) {
+      Log.log('Skill:addExperience', 1, 'experience is NaN', experience);
+      return;
+    }
     this.currentExperience += experience;
+    this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     if (this.currentExperience >= this.experienceRequired) {
       this.levelUp();
     }
@@ -97,6 +112,15 @@ export default class Skill extends Eventful<EventMap> {
     if (index !== -1) {
       this.goals.splice(index, 1);
       this.emit('goalRemoved', goal);
+    }
+  }
+
+  public updateGoal(goal_id: number, goal: Goal) {
+    const index = this.goals.findIndex(goal => goal.Id === goal_id);
+    if (index !== -1) {
+      this.goals[index] = goal;
+      this.emit('goalUpdated', goal);
+      this.listenToGoal(goal);
     }
   }
 
@@ -151,6 +175,10 @@ export class SkillManager extends Eventful<SkillEventMap> {
       listenToGoals(goal);
       this.emit('onUpdates', { skills: this.skills });
     });
+    skill.on('goalUpdated', (goal) => {
+      listenToGoals(goal);
+      this.emit('onUpdates', { skills: this.skills });
+    });
     skill.on('goalRemoved', (goal) => {
       this.emit('onUpdates', { skills: this.skills });
     });
@@ -175,6 +203,8 @@ export class SkillManager extends Eventful<SkillEventMap> {
     return this.skills;
   }
 
+  /* skill methods */
+
   public addSkill(skill: Skill) {
     this.skills.push(skill);
     this.emit('skillAdded', { skills: this.skills, newSkill: skill });
@@ -184,7 +214,7 @@ export class SkillManager extends Eventful<SkillEventMap> {
     const n_skill = (new Skill(skill.name, skill.level, skill.currentExperience));
     if (skill.goals) {
       for (const goal of skill.goals) {
-        n_skill.addGoal(new Goal(goal.name, goal.description, goal.progress, goal.metric, goal.target, goal.completed));
+        n_skill.addGoal(new Goal(goal.name, goal.description, goal.progress, goal.reward ?? 0, goal.metric, goal.target, goal.completed));
       }
     }
     this.addSkill(n_skill);
@@ -196,6 +226,10 @@ export class SkillManager extends Eventful<SkillEventMap> {
       this.skills.splice(index, 1);
       this.emit('skillRemoved', skill);
     }
+  }
+
+  public getSkillById(id: number) {
+    return this.skills.find(skill => skill.Id === id);
   }
 
   private serializeSkills() {

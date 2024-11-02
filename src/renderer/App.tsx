@@ -7,6 +7,7 @@ import { SkillView } from './model/SkillView';
 import Goal from '../model/Goal';
 import PopUp, { _popup_types, PopUpWindow } from './popup/Popup';
 import { useStateUtil } from './util/state';
+import { SkillPopupWrapper } from './model/popup/SkillPopup';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -31,46 +32,6 @@ export const useWindow = () => {
   if (!ctx) throw new Error('useWindow must be used within a WindowProvider');
   return React.useContext(WindowContext) as WindowContextType
 };
-
-function AddSkillWrapper() {
-  const [skill, setSkill] = useState<SkillProps>({});
-  const change = useStateUtil(setSkill);
-  const ctx = useWindow();
-
-
-  function saveSkill() {
-    setSkill(o => {
-      SkillManager.getInstance().addSkill(new Skill(o.name));
-      return {};
-    });
-  }
-
-
-  function addSkillPopUp() {
-    ctx.popUp.open({
-      type: 'confirm',
-      content: <div>
-        <h1>Add Skill</h1>
-        <input type="text" placeholder="Name" onChange={(e) => change('name', e.currentTarget.value)} />
-      </div>,
-      options: {
-        onOkay: () => {
-          saveSkill();
-          ctx.popUp.close();
-          return;
-        },
-        onCancel: () => {
-          ctx.popUp.close();
-          return;
-        }
-      }
-    });
-  }
-
-  return (
-    <button className="add_skill" onClick={addSkillPopUp}>Add Skill</button>
-  )
-}
 
 
 function Hello() {
@@ -97,7 +58,7 @@ function Hello() {
           <SkillView key={skill.Id} skill={skill} />
         )
       })}
-      <AddSkillWrapper />
+      <SkillPopupWrapper />
     </main>
   );
 }

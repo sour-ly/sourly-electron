@@ -12,6 +12,7 @@ export type GoalProps = {
   progress?: number;
   metric?: string;
   target?: number;
+  reward?: number;
   completed?: boolean;
 }
 
@@ -19,7 +20,7 @@ export default class Goal extends Eventful<EventMap> {
 
   private completed: boolean = false;
 
-  constructor(private name: string = "Untitled", private description: string = "No description", private progress: number = 0, private metric: string = "units", private target: number = 1, completed: boolean = false) {
+  constructor(private name: string = "Untitled", private description: string = "No description", private progress: number = 0, private reward: number = 1, private metric: string = "units", private target: number = 1, completed: boolean = false) {
     super();
     this.completed = completed;
   }
@@ -63,6 +64,10 @@ export default class Goal extends Eventful<EventMap> {
     return this.target;
   }
 
+  public get Reward() {
+    return this.reward;
+  }
+
   /* Searialization */
   public toJSON() {
     return {
@@ -70,6 +75,7 @@ export default class Goal extends Eventful<EventMap> {
       description: this.description,
       progress: this.progress,
       metric: this.metric,
+      reward: this.reward,
       target: this.target,
       completed: this.completed
     }
