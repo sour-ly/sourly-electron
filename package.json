@@ -1,5 +1,5 @@
 {
-  "name": "electron-react-boilerplate",
+  "name": "sourly-electron",
   "description": "A foundation for scalable desktop apps",
   "keywords": [
     "electron",
@@ -12,7 +12,7 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
+  "homepage": "https://github.com/sour-ly/sourly-electron",
   "bugs": {
     "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"
   },
@@ -109,7 +109,8 @@
     "electron-updater": "^6.1.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.16.0"
+    "react-router-dom": "^6.16.0",
+    "update-electron-app": "^3.0.0"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.3.0",
@@ -177,8 +178,8 @@
     "webpack-merge": "^5.9.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "Sourly",
+    "appId": "org.sourly.sourly",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -237,8 +238,8 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate"
+      "owner": "sour-ly",
+      "repo": "sourly-electron"
     }
   },
   "collective": {

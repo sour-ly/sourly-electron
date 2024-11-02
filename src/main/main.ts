@@ -16,10 +16,11 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { SourlyStorage } from '../storage/storage';
 import { Log } from '../log/log';
-import sass from 'sass';
+import * as Updater from 'update-electron-app';
 
 class AppUpdater {
   constructor() {
+
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
     autoUpdater.checkForUpdatesAndNotify();
