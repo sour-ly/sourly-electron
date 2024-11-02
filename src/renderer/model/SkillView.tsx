@@ -66,7 +66,7 @@ export function SkillView({ skill }: { skill: Skill }) {
       <h1>{skill.Name}: {skill.CurrentExperience} EXP</h1>
       <div className="skillview__goals">
         {skill.Goals.sort(sort_goals_by_completion).map((goal) => {
-          return <GoalView key={goal.Id} goal={goal} />
+          return <GoalView key={goal.Id} skill_id={skill.Id} goal={goal} />
         })}
         <AddGoalWrapper skill={skill} />
       </div>

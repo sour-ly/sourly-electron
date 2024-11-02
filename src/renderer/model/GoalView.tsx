@@ -3,7 +3,7 @@ import Goal from "../../model/Goal";
 import ProgressBar from '../components/ProgressBar';
 import { useWindow } from '../App';
 
-export default function GoalView({ goal }: { goal: Goal, skill_id: string }) {
+export default function GoalView({ goal }: { goal: Goal, skill_id: number }) {
 
   const ctx = useWindow();
 
