@@ -8,6 +8,7 @@ import Goal from '../model/Goal';
 import PopUp, { _popup_types, PopUpWindow } from './popup/Popup';
 import { useStateUtil } from './util/state';
 import { SkillPopupWrapper } from './model/popup/SkillPopup';
+import { version } from '../main/version';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -50,8 +51,7 @@ function Hello() {
   }, [])
 
   return (
-
-    <main>
+    <>
       {skills.length === 0 && <h1>No Skills Yet!</h1>}
       {skills.map((skill) => {
         return (
@@ -59,7 +59,7 @@ function Hello() {
         )
       })}
       <SkillPopupWrapper />
-    </main>
+    </>
   );
 }
 
@@ -67,15 +67,24 @@ export default function App() {
 
   const [ctx_popup, setPopUpContext] = React.useState<PopUpStates>({ open: false, context: null });
 
+  useEffect(() => {
+    window.document.title = `Sourly v${version}`;
+  }, []);
+
   return (
     <WindowContext.Provider value={{ popUp: { open: (ctx) => { setPopUpContext({ open: true, context: ctx }); return true; }, close: () => { setPopUpContext({ open: false, context: null }); return true; }, state: ctx_popup.open } }}>
-      <PopUp open={ctx_popup.open} context={ctx_popup.context} />
-      <div className="version">v{"0.0.2"}</div>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Hello />} />
-        </Routes>
-      </Router>
+      <main>
+        <PopUp open={ctx_popup.open} context={ctx_popup.context} />
+        <div className="version">v{version}</div>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Hello />} />
+          </Routes>
+        </Router>
+        <div className="feedback" style={{ borderTop: '1px solid black', paddingTop: '10px', marginTop: '25px' }}>
+          Please leave feedback on <a href="https://forms.gle/TQHj89A2EwuxytaMA">Google Forms</a>
+        </div>
+      </main>
     </WindowContext.Provider>
   );
 }
