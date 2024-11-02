@@ -14,6 +14,8 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { SourlyStorage } from '../storage/storage';
+import { Log } from '../log/log';
 
 class AppUpdater {
   constructor() {
@@ -25,10 +27,31 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
+const storage = SourlyStorage.getInstance();
+
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', 'pong');
+});
+
+ipcMain.on('storage-request', async (event, arg) => {
+  const [data] = arg
+  Log.log('ipcMain:lambda:request', 0, 'Received storage request', data);
+  event.reply('storage-request', storage.getItem(data.key) ?? {});
+});
+
+ipcMain.on('storage-save', async (event, arg) => {
+  const [data] = arg
+  Log.log('ipcMain:lambda:save', 0, 'Received storage save', data);
+  if (data.key === undefined || data.value === undefined) {
+    Log.log('ipcMain:lambda:save', 1, 'Invalid storage save request', data);
+    event.reply('storage-save', false);
+    return;
+  }
+  storage.setItem(data.key, data.value);
+  storage.save();
+  event.reply('storage-save', { key: arg.key, value: arg.value });
 });
 
 if (process.env.NODE_ENV === 'production') {

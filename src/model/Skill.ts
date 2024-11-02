@@ -1,5 +1,7 @@
 import { Eventful } from '../event/events';
-import Goal from './Goal';
+import { Log } from '../log/log';
+import IPC from '../renderer/ReactIPC';
+import Goal, { GoalProps } from './Goal';
 
 
 
@@ -15,6 +17,7 @@ export type SkillProps = {
   name?: string;
   level?: number;
   currentExperience?: number;
+  goals?: GoalProps[];
 }
 
 export default class Skill extends Eventful<EventMap> {
@@ -97,6 +100,16 @@ export default class Skill extends Eventful<EventMap> {
     }
   }
 
+  /* Searialize */
+  public toJSON() {
+    return {
+      name: this.name,
+      level: this.level,
+      currentExperience: this.currentExperience,
+      goals: this.goals.map(goal => goal.toJSON())
+    }
+  }
+
 }
 
 type SkillEventMap = {
@@ -121,6 +134,10 @@ export class SkillManager extends Eventful<SkillEventMap> {
     this.on('skillRemoved', (skill) => {
       this.emit('onUpdates', { skills: this.skills });
     });
+    this.on('onUpdates', ({ skills }) => {
+      IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
+      Log.log('skillManager:onUpdates', 0, 'saved skills to storage', this.serializeSkills());
+    });
   }
 
   private addSkillListeners(skill: Skill) {
@@ -130,7 +147,6 @@ export class SkillManager extends Eventful<SkillEventMap> {
         this.emit('onUpdates', { skills: this.skills });
       });
     }
-
     skill.on('goalAdded', (goal) => {
       listenToGoals(goal);
       this.emit('onUpdates', { skills: this.skills });
@@ -164,12 +180,26 @@ export class SkillManager extends Eventful<SkillEventMap> {
     this.emit('skillAdded', { skills: this.skills, newSkill: skill });
   }
 
+  public addSkillFromJSON(skill: SkillProps) {
+    const n_skill = (new Skill(skill.name, skill.level, skill.currentExperience));
+    if (skill.goals) {
+      for (const goal of skill.goals) {
+        n_skill.addGoal(new Goal(goal.name, goal.description, goal.progress, goal.metric, goal.target, goal.completed));
+      }
+    }
+    this.addSkill(n_skill);
+  }
+
   public removeSkill(skill: Skill) {
     const index = this.skills.indexOf(skill);
     if (index !== -1) {
       this.skills.splice(index, 1);
       this.emit('skillRemoved', skill);
     }
+  }
+
+  private serializeSkills() {
+    return this.skills.map(skill => skill.toJSON());
   }
 
 }

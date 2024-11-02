@@ -24,7 +24,7 @@ function AddGoalWrapper({ skill }: { skill: Skill }) {
   function saveGoal() {
     setGoal(o => {
       skill.addGoal(new Goal(o.name, o.description, 0, o.metric, o.target));
-      return o;
+      return {};
     });
   }
 

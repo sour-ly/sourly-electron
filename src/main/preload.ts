@@ -1,15 +1,18 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { StorageRequestPacket, StorageSavePacket } from '../storage/storage';
 
-export type Channels = 'ipc-example';
+export type Channels = 'ipc-example' | 'storage-request' | 'storage-save';
 
 export type ChannelsMap = {
   [key in Channels]: any[];
 }
 
 export const IPC_map = {
-  'ipc-example': ['']
+  'ipc-example': [''],
+  'storage-request': [{} as StorageRequestPacket],
+  'storage-save': [{} as StorageSavePacket],
 }
 
 const electronHandler = {

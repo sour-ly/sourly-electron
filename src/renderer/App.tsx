@@ -41,7 +41,7 @@ function AddSkillWrapper() {
   function saveSkill() {
     setSkill(o => {
       SkillManager.getInstance().addSkill(new Skill(o.name));
-      return o;
+      return {};
     });
   }
 
@@ -83,11 +83,6 @@ function Hello() {
         return [...skill.skills];
       })
     });
-    const skill = new Skill('Coding', 1, 100);
-    skill.addGoal(new Goal('Learn React', "React is a JavaScript library for building user interfaces.", 0, "Hours", 10));
-
-
-    SkillManager.getInstance().addSkill(skill);
     return () => {
       SkillManager.getInstance().off('onUpdates', i);
     }
@@ -96,6 +91,7 @@ function Hello() {
   return (
 
     <main>
+      {skills.length === 0 && <h1>No Skills Yet!</h1>}
       {skills.map((skill) => {
         return (
           <SkillView key={skill.Id} skill={skill} />

@@ -63,5 +63,18 @@ export default class Goal extends Eventful<EventMap> {
     return this.target;
   }
 
+  /* Searialization */
+  public toJSON() {
+    return {
+      name: this.name,
+      description: this.description,
+      progress: this.progress,
+      metric: this.metric,
+      target: this.target,
+      completed: this.completed
+    }
+  }
+
+
 
 }
