@@ -9,6 +9,7 @@ import { useStateUtil } from "../util/state";
 import ProgressBar from "../components/ProgressBar";
 import toRomanNumerals from "../util/roman";
 import { GoalPopUpWrapper } from "./popup/GoalPopup";
+import { SkillDeletePopUp } from "./popup/SkillPopup";
 
 
 const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boolean }) => {
@@ -28,6 +29,7 @@ export function SkillView({ skill }: { skill: Skill }) {
         <h1>{skill.Name} {toRomanNumerals(skill.Level)}: {skill.CurrentExperience} EXP</h1>
         <ProgressBar max={skill.ExperienceRequired} value={skill.CurrentExperience} />
       </div>
+      <SkillDeletePopUp skill={skill} />
       <div className="skillview__goals">
         {skill.Goals.sort(sort_goals_by_completion).map((goal) => {
           return <GoalView key={goal.Id} skill_id={skill.Id} goal={goal} />
