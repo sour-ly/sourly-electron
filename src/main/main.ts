@@ -16,7 +16,6 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { SourlyStorage } from '../storage/storage';
 import { Log } from '../log/log';
-import * as Updater from 'update-electron-app';
 
 class AppUpdater {
   constructor() {

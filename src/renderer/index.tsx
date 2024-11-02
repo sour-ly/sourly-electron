@@ -1,5 +1,4 @@
 import { createRoot } from 'react-dom/client';
-import sass from 'sass';
 import App from './App';
 import IPC from './ReactIPC';
 import { Log } from '../log/log';
@@ -26,16 +25,4 @@ Promise.resolve(new Promise((resolve) => {
 })).then(() => {
   root.render(<App />);
 });
-
-
-
-
-//TODO: dispose of this and create a better ipcRenderer System
-
-// calling IPC exposed from preload script
-IPC.once('ipc-example', (...arg) => {
-  // eslint-disable-next-line no-console
-  console.log(arg);
-});
-IPC.sendMessage('ipc-example', 'ping');
 

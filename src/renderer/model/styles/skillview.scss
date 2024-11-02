@@ -25,11 +25,25 @@
     margin-top: 20px;
   }
 
+  &__title {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: sticky;
+    background: white;
+    z-index: 5;
+    top: 0;
+    padding-top: 10px;
+    height: 85px;
+  }
+
   p {
     &::before {
       content: '- '
     }
   }
+
+
 
   button.add_goal {
     margin-top: 25px;
