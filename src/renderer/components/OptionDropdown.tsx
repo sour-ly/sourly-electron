@@ -32,6 +32,9 @@ export default function OptionDropdown({ options, ...props }: OptionDropdownProp
     const f = (e: MouseEvent) => {
       if (ref.current && e.target instanceof Node && !ref.current.contains(e.target)) {
         close();
+      } else {
+        //ignore the click
+        e.stopPropagation();
       }
     }
     document.addEventListener('click', f);
@@ -54,7 +57,7 @@ export default function OptionDropdown({ options, ...props }: OptionDropdownProp
   }
 
   return (
-    <div className="option-dropdown" ref={ref} {...props}>
+    <div ref={ref} {...props} className={"option-dropdown " + props.className} onClick={e => e.stopPropagation()}>
       <img src={dots} onClick={toggleDropdown} alt="dots" className="progress-bar__dots" />
       {open && (
         <div className={`option-dropdown__menu ${open && 'open' || ''}`}>

@@ -50,16 +50,21 @@ export function SkillView({ skill }: { skill: Skill }) {
     }
   }, [collapsed])
 
+  function toggle() {
+    if (skill.Goals.length === 0) return;
+    setCollapsed(!collapsed);
+  }
+
   return (
     <div className="skillview">
       <div className="skillview__title"
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={() => toggle()}
       >
         <h1>{skill.Name} {toRomanNumerals(skill.Level)}: {skill.CurrentExperience} EXP</h1>
         <ProgressBar max={skill.ExperienceRequired} value={skill.CurrentExperience} options={options} />
-        {!collapsed && <span className="expand-message">Click to expand</span>}
+        {skill.Goals.length > 0 && collapsed && <span className="expand-message">Click to expand</span>}
       </div>
-      <div className={`collapsible ${!collapsed ? 'collapsed' : 'open'}`} ref={collapse_ref}>
+      <div className={`collapsible ${collapsed ? 'collapsed' : 'open'}`} ref={collapse_ref}>
         <div className="skillview__description">
         </div>
         <div className="skillview__goals">
