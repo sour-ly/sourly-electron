@@ -2,8 +2,9 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { StorageRequestPacket, StorageSavePacket } from '../storage/storage';
+import { EnvironmentVariables } from './version';
 
-export type Channels = 'ipc-example' | 'storage-request' | 'storage-save' | 'open-link';
+export type Channels = 'ipc-example' | 'storage-request' | 'storage-save' | 'open-link' | 'environment-request' | 'environment-response';
 
 export type ChannelsMap = {
   [key in Channels]: any[];
@@ -14,6 +15,8 @@ export const IPC_map = {
   'storage-request': [{} as StorageRequestPacket],
   'storage-save': [{} as StorageSavePacket],
   'open-link': [''],
+  'environment-request': [''],
+  'environment-response': [{} as EnvironmentVariables],
 }
 
 const electronHandler = {

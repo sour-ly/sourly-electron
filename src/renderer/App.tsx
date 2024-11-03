@@ -11,6 +11,7 @@ import { SkillPopupWrapper } from './model/popup/SkillPopup';
 import { version } from '../main/version';
 import NotificationBanner, { INotifcation } from './notification/notification';
 import { Anchor } from './components/anchor';
+import { environment } from '.';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -82,7 +83,7 @@ export default function App() {
       <div>
         <PopUp open={ctx_popup.open} context={ctx_popup.context} />
         <Notification.Element notification={Notification.notification} />
-        <div className="version">v{version}</div>
+        <div className="version">v{environment.version}</div>
         <Router>
           <Routes>
             <Route path="/" element={<Hello />} />
