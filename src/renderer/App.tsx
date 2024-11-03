@@ -97,7 +97,7 @@ export default function App() {
       <div>
         <PopUp open={ctx_open} context={ctx_content} />
         <Notification.Element notification={Notification.notification} />
-        <div className="version">v{environment.version}</div>
+        <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>
         <Router>
           <Routes>
             <Route path="/" element={<Hello />} />
