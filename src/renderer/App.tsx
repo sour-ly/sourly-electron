@@ -60,7 +60,7 @@ function Hello() {
       {skills.length === 0 && <h1>No Skills Yet!</h1>}
       {skills.map((skill) => {
         return (
-          <SkillView key={skill.Id} skill={skill} />
+          <SkillView key={skill.Id} skill={skill} skills={skills} />
         )
       })}
       <SkillPopupWrapper />

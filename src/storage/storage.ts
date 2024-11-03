@@ -56,7 +56,7 @@ export class SourlyStorage {
       Log.log("Storage::save", 0, "Creating directory " + path);
       fs.mkdirSync(path);
     }
-    fs.writeFileSync(path + '/storage.json', JSON.stringify(this.storage));
+    fs.writeFileSync(path + '/' + SourlyStorage.filename, JSON.stringify(this.storage));
     Log.log("Storage::save", 0, "Saved storage to " + path + '/storage.json');
   }
 

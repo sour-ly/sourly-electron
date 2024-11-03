@@ -21,7 +21,8 @@ const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boo
 
 
 
-export function SkillView({ skill }: { skill: Skill }) {
+//TODO debug why collapsable isn't listening to skill
+export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) {
 
   const [collapsed, setCollapsed] = useState(false);
   const collapse_ref = useRef<HTMLDivElement>(null);
@@ -45,10 +46,17 @@ export function SkillView({ skill }: { skill: Skill }) {
 
   useEffect(() => {
     //set --collapsible-height to the height of the collapsible div
-    if (collapse_ref.current) {
-      collapse_ref.current.style.setProperty('--collapsible-height', `${collapse_ref.current.scrollHeight + 50}px`);
+    function setHeight() {
+      if (collapse_ref.current) {
+        collapse_ref.current.style.setProperty('--collapsible-height', `${collapse_ref.current.scrollHeight + 50}px`);
+      }
     }
-  }, [collapsed, skill])
+    setHeight();
+    window.addEventListener('resize', setHeight);
+    return () => {
+      window.removeEventListener('resize', setHeight);
+    }
+  }, [collapsed, skills])
 
   function toggle() {
     if (skill.Goals.length === 0) return;
