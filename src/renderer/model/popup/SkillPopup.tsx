@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { ButtonHTMLAttributes, DetailedHTMLProps, useState } from "react";
 //import Goal, { GoalProps } from "../../../model/Goal";
 import Skill, { SkillManager, SkillProps } from "../../../model/Skill";
 import { useWindow } from "../../App";
 import { useStateUtil } from "../../util/state";
 import Input from "../../components/Input";
+import { ButtonProps } from "../../popup/Popup";
 
-export function SkillPopupWrapper() {
+export function SkillPopupWrapper({ ...props }: ButtonProps) {
   const [skill, setSkill] = useState<SkillProps>({});
   const change = useStateUtil(setSkill);
   const ctx = useWindow();
@@ -21,6 +22,7 @@ export function SkillPopupWrapper() {
 
 
   function addSkillPopUp() {
+    props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
       content: <div>
@@ -46,10 +48,11 @@ export function SkillPopupWrapper() {
   )
 }
 
-export function SkillDeletePopUp({ skill }: { skill: Skill }) {
+export function SkillDeletePopUp({ skill, ...props }: { skill: Skill } & ButtonProps) {
   const ctx = useWindow();
 
   function deleteSkillPopUp() {
+    props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
       content: <div>
@@ -71,7 +74,7 @@ export function SkillDeletePopUp({ skill }: { skill: Skill }) {
   }
 
   return (
-    <button className="delete_skill" onClick={deleteSkillPopUp}>Delete Skill</button>
+    <button {...props} className={"delete_skill " + props.className} onClick={deleteSkillPopUp}>Delete Skill</button>
   )
 }
 

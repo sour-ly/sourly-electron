@@ -14,10 +14,13 @@ export default function Input({ placeholder, onChange, value }: InputProps) {
     setVal(value ?? '');
   }, [value])
 
+  useEffect(() => {
+    if (val === value || val === undefined) return;
+    onChange && onChange({ currentTarget: { value: val } } as any);
+  }, [val])
+
   function _onChange(e: React.ChangeEvent<HTMLInputElement>) {
     setVal(e.currentTarget.value);
-    if (onChange)
-      onChange(e);
   }
 
   return (

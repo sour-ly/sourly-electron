@@ -16,6 +16,7 @@ import MenuBuilder from './menu';
 import { openInBrowser, resolveHtmlPath } from './util';
 import { SourlyStorage } from '../storage/storage';
 import { Log } from '../log/log';
+import { version } from './version';
 
 class AppUpdater {
   constructor() {
@@ -36,6 +37,8 @@ ipcMain.on('ipc-example', async (event, arg) => {
   event.reply('ipc-example', 'pong');
 });
 
+
+/* STORAGE IPC CALLS */
 ipcMain.on('storage-request', async (event, arg) => {
   const [data] = arg
   Log.log('ipcMain:lambda:request', 0, 'Received storage request', data);
@@ -54,6 +57,19 @@ ipcMain.on('storage-save', async (event, arg) => {
   storage.save();
   event.reply('storage-save', { key: arg.key, value: arg.value });
 });
+
+/* ENVIRONMENT IPC CALLS */
+
+ipcMain.on('environment-request', async (event, arg) => {
+  Log.log('ipcMain:lambda:environment-request', 0, 'Received environment request', arg);
+  event.reply('environment-response', {
+    version: version,
+    mode: process.env.NODE_ENV,
+    debug: process.env.DEBUG_PROD === 'true',
+    platform: process.platform,
+  });
+});
+
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');

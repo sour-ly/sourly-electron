@@ -1,0 +1,96 @@
+.option-dropdown {
+  position: relative;
+  --menu--max-width: 240px;
+
+  &__menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    border: 1px solid black;
+    background-color: #fff;
+    min-width: calc(var(--menu--max-width) * 0.667);
+    max-width: var(--menu--max-width);
+    min-height: 4px;
+    max-height: 64px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    pointer-events: auto !important;
+    z-index: 1000;
+
+    /* scrollbar */
+
+    ::-webkit-scrollbar {
+      width: 16px;
+      right: 0;
+      margin-right: 3px;
+      border: solid 25px transparent;
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: #dfdfdf;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #dfdfdf;
+      box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
+    }
+
+    ::-webkit-scrollbar-track {
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='2' height='2' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M1 0H0v1h1v1h1V1H1V0z' fill='silver'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 0H1v1H0v1h1V1h1V0z' fill='%23fff'/%3E%3C/svg%3E");
+    }
+
+    ::-webkit-scrollbar-button:horizontal:start:decrement,
+    ::-webkit-scrollbar-button:horizontal:end:increment,
+    ::-webkit-scrollbar-button:vertical:start:decrement,
+    ::-webkit-scrollbar-button:vertical:end:increment {
+      display: block;
+    }
+
+    ::-webkit-scrollbar-button:vertical:start {
+      height: 17px !important;
+      //background-image: url("../../../../public/assets/svg/button-up.svg") !important;
+
+    }
+
+    ::-webkit-scrollbar-button:vertical:end {
+      height: 17px;
+      //background-image: url("../../../../public/assets/svg/button-down-old.svg") !important;
+    }
+
+    ::-webkit-scrollbar-button:vertical:start:increment,
+    ::-webkit-scrollbar-button:vertical:end:decrement,
+    ::-webkit-scrollbar-button:horizontal:start:increment,
+    ::-webkit-scrollbar-button:horizontal:end:decrement {
+      display: none;
+    }
+
+
+    button {
+      background-color: #fff;
+      border: none;
+      cursor: pointer;
+      margin: 0 !important;
+      text-align: left;
+      color: #000;
+      font-size: 1rem;
+    }
+
+    &.open {
+      display: block;
+    }
+  }
+
+
+  &__item {
+    padding: 2px 2.5px;
+    cursor: pointer;
+    width: 100%;
+
+    &:hover {
+      color: #FFF;
+      background-color: navy;
+    }
+  }
+}

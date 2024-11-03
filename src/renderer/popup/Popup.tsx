@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { DetailedHTMLProps, ReactNode, useEffect, useState } from 'react';
 import './styles/popup.scss';
 import { useWindow } from '../App';
+
+
+//CHANGE EVERYTHING @TODO
 
 type PopUpProps<T extends _popup_types = 'dialog'> = {
   open: boolean;
@@ -11,9 +14,11 @@ export type _popup_types = 'dialog' | 'confirm' | 'input';
 
 export type PopUpWindow<T extends _popup_types = 'confirm'> = {
   type: _popup_types;
-  content: JSX.Element;
+  content: ReactNode;
   options?: T extends 'confirm' ? Confirm : T extends 'input' ? Input : Dialog;
 }
+
+export type ButtonProps = Omit<DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, 'onClick'> & { onClick?: () => void };
 
 type Generic = {
   onOkay: () => void;
@@ -33,19 +38,12 @@ type Input = {
 } & Generic
 
 
+//@WARNING: This is a bad idea, be ready for a big change.
 export default function PopUp<T extends _popup_types = 'dialog'>({ open, ...props }: PopUpProps<T>) {
 
   //wow never use this again
-  const [content, setContent] = useState<JSX.Element>((<></>));
   const [closing, setClosing] = useState<boolean>(false);
   const [last_state, setState] = useState<boolean>(open);
-  const ctx = useWindow();
-
-  useEffect(() => {
-    if (props.context) {
-      setContent(props.context.content);
-    }
-  }, [props.context])
 
   useEffect(() => {
     if (!open && last_state) {
@@ -69,7 +67,7 @@ export default function PopUp<T extends _popup_types = 'dialog'>({ open, ...prop
           <div className="popup__window__controls">
           </div>
           <div className="popup__window__content">
-            {content && React.isValidElement(content) && React.cloneElement(content, { key: 'popup' })}
+            {props.context?.content}
             <div className="popup__window__content__options">
               {(props.context?.type === 'confirm' || props.context?.type === 'input') && (
                 <>
