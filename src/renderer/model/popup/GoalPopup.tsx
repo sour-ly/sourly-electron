@@ -20,6 +20,7 @@ export function GoalPopUpWrapper({ skill, goalt }: { skill?: Skill, goalt?: Goal
       if (goalt) {
         skill!.updateGoal(goalt.Id, new Goal(o.name, o.description, goalt.Progress, o.reward, o.metric, o.target, goalt.Completed));
         ctx.notification.notify(`Goal ${o.name} updated!`);
+        return {};
       }
       skill!.addGoal(new Goal(o.name, o.description, 0, o.reward, o.metric, o.target));
       ctx.notification.notify(`Goal ${o.name} created!`);
