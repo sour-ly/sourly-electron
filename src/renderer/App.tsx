@@ -2,16 +2,18 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.svg';
 import './App.scss';
 import Skill, { SkillManager, SkillProps } from '../model/Skill';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SkillView } from './model/SkillView';
 import Goal from '../model/Goal';
 import PopUp, { _popup_types, PopUpWindow } from './popup/Popup';
 import { useStateUtil } from './util/state';
 import { SkillPopupWrapper } from './model/popup/SkillPopup';
 import { version } from '../main/version';
+import NotificationBanner, { INotifcation } from './notification/notification';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
+  notification: Omit<Omit<INotifcation, 'Element'>, 'notification'>;
 }
 
 export type WindowPopUp = {
@@ -66,15 +68,20 @@ function Hello() {
 export default function App() {
 
   const [ctx_popup, setPopUpContext] = React.useState<PopUpStates>({ open: false, context: null });
+  const Notification = NotificationBanner();
 
+  console.log('Notification', Notification);
   useEffect(() => {
     window.document.title = `Sourly v${version}`;
   }, []);
 
+
   return (
-    <WindowContext.Provider value={{ popUp: { open: (ctx) => { setPopUpContext({ open: true, context: ctx }); return true; }, close: () => { setPopUpContext({ open: false, context: null }); return true; }, state: ctx_popup.open } }}>
+    <WindowContext.Provider value={{ notification: { notify: (s: string) => { Notification.notify(s); } }, popUp: { open: (ctx) => { setPopUpContext({ open: true, context: ctx }); return true; }, close: () => { setPopUpContext({ open: false, context: null }); return true; }, state: ctx_popup.open } }}>
+
       <div>
         <PopUp open={ctx_popup.open} context={ctx_popup.context} />
+        <Notification.Element notification={Notification.notification} />
         <div className="version">v{version}</div>
         <Router>
           <Routes>
