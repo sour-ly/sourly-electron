@@ -4,8 +4,9 @@ import Skill from "../../../model/Skill";
 import { useWindow } from "../../App";
 import { useStateUtil } from "../../util/state";
 import Input from "../../components/Input";
+import { ButtonProps } from "../../popup/Popup";
 
-export function GoalPopUpWrapper({ skill, goalt }: { skill?: Skill, goalt?: Goal }) {
+export function GoalPopUpWrapper({ skill, goalt, ...props }: { skill?: Skill, goalt?: Goal } & ButtonProps) {
 
   const ctx = useWindow();
   const [goal, setGoal] = useState<GoalProps>(goalt?.toJSON() ?? {});
@@ -29,6 +30,7 @@ export function GoalPopUpWrapper({ skill, goalt }: { skill?: Skill, goalt?: Goal
   }
 
   function addGoalPopUp() {
+    props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
       content: <div className="popup__add">
@@ -54,17 +56,18 @@ export function GoalPopUpWrapper({ skill, goalt }: { skill?: Skill, goalt?: Goal
   }
 
   return (
-    <button className={goalt ? "edit_goal" : "add_goal"} onClick={addGoalPopUp}>{goalt ? 'Edit Goal' : 'Add Goal'}</button>
+    <button {...props} className={`${props.className} ${goalt ? "edit_goal" : "add_goal"}`} onClick={addGoalPopUp}>{goalt ? 'Edit Goal' : 'Add Goal'}</button>
   )
 
 }
 
-export function GoalDeletePopUp({ goal, skill }: { goal: Goal, skill?: Skill }) {
+export function GoalDeletePopUp({ goal, skill, ...props }: { goal: Goal, skill?: Skill } & ButtonProps) {
   const ctx = useWindow();
 
   if (skill === undefined) return null;
 
   function askToDelete() {
+    props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
       content: <div className="popup__delete">
@@ -86,6 +89,6 @@ export function GoalDeletePopUp({ goal, skill }: { goal: Goal, skill?: Skill }) 
   }
 
   return (
-    <button className="delete_goal" onClick={() => askToDelete()}>Delete Goal</button>
+    <button {...props} className={"delete_goal " + props.className} onClick={() => askToDelete()}>Delete Goal</button>
   )
 }

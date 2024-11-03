@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { DetailedHTMLProps, useEffect, useState } from 'react';
 import './styles/popup.scss';
 import { useWindow } from '../App';
 
@@ -14,6 +14,8 @@ export type PopUpWindow<T extends _popup_types = 'confirm'> = {
   content: JSX.Element;
   options?: T extends 'confirm' ? Confirm : T extends 'input' ? Input : Dialog;
 }
+
+export type ButtonProps = Omit<DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, 'onClick'> & { onClick?: () => void };
 
 type Generic = {
   onOkay: () => void;

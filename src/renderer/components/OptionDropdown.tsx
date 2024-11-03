@@ -2,12 +2,19 @@ import './styles/optiondropdown.scss';
 import React, { useEffect } from "react";
 import dots from '../../../assets/ui/dots.svg';
 
-export type Option = {
+
+export type OptionPreferred = {
   key: string;
-  value: string
+  element: JSX.Element;
+}
+
+export type OptionAlt = {
+  key: string;
+  value: string;
   onClick: () => void;
-  // add default props for a div
-};
+}
+
+export type Option = OptionAlt | OptionPreferred;
 
 
 export type Options = Option[];
@@ -51,8 +58,11 @@ export default function OptionDropdown({ options, ...props }: OptionDropdownProp
       <img src={dots} onClick={toggleDropdown} alt="dots" className="progress-bar__dots" />
       {open && (
         <div className={`option-dropdown__menu ${open && 'open' || ''}`}>
-          {options.map((option, i) => (
-            <button key={i} onClick={() => clickWrapper(option.onClick)} className="option-dropdown__item">{option.value}</button>
+
+          {options && options.map((option, i) => (
+            (option as OptionAlt).value &&
+            (<button key={i} onClick={() => clickWrapper((option as OptionAlt).onClick)} className="option-dropdown__item">{(option as OptionAlt).value}</button>) ||
+            React.cloneElement((option as OptionPreferred).element, { key: i, className: "option-dropdown__item", onClick: () => clickWrapper(() => { }) })
           ))}
           {options.length === 0 && <div className="option-dropdown__item">No options available</div>}
         </div>
