@@ -3,10 +3,29 @@
   height: 0.3571rem;
   position: relative;
 
+  &__container {
+    position: relative;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    margin: .5rem 0;
+    gap: .5rem;
+  }
+
+  &__dots {
+    width: 1.5rem;
+    height: auto;
+    transform: translateX(33%);
+  }
+
+  &__dot_container {
+    align-self: flex-end;
+  }
+
 
 
   &__background,
-  &__fill {
+  &__fill center {
     position: absolute;
     top: 0;
     left: 0;
