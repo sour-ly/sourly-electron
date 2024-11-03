@@ -22,6 +22,7 @@ export type WindowPopUp = {
   open: (ctx: PopUpWindow<_popup_types>) => boolean; //return true, if successful, return false if failure (like the window is already open)
   close: () => boolean; //force a close, i can't really see why I would need to do this but this could prove to be useful
   state: boolean;
+  update: () => void; //sync the current popup with the new context
 }
 
 type PopUpStates = {
@@ -69,7 +70,9 @@ function Hello() {
 
 export default function App() {
 
-  const [ctx_popup, setPopUpContext] = React.useState<PopUpStates>({ open: false, context: null });
+  const [ctx_open, setCtxOpen] = useState(false);
+  const [ctx_content, setCtxContent] = useState<PopUpWindow | null>(null);
+  const [update, setUpdate] = useState<boolean>(false);
   const Notification = NotificationBanner();
 
   useEffect(() => {
@@ -77,11 +80,22 @@ export default function App() {
   }, []);
 
 
+  function setPopUpContext(ctx: PopUpStates) {
+    setCtxOpen(ctx.open);
+    setCtxContent(ctx.context);
+  }
+
+  function openPopUp(ctx: PopUpWindow) {
+    const element = React.cloneElement(ctx.content as JSX.Element);
+    setPopUpContext({ open: true, context: { ...ctx, content: element } });
+  }
+
+
   return (
-    <WindowContext.Provider value={{ notification: { notify: (s: string) => { Notification.notify(s); } }, popUp: { open: (ctx) => { setPopUpContext({ open: true, context: ctx }); return true; }, close: () => { setPopUpContext({ open: false, context: null }); return true; }, state: ctx_popup.open } }}>
+    <WindowContext.Provider value={{ notification: { notify: (s: string) => { Notification.notify(s); } }, popUp: { open: (ctx) => { openPopUp(ctx); return true; }, close: () => { setPopUpContext({ open: false, context: null }); return true; }, state: ctx_open, update: () => setUpdate(!update) } }}>
 
       <div>
-        <PopUp open={ctx_popup.open} context={ctx_popup.context} />
+        <PopUp open={ctx_open} context={ctx_content} />
         <Notification.Element notification={Notification.notification} />
         <div className="version">v{environment.version}</div>
         <Router>

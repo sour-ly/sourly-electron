@@ -26,12 +26,12 @@ export function SkillView({ skill }: { skill: Skill }) {
   const [collapsed, setCollapsed] = useState(false);
   const collapse_ref = useRef<HTMLDivElement>(null);
   const ctx = useWindow();
-  const options = useMemo(() => {
-    return [
-      { key: 'add', element: <GoalPopUpWrapper skill={skill} /> },
-      { key: 'delete', element: <SkillDeletePopUp skill={skill} /> }
-    ]
-  }, [skill]);
+  const goalpop = GoalPopUpWrapper({ skill });
+  const options = useRef(
+    [
+      { key: 'add', element: goalpop },
+      { key: 'delete', element: useMemo(() => <SkillDeletePopUp skill={skill} />, [skill]) }
+    ]);
 
   useEffect(() => {
     const i = skill.on('levelUp', (arg) => {
@@ -48,7 +48,7 @@ export function SkillView({ skill }: { skill: Skill }) {
     if (collapse_ref.current) {
       collapse_ref.current.style.setProperty('--collapsible-height', `${collapse_ref.current.scrollHeight + 50}px`);
     }
-  }, [collapsed])
+  }, [collapsed, skill])
 
   function toggle() {
     if (skill.Goals.length === 0) return;
@@ -61,7 +61,7 @@ export function SkillView({ skill }: { skill: Skill }) {
         onClick={() => toggle()}
       >
         <h1>{skill.Name} {toRomanNumerals(skill.Level)}: {skill.CurrentExperience} EXP</h1>
-        <ProgressBar max={skill.ExperienceRequired} value={skill.CurrentExperience} options={options} />
+        <ProgressBar max={skill.ExperienceRequired} value={skill.CurrentExperience} options={options.current} />
         {skill.Goals.length > 0 && collapsed && <span className="expand-message">Click to expand</span>}
       </div>
       <div className={`collapsible ${collapsed ? 'collapsed' : 'open'}`} ref={collapse_ref}>

@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import dots from '../../../assets/ui/dots.svg';
 
 
+//avoid using this for stateful components
 export type OptionPreferred = {
   key: string;
   element: JSX.Element;
@@ -27,6 +28,7 @@ export default function OptionDropdown({ options, ...props }: OptionDropdownProp
 
   const ref = React.createRef<HTMLDivElement>();
   const [open, setOpen] = React.useState(false);
+  const [optionsState, setOptions] = React.useState<Options>(options);
 
   useEffect(() => {
     const f = (e: MouseEvent) => {
@@ -52,7 +54,7 @@ export default function OptionDropdown({ options, ...props }: OptionDropdownProp
   }
 
   function clickWrapper(callback: () => void) {
-    callback();
+    callback && callback();
     close();
   }
 
@@ -61,11 +63,14 @@ export default function OptionDropdown({ options, ...props }: OptionDropdownProp
       <img src={dots} onClick={toggleDropdown} alt="dots" className="progress-bar__dots" />
       {open && (
         <div className={`option-dropdown__menu ${open && 'open' || ''}`}>
-
-          {options && options.map((option, i) => (
+          {optionsState && optionsState.map((option, i) => (
             (option as OptionAlt).value &&
-            (<button key={i} onClick={() => clickWrapper((option as OptionAlt).onClick)} className="option-dropdown__item">{(option as OptionAlt).value}</button>) ||
-            React.cloneElement((option as OptionPreferred).element, { key: i, className: "option-dropdown__item", onClick: () => clickWrapper(() => { }) })
+            <button key={i} onClick={() => clickWrapper((option as OptionAlt).onClick)} className="option-dropdown__item">
+              {(option as unknown as OptionAlt).value}
+            </button>
+            ||
+            (option as OptionPreferred).element &&
+            React.cloneElement((option as OptionPreferred).element, { key: option.key, className: "option-dropdown__item", onClick: () => clickWrapper((option as OptionPreferred).element.props.onClick) })
           ))}
           {options.length === 0 && <div className="option-dropdown__item">No options available</div>}
         </div>

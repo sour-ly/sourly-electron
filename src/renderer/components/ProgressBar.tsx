@@ -8,7 +8,6 @@ type ProgressBarProps = {
   options?: Options;
 }
 
-
 export default function ProgressBar({ max, value, options = [] }: ProgressBarProps) {
   const ref = React.createRef<HTMLDivElement>();
 

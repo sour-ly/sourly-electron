@@ -4,18 +4,18 @@ import ProgressBar from '../components/ProgressBar';
 import { useWindow } from '../App';
 import { SkillManager } from '../../model/Skill';
 import { GoalDeletePopUp, GoalPopUpWrapper } from './popup/GoalPopup';
-import { useMemo } from 'react';
+import { Options } from '../components/OptionDropdown';
+
 
 export default function GoalView({ goal, skill_id }: { goal: Goal, skill_id: number }) {
 
   const ctx = useWindow();
+  const goalpop = GoalPopUpWrapper({ goalt: goal, skill: SkillManager.getInstance().getSkillById(skill_id) });
 
-  const options = useMemo(() => {
-    return [
-      { key: 'edit', element: <GoalPopUpWrapper skill={SkillManager.getInstance().getSkillById(skill_id)} goalt={goal} /> },
-      { key: 'delete', element: <GoalDeletePopUp goal={goal} skill={SkillManager.getInstance().getSkillById(skill_id)} /> }
-    ]
-  }, [goal, skill_id]);
+  const options = [
+    { key: 'edit', element: goalpop },
+    { key: 'delete', element: <GoalDeletePopUp goal={goal} skill={SkillManager.getInstance().getSkillById(skill_id)} /> }
+  ] as Options
 
   return (
     <div className={`goalview ${goal.Completed && 'done'}`}>

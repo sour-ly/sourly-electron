@@ -21,6 +21,7 @@ export class SourlyStorage {
 
   private storage: Record<string, any>;
   private static instance: SourlyStorage;
+  private static readonly filename = `storage${process.env.NODE_ENV === 'development' ? '.dev' : ''}.json`;
 
   private constructor() {
     this.storage = {};
@@ -63,9 +64,9 @@ export class SourlyStorage {
     const os = process.platform;
     let path = '';
     if (os == 'win32') {
-      path = process.env.APPDATA + '/sourly/storage.json';
+      path = process.env.APPDATA + '/sourly/' + SourlyStorage.filename;
     } else {
-      path = process.env.HOME + '/.sourly/storage.json';
+      path = process.env.HOME + '/.sourly/' + SourlyStorage.filename;
     }
     if (fs.existsSync(path)) {
       this.storage = JSON.parse(fs.readFileSync(path).toString());
