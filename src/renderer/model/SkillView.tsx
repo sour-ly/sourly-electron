@@ -4,7 +4,7 @@ import GoalView from "./GoalView";
 import { useWindow } from "../App";
 import Input from "../components/Input";
 import Goal, { GoalProps } from "../../model/Goal";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useStateUtil } from "../util/state";
 import ProgressBar from "../components/ProgressBar";
 import toRomanNumerals from "../util/roman";
@@ -23,8 +23,9 @@ const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boo
 
 export function SkillView({ skill }: { skill: Skill }) {
 
+  const [collapsed, setCollapsed] = useState(false);
+  const collapse_ref = useRef<HTMLDivElement>(null);
   const ctx = useWindow();
-
   const options = useMemo(() => {
     return [
       { key: 'add', element: <GoalPopUpWrapper skill={skill} /> },
@@ -42,17 +43,30 @@ export function SkillView({ skill }: { skill: Skill }) {
     }
   }, [])
 
+  useEffect(() => {
+    //set --collapsible-height to the height of the collapsible div
+    if (collapse_ref.current) {
+      collapse_ref.current.style.setProperty('--collapsible-height', `${collapse_ref.current.scrollHeight + 50}px`);
+    }
+  }, [collapsed])
+
   return (
     <div className="skillview">
-      <div className="skillview__title">
+      <div className="skillview__title"
+        onClick={() => setCollapsed(!collapsed)}
+      >
         <h1>{skill.Name} {toRomanNumerals(skill.Level)}: {skill.CurrentExperience} EXP</h1>
         <ProgressBar max={skill.ExperienceRequired} value={skill.CurrentExperience} options={options} />
+        {!collapsed && <span className="expand-message">Click to expand</span>}
       </div>
-      <SkillDeletePopUp skill={skill} />
-      <div className="skillview__goals">
-        {skill.Goals.sort(sort_goals_by_completion).map((goal) => {
-          return <GoalView key={goal.Id} skill_id={skill.Id} goal={goal} />
-        })}
+      <div className={`collapsible ${!collapsed ? 'collapsed' : 'open'}`} ref={collapse_ref}>
+        <div className="skillview__description">
+        </div>
+        <div className="skillview__goals">
+          {skill.Goals.sort(sort_goals_by_completion).map((goal) => {
+            return <GoalView key={goal.Id} skill_id={skill.Id} goal={goal} />
+          })}
+        </div>
       </div>
     </div>
   )

@@ -20,7 +20,7 @@ export default function GoalView({ goal, skill_id }: { goal: Goal, skill_id: num
   return (
     <div className={`goalview ${goal.Completed && 'done'}`}>
       <h2>{goal.Name} </h2>
-      <p>{goal.Description}</p>
+      <p>{goal.Description.trim().length === 0 ? 'No Description' : goal.Description}</p>
       <p className="metric">{goal.Current} / {goal.Target} {goal.Metric}</p>
       <ProgressBar max={goal.Target} value={goal.Current} options={options} />
       <button onClick={() => goal.incrementProgress(1)}>Log</button>
