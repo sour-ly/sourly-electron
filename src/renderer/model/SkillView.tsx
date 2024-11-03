@@ -23,6 +23,18 @@ const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boo
 
 export function SkillView({ skill }: { skill: Skill }) {
 
+  const ctx = useWindow();
+
+  useEffect(() => {
+    const i = skill.on('levelUp', (arg) => {
+      ctx.notification.notify(`You have leveled up ${skill.Name} to level ${toRomanNumerals(skill.Level)}`);
+    });
+
+    return () => {
+      skill.off('levelUp', i);
+    }
+  }, [])
+
   return (
     <div className="skillview">
       <div className="skillview__title">
