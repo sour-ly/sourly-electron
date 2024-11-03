@@ -3,7 +3,7 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { StorageRequestPacket, StorageSavePacket } from '../storage/storage';
 
-export type Channels = 'ipc-example' | 'storage-request' | 'storage-save';
+export type Channels = 'ipc-example' | 'storage-request' | 'storage-save' | 'open-link';
 
 export type ChannelsMap = {
   [key in Channels]: any[];
@@ -13,6 +13,7 @@ export const IPC_map = {
   'ipc-example': [''],
   'storage-request': [{} as StorageRequestPacket],
   'storage-save': [{} as StorageSavePacket],
+  'open-link': [''],
 }
 
 const electronHandler = {

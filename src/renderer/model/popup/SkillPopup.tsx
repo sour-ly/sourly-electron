@@ -14,6 +14,7 @@ export function SkillPopupWrapper() {
   function saveSkill() {
     setSkill(o => {
       SkillManager.getInstance().addSkill(new Skill(o.name));
+      ctx.notification.notify(`Skill ${o.name} created!`);
       return {};
     });
   }

@@ -13,7 +13,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { openInBrowser, resolveHtmlPath } from './util';
 import { SourlyStorage } from '../storage/storage';
 import { Log } from '../log/log';
 
@@ -160,3 +160,6 @@ app
   })
   .catch(console.log);
 
+ipcMain.on('open-link', (event, arg) => {
+  openInBrowser(arg[0]);
+});

@@ -26,12 +26,12 @@ export function SkillView({ skill }: { skill: Skill }) {
   const ctx = useWindow();
 
   useEffect(() => {
-    const i = skill.on('experienceGained', (arg) => {
-      ctx.notification.notify('Skill Updated');
+    const i = skill.on('levelUp', (arg) => {
+      ctx.notification.notify(`You have leveled up ${skill.Name} to level ${toRomanNumerals(skill.Level)}`);
     });
 
     return () => {
-      skill.off('experienceGained', i);
+      skill.off('levelUp', i);
     }
   }, [])
 

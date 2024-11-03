@@ -10,6 +10,7 @@ import { useStateUtil } from './util/state';
 import { SkillPopupWrapper } from './model/popup/SkillPopup';
 import { version } from '../main/version';
 import NotificationBanner, { INotifcation } from './notification/notification';
+import { Anchor } from './components/anchor';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -70,7 +71,6 @@ export default function App() {
   const [ctx_popup, setPopUpContext] = React.useState<PopUpStates>({ open: false, context: null });
   const Notification = NotificationBanner();
 
-  console.log('Notification', Notification);
   useEffect(() => {
     window.document.title = `Sourly v${version}`;
   }, []);
@@ -89,7 +89,7 @@ export default function App() {
           </Routes>
         </Router>
         <div className="feedback" style={{ borderTop: '1px solid black', paddingTop: '10px', marginTop: '25px' }}>
-          Please leave feedback on <a href="https://forms.gle/TQHj89A2EwuxytaMA">Google Forms</a>
+          Please leave feedback on <Anchor href="https://forms.gle/TQHj89A2EwuxytaMA" text={"Google Forms"} />
         </div>
       </div>
     </WindowContext.Provider>
