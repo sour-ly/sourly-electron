@@ -110,7 +110,7 @@ export function GoalPopUpWrapper({ skill, goalt, ...props }: { skill?: Skill, go
     //props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
-      content: addPage,
+      content: () => addPage,
       options: {
         onOkay: () => {
           setGoal(o => {
@@ -143,10 +143,11 @@ export function GoalDeletePopUp({ goal, skill, ...props }: { goal: Goal, skill?:
     props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
-      content: <div className="popup__delete">
+      content: () =>
+      (<div className="popup__delete">
         <h1>Delete Goal</h1>
         <p>Are you sure you want to delete this goal?</p>
-      </div>,
+      </div>),
       options: {
         onOkay: () => {
           skill!.removeGoal(goal);

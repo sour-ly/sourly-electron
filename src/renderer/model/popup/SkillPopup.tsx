@@ -25,10 +25,10 @@ export function SkillPopupWrapper({ ...props }: ButtonProps) {
     props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
-      content: <div>
+      content: () => (<div>
         <h1>Add Skill</h1>
         <Input placeholder="Name" onChange={(e) => change('name', e.currentTarget.value)} />
-      </div>,
+      </div>),
       options: {
         onOkay: () => {
           saveSkill();
@@ -55,10 +55,11 @@ export function SkillDeletePopUp({ skill, ...props }: { skill: Skill } & ButtonP
     props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
-      content: <div>
+      content: () =>
+      (<div>
         <h1>Delete Skill</h1>
         <p>Are you sure you want to delete this skill?</p>
-      </div>,
+      </div>),
       options: {
         onOkay: () => {
           SkillManager.getInstance().removeSkill(skill);

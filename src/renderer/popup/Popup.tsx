@@ -14,7 +14,7 @@ export type _popup_types = 'dialog' | 'confirm' | 'input';
 
 export type PopUpWindow<T extends _popup_types = 'confirm'> = {
   type: _popup_types;
-  content: ReactNode;
+  content: () => ReactNode;
   options?: T extends 'confirm' ? Confirm : T extends 'input' ? Input : Dialog;
 }
 
@@ -67,7 +67,7 @@ export default function PopUp<T extends _popup_types = 'dialog'>({ open, ...prop
           <div className="popup__window__controls">
           </div>
           <div className="popup__window__content">
-            {props.context?.content}
+            {props.context?.content()}
             <div className="popup__window__content__options">
               {(props.context?.type === 'confirm' || props.context?.type === 'input') && (
                 <>
