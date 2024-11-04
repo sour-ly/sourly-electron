@@ -6,8 +6,6 @@ import { SkillManager } from '../model/Skill';
 import { createWaitFunction } from './util/promise';
 import { EnvironmentVariables } from '../main/version';
 
-const container = document.getElementById('root') as HTMLElement;
-const root = createRoot(container);
 export var environment: EnvironmentVariables;
 
 
@@ -54,5 +52,8 @@ createWaitFunction(
       resolve(undefined);
     });
     IPC.sendMessage('storage-request', { key: 'skill', value: '' });
-  }), async () => root.render(<App />));
-
+  }), async () => {
+    const container = document.getElementById('root') as HTMLElement;
+    const root = createRoot(container);
+    root.render(<App />)
+  })

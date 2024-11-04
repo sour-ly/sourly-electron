@@ -12,6 +12,7 @@ import { version } from '../main/version';
 import NotificationBanner, { INotifcation } from './notification/notification';
 import { Anchor } from './components/anchor';
 import { environment } from '.';
+import Home from './views/Home';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -19,7 +20,7 @@ export type WindowContextType = {
 }
 
 export type WindowPopUp = {
-  open: (ctx: PopUpWindow<_popup_types>) => boolean; //return true, if successful, return false if failure (like the window is already open)
+  open: (ctx: PopUpWindow<_popup_types>, func_ptr?: any) => boolean; //return true, if successful, return false if failure (like the window is already open)
   close: () => boolean; //force a close, i can't really see why I would need to do this but this could prove to be useful
   state: boolean;
   update: () => void; //sync the current popup with the new context
@@ -40,33 +41,7 @@ export const useWindow = () => {
 };
 
 
-function Hello() {
 
-  const [skills, setSkills] = useState<Skill[]>(SkillManager.getInstance().Skills);
-
-  useEffect(() => {
-    const i = SkillManager.getInstance().on('onUpdates', (skill) => {
-      setSkills(_ => {
-        return [...skill.skills];
-      })
-    });
-    return () => {
-      SkillManager.getInstance().off('onUpdates', i);
-    }
-  }, [])
-
-  return (
-    <main>
-      {skills.length === 0 && <h1>No Skills Yet!</h1>}
-      {skills.map((skill) => {
-        return (
-          <SkillView key={skill.Id} skill={skill} skills={skills} />
-        )
-      })}
-      <SkillPopupWrapper />
-    </main>
-  );
-}
 
 export default function App() {
 
@@ -100,7 +75,7 @@ export default function App() {
         <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>
         <Router>
           <Routes>
-            <Route path="/" element={<Hello />} />
+            <Route path="/" element={<Home />} />
           </Routes>
         </Router>
         <div className="feedback" style={{ borderTop: '1px solid black', paddingTop: '10px', marginTop: '25px' }}>
