@@ -4,6 +4,7 @@ import IPC from '../renderer/ReactIPC';
 import Goal, { GoalProps } from './Goal';
 
 
+export type Metric = 'units' | 'times' | '%' | 'pages' | 'chapters' | 'books' | 'articles' | 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years' | 'lbs' | 'kg' | 'miles' | 'meters' | 'other' | string;
 
 type EventMap = {
   'levelUp': number;

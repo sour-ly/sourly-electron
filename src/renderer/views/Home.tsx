@@ -26,6 +26,7 @@ function Home() {
           <SkillView key={skill.Id} skill={skill} skills={skills} />
         )
       })}
+      <SkillPopupWrapper />
     </main>
   );
 }

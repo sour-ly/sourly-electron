@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Goal, { GoalProps } from "../../../model/Goal";
-import Skill from "../../../model/Skill";
+import Skill, { Metric } from "../../../model/Skill";
 import { useWindow } from "../../App";
 import { useStateUtil } from "../../util/state";
 import Input from "../../components/Input";
@@ -8,14 +8,14 @@ import { ButtonProps } from "../../popup/Popup";
 import { Dropdown } from "../../components/Dropdown";
 
 
-const MetricOptions = [
+const MetricOptions: Metric[] = [
   'units',
   'times',
   '%',
-  'Pages',
-  'Chapters',
-  'Books',
-  'Articles',
+  'pages',
+  'chapters',
+  'books',
+  'articles',
   'minutes',
   'hours',
   'days',
