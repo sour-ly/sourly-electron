@@ -19,7 +19,7 @@ function Home() {
   }, [])
 
   return (
-    <main>
+    <main className="home">
       {skills.length === 0 && <h1>No Skills Yet!</h1>}
       {skills.map((skill) => {
         return (

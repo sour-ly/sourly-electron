@@ -1,9 +1,16 @@
 nav.navigation {
-  position: fixed;
+  position: absolute;
   left: 50%;
   top: 1.5rem;
   transform: translateX(-50%);
   background-color: #bcbcbc;
+  z-index: 99;
+
+  transition: opacity 0.3s;
+
+  &:hover {
+    opacity: 1;
+  }
 
   .navigation {
 
@@ -37,14 +44,18 @@ nav.navigation {
       height: auto;
     }
 
-    span {
+    span,
+    a {
       font-size: 12px;
+      text-decoration: none;
+      color: inherit;
     }
 
     &.disabled {
       box-shadow: var(--o-windows-button-disabled-shadow);
 
-      span {
+      span,
+      a {
         color: #aca89a;
       }
 

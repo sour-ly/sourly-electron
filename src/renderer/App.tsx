@@ -9,6 +9,7 @@ import { environment } from '.';
 import Home from './views/Home';
 import Queue from './util/queue';
 import Navigator from './navigation/Navigation';
+import Settings from './views/Settings';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -111,18 +112,19 @@ export default function App() {
   return (
     <WindowContext.Provider value={{ notification: { notify: (s: string) => { notify(s); } }, popUp: { open: (ctx) => { openPopUp(ctx); return true; }, close: () => { setPopUpContext({ open: false, context: null }); return true; }, state: ctx_open, update: () => setUpdate(!update) } }}>
       <div>
-        <PopUp open={ctx_open} context={ctx_content} />
-        <NotificationBanner notification={{ state: notification, setState: setNotification }} />
-        <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>
-        <Navigator />
         <Router>
+          <PopUp open={ctx_open} context={ctx_content} />
+          <NotificationBanner notification={{ state: notification, setState: setNotification }} />
+          <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>
+          <Navigator />
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
+          <div className="feedback" style={{ borderTop: '1px solid black', paddingTop: '10px', marginTop: '25px' }}>
+            Please leave feedback on <Anchor href="https://forms.gle/TQHj89A2EwuxytaMA" text={"Google Forms"} />
+          </div>
         </Router>
-        <div className="feedback" style={{ borderTop: '1px solid black', paddingTop: '10px', marginTop: '25px' }}>
-          Please leave feedback on <Anchor href="https://forms.gle/TQHj89A2EwuxytaMA" text={"Google Forms"} />
-        </div>
       </div>
     </WindowContext.Provider>
   );

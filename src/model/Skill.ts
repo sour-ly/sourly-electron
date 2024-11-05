@@ -143,11 +143,10 @@ type SkillEventMap = {
   'skillRemoved': Skill;
 }
 
-export class SkillManager extends Eventful<SkillEventMap> {
-  private skills: Skill[] = [];
-  private static instance: SkillManager | undefined;
+export abstract class SkillContainer extends Eventful<SkillEventMap> {
+  protected skills: Skill[] = [];
 
-  private constructor() {
+  protected constructor() {
     super();
     this.skills.forEach(skill => {
       this.addSkillListeners(skill);
@@ -165,8 +164,7 @@ export class SkillManager extends Eventful<SkillEventMap> {
     });
   }
 
-  private addSkillListeners(skill: Skill) {
-
+  protected addSkillListeners(skill: Skill) {
     const listenToGoals = (goal: Goal) => {
       goal.on('goalProgressChanged', () => {
         this.emit('onUpdates', { skills: this.skills });
@@ -191,13 +189,6 @@ export class SkillManager extends Eventful<SkillEventMap> {
     });
 
     skill.Goals.forEach(listenToGoals);
-  }
-
-  public static getInstance() {
-    if (!this.instance) {
-      this.instance = new SkillManager();
-    }
-    return this.instance;
   }
 
   public get Skills() {
@@ -235,6 +226,24 @@ export class SkillManager extends Eventful<SkillEventMap> {
 
   private serializeSkills() {
     return this.skills.map(skill => skill.toJSON());
+  }
+
+}
+
+export class SkillManager extends SkillContainer {
+  private static instance: SkillManager | undefined;
+
+  private constructor() {
+    super();
+
+  }
+
+
+  public static getInstance() {
+    if (!this.instance) {
+      this.instance = new SkillManager();
+    }
+    return this.instance;
   }
 
 }
