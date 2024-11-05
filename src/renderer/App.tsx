@@ -56,13 +56,7 @@ export default function App() {
   useEffect(() => {
     //change the title of the document
     window.document.title = `Sourly v${version}`;
-    const i = notification_queue.on('queueintoempty', (s) => {
-      //setNotification(s);
-    })
 
-    return () => {
-      notification_queue.off('queueintoempty', i);
-    }
   }, []);
 
   useEffect(() => {
