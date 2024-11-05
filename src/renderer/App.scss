@@ -15,7 +15,7 @@ div#root {
 }
 
 main {
-  margin-top: 75px;
+  margin-top: calc(75px + var(--navigation-bar-top));
   max-width: 600px;
   width: 600px;
 }

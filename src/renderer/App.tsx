@@ -8,6 +8,7 @@ import { Anchor } from './components/anchor';
 import { environment } from '.';
 import Home from './views/Home';
 import Queue from './util/queue';
+import Navigator from './navigation/Navigation';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -113,6 +114,7 @@ export default function App() {
         <PopUp open={ctx_open} context={ctx_content} />
         <NotificationBanner notification={{ state: notification, setState: setNotification }} />
         <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>
+        <Navigator />
         <Router>
           <Routes>
             <Route path="/" element={<Home />} />
