@@ -7,8 +7,8 @@ import Goal, { GoalProps } from './Goal';
 export type Metric = 'units' | 'times' | '%' | 'pages' | 'chapters' | 'books' | 'articles' | 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years' | 'lbs' | 'kg' | 'miles' | 'meters' | 'other' | string;
 
 type EventMap = {
-  'levelUp': number;
-  'experienceGained': number;
+  'levelUp': { skill: Skill, level: number };
+  'experienceGained': { skill: Skill, experience: number };
   'skillChanged': Skill;
   'goalAdded': Goal;
   'goalUpdated': Goal;
@@ -60,7 +60,7 @@ export default class Skill extends Eventful<EventMap> {
     this.level++;
     this.currentExperience = 0;
     this.experienceRequired = this.calculateExperienceRequired(this.level);
-    this.emit('levelUp', this.level);
+    this.emit('levelUp', { skill: this, level: this.level });
   }
 
   private addExperience(experience: number) {
@@ -73,7 +73,7 @@ export default class Skill extends Eventful<EventMap> {
     if (this.currentExperience >= this.experienceRequired) {
       this.levelUp();
     }
-    this.emit('experienceGained', experience);
+    this.emit('experienceGained', { skill: this, experience: experience });
   }
 
 
@@ -143,7 +143,7 @@ type SkillEventMap = {
   'skillRemoved': Skill;
 }
 
-export abstract class SkillContainer extends Eventful<SkillEventMap> {
+export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> extends Eventful<T> {
   protected skills: Skill[] = [];
 
   protected constructor() {

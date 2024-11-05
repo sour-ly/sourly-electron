@@ -2,13 +2,12 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import IPC from './ReactIPC';
 import { Log } from '../log/log';
-import { SkillManager } from '../model/Skill';
 import { createWaitFunction } from './util/promise';
 import { EnvironmentVariables } from '../main/version';
+import { Profile } from '../model/Profile';
 
 export var environment: EnvironmentVariables;
-
-
+export var profile: Profile;
 
 
 createWaitFunction(
@@ -44,8 +43,9 @@ createWaitFunction(
         Log.log('storage:request', 1, 'got a bad packet', data);
         resolve(undefined);
       } else if (Array.isArray(data)) {
+        if (!profile) profile = new Profile();
         for (const skill of data) {
-          SkillManager.getInstance().addSkillFromJSON(skill);
+          profile.addSkillFromJSON(skill);
         }
         Log.log('storage:request', 0, 'loaded skills from storage', data);
       }

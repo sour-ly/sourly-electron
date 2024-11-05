@@ -2,19 +2,20 @@ import { useEffect, useState } from "react";
 import Skill, { SkillManager } from "../../model/Skill";
 import { SkillPopupWrapper } from "../model/popup/SkillPopup";
 import { SkillView } from "../model/SkillView";
+import { profile } from "..";
 
 function Home() {
 
-  const [skills, setSkills] = useState<Skill[]>(SkillManager.getInstance().Skills);
+  const [skills, setSkills] = useState<Skill[]>(profile.Skills);
 
   useEffect(() => {
-    const i = SkillManager.getInstance().on('onUpdates', (skill) => {
+    const i = profile.on('onUpdates', (skill) => {
       setSkills(_ => {
         return [...skill.skills];
       })
     });
     return () => {
-      SkillManager.getInstance().off('onUpdates', i);
+      profile.off('onUpdates', i);
     }
   }, [])
 
