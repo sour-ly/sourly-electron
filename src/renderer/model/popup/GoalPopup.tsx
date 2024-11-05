@@ -74,7 +74,7 @@ function AddPage({ goal, change, edit }: { goal: GoalProps, change: (key: any, v
         value={isPredefinedMetric(goal_copy.metric?.toLowerCase() ?? '') ? Capitalize(goal_copy.metric ?? '') : 'Other'}
       />
       {dropdown_state === 'other' ?
-        <Input placeholder="Metric" onChange={(e) => setGoal('metric', e.currentTarget.value)} /> : <></>}
+        <Input placeholder="Metric" onChange={(e) => setGoal('metric', e.currentTarget.value)} value={goal_copy.metric} /> : <></>}
       <Input placeholder="Goal" onChange={(e) => setGoal('target', parseInt(e.currentTarget.value) ?? 0)} value={`${goal_copy.target ?? 0}`} />
       <Input placeholder="Reward" onChange={(e) => setGoal('reward', parseInt(e.currentTarget.value) ?? 0)} value={`${goal_copy.reward ?? 0}`} />
     </div>
