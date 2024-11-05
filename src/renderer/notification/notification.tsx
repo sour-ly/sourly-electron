@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import './styles/notification.scss';
+import PopUp from "../popup/Popup";
+import { Stateful } from "../util/state";
 
 export interface INotifcation {
   notify: (message: string) => void;
@@ -8,20 +10,40 @@ export interface INotifcation {
 }
 
 
-function NotificationBanner(): INotifcation {
+function NotificationElement({ notification = "?", ...props }: { notification: string | null, cancelTimer: () => void, init: boolean, setInit: (value: boolean) => void }) {
+  useEffect(() => {
+    if (notification) {
+      props.setInit(false);
+    }
+  }, [notification])
+  return (
+    <div id="notification" className={notification ? 'show' : props.init ? '' : 'hide'} onClick={props.cancelTimer}>
+      <div className="notification__top" onClick={() => { }}>
+        <span>ALERT</span>
+      </div>
+      <div className="notification__content">
+        <p>{notification}</p>
+      </div>
+    </div>
+  )
+}
 
-  const [notification, setNotification] = React.useState<string | null>(null);
-  const ref = useRef<INotifcation>();
+type NotificationBannerProps = {
+  notification: Stateful<string | null>;
+}
+
+function NotificationBanner({ notification }: NotificationBannerProps) {
+
   const [init, setInit] = useState(true);
   const timeout_ref = useRef<any>();
 
   useEffect(() => {
-    if (notification) {
+    if (notification.state) {
       if (timeout_ref.current) {
         clearTimeout(timeout_ref.current);
       }
       timeout_ref.current = setTimeout(() => {
-        setNotification(null);
+        notification.setState(null);
       }, 5000);
     }
     return () => {
@@ -29,45 +51,18 @@ function NotificationBanner(): INotifcation {
         clearTimeout(timeout_ref.current);
       }
     }
-  }, [notification])
-
-  const onNotify = useCallback((message: string) => {
-    setNotification(message);
-  }, [setNotification]);
+  }, [notification.state])
 
   function cancelTimer() {
     if (timeout_ref.current) {
       clearTimeout(timeout_ref.current);
     }
-    setNotification(null);
+    notification.setState(null);
   }
 
-
-  function NotificationElement({ notification = "?" }: { notification: string | null }) {
-
-
-    useEffect(() => {
-      if (notification) {
-        setInit(false);
-      }
-    }, [notification])
-
-
-    return (
-      <div id="notification" className={notification ? "show" : init === true ? "" : "hide"} onClick={cancelTimer}>
-        <div className="notification__top" onClick={() => { }}>
-          <span>ALERT</span>
-        </div>
-        <div className="notification__content">
-          <p>{notification}</p>
-        </div>
-      </div>
-    )
-  }
-
-  ref.current = { notify: onNotify, notification, Element: () => <NotificationElement notification={notification} /> };
-
-  return ref.current;
+  return (
+    <NotificationElement notification={notification.state} cancelTimer={cancelTimer} init={init} setInit={setInit} />
+  )
 
 }
 
