@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Profile } from "../../model/Profile";
-import ProgressBar from "../components/ProgressBar";
 import { profileobj } from "..";
 import { useWindow } from "../App";
 import ProductDetailCard from "../components/profile/ProfileDetailCard";
@@ -27,7 +26,7 @@ function ProfilePage() {
 
   return (
     <main>
-      <h1>Profile</h1>
+      <h1 style={{ marginBottom: '1rem' }}>Profile</h1>
       <ProductDetailCard profile={profile_state} />
     </main>
   )

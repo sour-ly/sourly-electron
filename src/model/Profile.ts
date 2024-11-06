@@ -13,7 +13,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
   private level: number = 0;
   private currentExperience: number = 0;
 
-  constructor(level?: number, currentExperience?: number, skills?: Skill[]) {
+  constructor(private name: string = "User", level?: number, currentExperience?: number, skills?: Skill[]) {
     super();
     this.level = level || 0;
     this.currentExperience = currentExperience || 0;
@@ -56,6 +56,23 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
       this.level++;
       this.currentExperience = 0;
     }
+  }
+
+  public adjustProfileToSkills() {
+    for (const skill of this.skills) {
+      this.addExperience(skill.CurrentExperience * .6);
+      this.addExperience(skill.Level * 25);
+    }
+  }
+
+
+  get Name() {
+    return this.name;
+  }
+
+  // this setter will be used to update the profile name, but do not ever call it directly when the API comes out
+  set Name(name: string) {
+    this.name = name;
   }
 
   get Level() {

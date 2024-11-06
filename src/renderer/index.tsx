@@ -61,10 +61,12 @@ createWaitFunction(
     //load skills
     IPC.once('storage-request', (...arg) => {
       const [data] = arg;
+      let new_profile_flag = false;
 
       if (!profileobj) {
         Log.log('storage:request', 1, 'no profile object to load into, for now we will just create a new one but later we will need to handle this better');
         profileobj = new Profile();
+        new_profile_flag = true;
       }
 
       if (!data || Object.keys(data).length === 0) {
@@ -79,6 +81,9 @@ createWaitFunction(
         } catch (e) {
           Log.log('storage:request', 1, 'failed to load skills from storage', data);
         }
+      }
+      if (new_profile_flag) {
+        profileobj.adjustProfileToSkills();
       }
       resolve(undefined);
     });
