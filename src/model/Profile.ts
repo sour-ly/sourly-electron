@@ -5,6 +5,7 @@ import Skill, { SkillContainer, SkillEventMap } from "./Skill";
 
 type SkillEventMapOverride = {
   'onUpdates': { profile: Profile, skills: Skill[] };
+  'profilelevelUp': { profile: Profile, level: number };
 
 } & Omit<SkillEventMap, 'onUpdates'>
 
@@ -52,6 +53,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     if (this.currentExperience >= this.calculateMaxExperience()) {
       Log.log('Profile:addExperience', 0, 'leveling up', this.level);
+      this.emit('profilelevelUp', { profile: this, level: this.level + 1 });
       this.level++;
       this.currentExperience = 0;
     }

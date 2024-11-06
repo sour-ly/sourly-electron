@@ -2,15 +2,28 @@ import { useEffect, useState } from "react";
 import { Profile } from "../../model/Profile";
 import ProgressBar from "../components/ProgressBar";
 import { profileobj } from "..";
+import { useWindow } from "../App";
 
 function ProfilePage() {
 
   const [profile_state, setProfile] = useState<Profile>(profileobj);
+  const ctx = useWindow();
 
   useEffect(() => {
-    profileobj.on('onUpdates', (arg) => {
+    const i = profileobj.on('onUpdates', (arg) => {
       setProfile(arg.profile);
     });
+    const z = profileobj.on('onUpdates', (arg) => {
+      ctx.notification.notify(`You have leveled up to level ${arg.profile.Level}`);
+    });
+    return () => {
+      if (i) {
+        profileobj.off('onUpdates', i);
+      }
+      if (z) {
+        profileobj.off('onUpdates', z);
+      }
+    }
   }, [])
 
 
