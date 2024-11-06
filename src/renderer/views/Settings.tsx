@@ -6,7 +6,7 @@ function Settings() {
     <main className="settings">
       <h1>Settings</h1>
       <div className="settings__content">
-        <p>Version: v{environment.version}</p>
+        <p style={{ marginTop: '.3rem' }}>Version: v{environment.version}</p>
       </div>
     </main>
   )

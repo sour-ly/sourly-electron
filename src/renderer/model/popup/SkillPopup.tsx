@@ -5,7 +5,7 @@ import { useWindow } from "../../App";
 import { useStateUtil } from "../../util/state";
 import Input from "../../components/Input";
 import { ButtonProps } from "../../popup/Popup";
-import { profile } from "../..";
+import { profileobj } from "../..";
 
 export function SkillPopupWrapper({ ...props }: ButtonProps) {
   const [skill, setSkill] = useState<SkillProps>({});
@@ -15,7 +15,7 @@ export function SkillPopupWrapper({ ...props }: ButtonProps) {
 
   function saveSkill() {
     setSkill(o => {
-      profile.addSkill(new Skill(o.name));
+      profileobj.addSkill(new Skill(o.name));
       ctx.notification.notify(`Skill ${o.name} created!`);
       return {};
     });
@@ -63,7 +63,7 @@ export function SkillDeletePopUp({ skill, ...props }: { skill: Skill } & ButtonP
       </div>),
       options: {
         onOkay: () => {
-          profile.removeSkill(skill);
+          profileobj.removeSkill(skill);
           ctx.popUp.close();
           return;
         },

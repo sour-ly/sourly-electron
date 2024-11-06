@@ -137,7 +137,7 @@ export default class Skill extends Eventful<EventMap> {
 
 }
 
-type SkillEventMap = {
+export type SkillEventMap = {
   'skillAdded': { skills: Skill[], newSkill: Skill };
   'onUpdates': { skills: Skill[] };
   'skillRemoved': Skill;
@@ -152,11 +152,11 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
       this.addSkillListeners(skill);
     });
     this.on('skillAdded', ({ newSkill }) => {
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
       this.addSkillListeners(newSkill);
     });
     this.on('skillRemoved', (skill) => {
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
     this.on('onUpdates', ({ skills }) => {
       IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
@@ -164,28 +164,33 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
     });
   }
 
+  //this should be overriden
+  protected emitUpdates() {
+    this.emit('onUpdates', { skills: this.skills });
+  }
+
   protected addSkillListeners(skill: Skill) {
     const listenToGoals = (goal: Goal) => {
       goal.on('goalProgressChanged', () => {
-        this.emit('onUpdates', { skills: this.skills });
+        this.emitUpdates();
       });
     }
     skill.on('goalAdded', (goal) => {
       listenToGoals(goal);
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
     skill.on('goalUpdated', (goal) => {
       listenToGoals(goal);
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
     skill.on('goalRemoved', (goal) => {
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
     skill.on('levelUp', (level) => {
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
     skill.on('experienceGained', (experience) => {
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
 
     skill.Goals.forEach(listenToGoals);

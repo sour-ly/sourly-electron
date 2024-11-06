@@ -1,8 +1,14 @@
 import Identifiable from "../id/id";
 import { Log } from "../log/log";
-import Skill, { SkillContainer } from "./Skill";
+import IPC from "../renderer/ReactIPC";
+import Skill, { SkillContainer, SkillEventMap } from "./Skill";
 
-export class Profile extends SkillContainer {
+type SkillEventMapOverride = {
+  'onUpdates': { profile: Profile, skills: Skill[] };
+
+} & Omit<SkillEventMap, 'onUpdates'>
+
+export class Profile extends SkillContainer<SkillEventMapOverride> {
 
   private level: number = 0;
   private currentExperience: number = 0;
@@ -22,13 +28,21 @@ export class Profile extends SkillContainer {
     skill.on('experienceGained', (arg) => {
       this.addExperience(arg.experience * .6);
     });
+    this.on('onUpdates', () => {
+      IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
+    });
   }
+
+  override emitUpdates() {
+    this.emit('onUpdates', { profile: this, skills: this.skills });
+  }
+
 
   public serialize() {
-    return JSON.stringify(this);
+    return JSON.stringify({ level: this.level, currentExperience: this.currentExperience });
   }
 
-  private calculateMaxExperience() {
+  public calculateMaxExperience() {
     return 100 * this.level + (Math.pow(this.level - 1, 2) * 5);
   }
 

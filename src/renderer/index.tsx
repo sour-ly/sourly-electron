@@ -7,7 +7,7 @@ import { EnvironmentVariables } from '../main/version';
 import { Profile } from '../model/Profile';
 
 export var environment: EnvironmentVariables;
-export var profile: Profile;
+export var profileobj: Profile;
 
 
 createWaitFunction(
@@ -37,17 +37,48 @@ createWaitFunction(
       };
     }
 
+    //load profile
+    await new Promise((resolve) => {
+      IPC.once('storage-request', (...arg) => {
+        //handle profile stuff
+        const [data] = arg;
+        if (!data || Object.keys(data).length === 0) {
+          Log.log('storage:request', 1, 'got a bad packet', data);
+        } else {
+          try {
+            const json = JSON.parse(data as unknown as string);
+            profileobj = new Profile((json).level, (json).currentExperience);
+            Log.log('storage:request', 0, 'loaded profile from storage', data);
+          } catch (e) {
+            Log.log('storage:request', 1, 'failed to load profile from storage', data);
+          }
+        }
+        resolve(undefined);
+      });
+      IPC.sendMessage('storage-request', { key: 'profile', value: '' });
+    });
+
+    //load skills
     IPC.once('storage-request', (...arg) => {
       const [data] = arg;
+
+      if (!profileobj) {
+        Log.log('storage:request', 1, 'no profile object to load into, for now we will just create a new one but later we will need to handle this better');
+        profileobj = new Profile();
+      }
+
       if (!data || Object.keys(data).length === 0) {
         Log.log('storage:request', 1, 'got a bad packet', data);
         resolve(undefined);
       } else if (Array.isArray(data)) {
-        if (!profile) profile = new Profile();
-        for (const skill of data) {
-          profile.addSkillFromJSON(skill);
+        try {
+          for (const skill of data) {
+            profileobj.addSkillFromJSON(skill);
+          }
+          Log.log('storage:request', 0, 'loaded skills from storage', data);
+        } catch (e) {
+          Log.log('storage:request', 1, 'failed to load skills from storage', data);
         }
-        Log.log('storage:request', 0, 'loaded skills from storage', data);
       }
       resolve(undefined);
     });

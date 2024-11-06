@@ -10,6 +10,8 @@ import Home from './views/Home';
 import Queue from './util/queue';
 import Navigator from './navigation/Navigation';
 import Settings from './views/Settings';
+import Profile from './views/Profile';
+import ProfilePage from './views/Profile';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -119,6 +121,7 @@ export default function App() {
           <Navigator />
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
           <div className="feedback" style={{ borderTop: '1px solid black', paddingTop: '10px', marginTop: '25px' }}>

@@ -88,6 +88,8 @@ export function GoalPopUpWrapper({ skill, goalt, ...props }: { skill?: Skill, go
   const [goal, setGoal] = useState<GoalProps>(goalt?.toJSON() ?? { metric: 'Units' });
   const change = useStateUtil(setGoal);
 
+  if (skill === undefined) return <> </>;
+
   const saveGoal = useCallback(() => {
     props.onClick && props.onClick();
     setGoal(o => {
