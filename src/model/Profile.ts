@@ -17,6 +17,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     super();
     this.level = level || 0;
     this.currentExperience = currentExperience || 0;
+    this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     this.skills = skills || [];
   }
 
@@ -48,6 +49,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
   private addExperience(experience: number) {
     this.currentExperience += experience;
+    this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     if (this.currentExperience >= this.calculateMaxExperience()) {
       Log.log('Profile:addExperience', 0, 'leveling up', this.level);
       this.level++;
