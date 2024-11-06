@@ -26,7 +26,9 @@ export default function ProgressBar({ max, value, options = [] }: ProgressBarPro
 
   return (
     <div className="progress-bar__container">
-      <OptionDropdown options={options} className="progress-bar__dot_container" />
+      {options && options.length > 0 &&
+        <OptionDropdown options={options} className="progress-bar__dot_container" />
+      }
       <div className="progress-bar">
         <div className="progress-bar__background"></div>
         <div className="progress-bar__fill" ref={ref}></div>

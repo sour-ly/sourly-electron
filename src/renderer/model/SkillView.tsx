@@ -35,8 +35,8 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
     ]);
 
   useEffect(() => {
-    const i = skill.on('levelUp', (arg) => {
-      ctx.notification.notify(`You have leveled up ${skill.Name} to level ${toRomanNumerals(skill.Level)}`);
+    const i = skill.on('levelUp', (args) => {
+      ctx.notification.notify(`You have leveled up "${skill.Name}" to level ${toRomanNumerals(skill.Level)}`);
     });
 
     return () => {

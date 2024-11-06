@@ -5,7 +5,7 @@ import PopUp, { _popup_types, PopUpWindow } from './popup/Popup';
 import { version } from '../main/version';
 import NotificationBanner, { INotifcation } from './notification/notification';
 import { Anchor } from './components/anchor';
-import { environment } from '.';
+import { environment, profileobj } from '.';
 import Home from './views/Home';
 import Queue from './util/queue';
 import Navigator from './navigation/Navigation';
@@ -60,7 +60,14 @@ export default function App() {
   useEffect(() => {
     //change the title of the document
     window.document.title = `Sourly v${version}`;
-
+    const z = profileobj.on('profilelevelUp', (arg) => {
+      notify(`You have leveled up to level ${arg.level}`);
+    });
+    return () => {
+      if (z) {
+        profileobj.off('onUpdates', z);
+      }
+    }
   }, []);
 
   useEffect(() => {

@@ -1,4 +1,3 @@
-import Identifiable from "../id/id";
 import { Log } from "../log/log";
 import IPC from "../renderer/ReactIPC";
 import Skill, { SkillContainer, SkillEventMap } from "./Skill";

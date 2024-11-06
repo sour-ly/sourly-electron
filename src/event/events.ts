@@ -28,7 +28,7 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
     if (!this.listeners.has(event)) {
       return;
     }
-    this.listeners.get(event)!.splice(idx, 1);
+    this.listeners.set(event, this.listeners.get(event)!.splice(idx, 1));
   }
 
   protected emit<K extends keyof T>(event: K, args: T[K]) {

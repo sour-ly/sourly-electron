@@ -3,8 +3,13 @@ nav.navigation {
   left: 50%;
   top: 1.5rem;
   transform: translateX(-50%);
-  background-color: #bcbcbc;
+  background: #f3f3f3;
+  border-radius: 2rem;
   z-index: 99;
+  width: fit-content;
+  padding: .1rem;
+  display: flex;
+  gap: .25rem;
 
   transition: opacity 0.3s;
 
@@ -17,7 +22,6 @@ nav.navigation {
     //empty rule for now
     &__row {
       width: fit-content;
-      box-shadow: inset -1px -1px #0a0a0a, inset 0px 1px #fff, inset 0px -2px grey, inset 0px 2px #dfdfdf;
       display: flex;
     }
   }
@@ -28,14 +32,42 @@ nav.navigation {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 70px;
-    height: 60px;
+    width: 125px;
+    height: 30px;
     user-select: none;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    border-radius: 2rem;
 
-    box-shadow: var(--o-windows-button-shadow);
+
+    &.effect,
+    &.effect-2 {
+      position: absolute;
+      background: #ffffff;
+      border: 1px solid #e8e8e8;
+      top: .025rem;
+      --spot: 0;
+      left: calc(125px * var(--spot) + .05rem);
+      transition: all 0.3s;
+      z-index: 101;
+      //disable all cursor events
+      pointer-events: none;
+    }
+
+    &.effect-2 {
+      --opacity: 0;
+      opacity: var(--opacity);
+      background: #e4e4e4;
+      z-index: 100;
+    }
 
     &:active {
-      box-shadow: var(--o-windows-button-active-shadow);
+      transform: scale(0.95);
+    }
+
+    &.active {
+      background: #ffffff;
+      border: 1px solid #e8e8e8;
     }
 
     img {
@@ -46,13 +78,17 @@ nav.navigation {
 
     span,
     a {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       font-size: 12px;
+      z-index: 105;
       text-decoration: none;
       color: inherit;
     }
 
     &.disabled {
-      box-shadow: var(--o-windows-button-disabled-shadow);
 
       span,
       a {
