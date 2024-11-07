@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Goal, { GoalProps } from "../../../model/Goal";
-import Skill from "../../../model/Skill";
+import Skill, { Metric } from "../../../model/Skill";
 import { useWindow } from "../../App";
 import { useStateUtil } from "../../util/state";
 import Input from "../../components/Input";
@@ -8,14 +8,14 @@ import { ButtonProps } from "../../popup/Popup";
 import { Dropdown } from "../../components/Dropdown";
 
 
-const MetricOptions = [
+const MetricOptions: Metric[] = [
   'units',
   'times',
   '%',
-  'Pages',
-  'Chapters',
-  'Books',
-  'Articles',
+  'pages',
+  'chapters',
+  'books',
+  'articles',
   'minutes',
   'hours',
   'days',
@@ -74,7 +74,7 @@ function AddPage({ goal, change, edit }: { goal: GoalProps, change: (key: any, v
         value={isPredefinedMetric(goal_copy.metric?.toLowerCase() ?? '') ? Capitalize(goal_copy.metric ?? '') : 'Other'}
       />
       {dropdown_state === 'other' ?
-        <Input placeholder="Metric" onChange={(e) => setGoal('metric', e.currentTarget.value)} /> : <></>}
+        <Input placeholder="Metric" onChange={(e) => setGoal('metric', e.currentTarget.value)} value={goal_copy.metric} /> : <></>}
       <Input placeholder="Goal" onChange={(e) => setGoal('target', parseInt(e.currentTarget.value) ?? 0)} value={`${goal_copy.target ?? 0}`} />
       <Input placeholder="Reward" onChange={(e) => setGoal('reward', parseInt(e.currentTarget.value) ?? 0)} value={`${goal_copy.reward ?? 0}`} />
     </div>
@@ -87,6 +87,8 @@ export function GoalPopUpWrapper({ skill, goalt, ...props }: { skill?: Skill, go
   const ctx = useWindow();
   const [goal, setGoal] = useState<GoalProps>(goalt?.toJSON() ?? { metric: 'Units' });
   const change = useStateUtil(setGoal);
+
+  if (skill === undefined) return <> </>;
 
   const saveGoal = useCallback(() => {
     props.onClick && props.onClick();
@@ -110,7 +112,7 @@ export function GoalPopUpWrapper({ skill, goalt, ...props }: { skill?: Skill, go
     //props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
-      content: addPage,
+      content: () => addPage,
       options: {
         onOkay: () => {
           setGoal(o => {
@@ -143,10 +145,11 @@ export function GoalDeletePopUp({ goal, skill, ...props }: { goal: Goal, skill?:
     props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
-      content: <div className="popup__delete">
+      content: () =>
+      (<div className="popup__delete">
         <h1>Delete Goal</h1>
         <p>Are you sure you want to delete this goal?</p>
-      </div>,
+      </div>),
       options: {
         onOkay: () => {
           skill!.removeGoal(goal);

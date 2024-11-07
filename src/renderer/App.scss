@@ -7,6 +7,7 @@ body {
 }
 
 div#root {
+  position: relative;
   overflow-x: hidden;
   display: flex;
   justify-content: center;
@@ -15,9 +16,15 @@ div#root {
 }
 
 main {
-  margin-top: 75px;
+  margin-top: calc(75px + var(--navigation-bar-top));
   max-width: 600px;
   width: 600px;
+
+  &.home {
+    p {
+      margin: 10px;
+    }
+  }
 }
 
 h1,
@@ -26,9 +33,6 @@ p {
   margin: 0;
 }
 
-p {
-  margin: 10px;
-}
 
 button.add_skill {
   width: 100%;
@@ -39,5 +43,8 @@ button.add_skill {
   position: fixed;
   bottom: 10px;
   right: 20px;
+}
 
+.feedback {
+  padding-bottom: 3rem;
 }

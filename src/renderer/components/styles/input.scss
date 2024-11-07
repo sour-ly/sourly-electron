@@ -1,21 +1,35 @@
 .input--label {
   display: flex;
   flex-direction: column;
-  gap: .2rem;
+  gap: .25rem;
+  --padding-tb: .5rem;
+  --border-color: #8e8e8e;
+  --border-color-active: #bbbbbb;
+  --bg: #f9f9f9;
 
   label {
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: 500;
     color: var(--text-color);
+  }
+
+  text-area,
+  input {
+    background: var(--bg) !important;
+    border: 2px solid var(--border-color);
+    padding: var(--padding-tb) .75rem;
+    transition: border-color 250ms;
+
+    &:focus,
+    &:active {
+      border-color: var(--border-color-active);
+    }
   }
 
   textarea {
     max-height: 4rem;
     resize: none;
     border-radius: .2rem;
-    border: none;
-    padding: .205rem .75rem;
-    border: 1px solid #1f1f1f;
     outline: none;
 
     &::focus,
@@ -27,10 +41,9 @@
 
   input {
     border-radius: .2rem;
-    border: none;
-    padding: .205rem .75rem;
-    border: 1px solid #1f1f1f;
     outline: none;
+    font-size: 1.1rem;
+    border-radius: .2rem;
 
     &::focus,
     &::active {

@@ -5,4 +5,6 @@ export type EnvironmentVariables = {
   platform: NodeJS.Platform;
 }
 
-export const version = "0.0.5";
+type Version = `${number}.${number}.${number}`;
+
+export const version: Version = "0.0.6";

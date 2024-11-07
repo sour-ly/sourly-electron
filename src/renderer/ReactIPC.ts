@@ -10,12 +10,24 @@ interface IPCHandler {
 
 var IPC: IPCHandler = {
   on: (channel, listener) => {
+    if (!window.electron) {
+      console.error('electron is not defined');
+      return;
+    }
     window.electron.ipcRenderer.on(channel, listener as any);
   },
   once: (channel, listener) => {
+    if (!window.electron) {
+      console.error('electron is not defined');
+      return;
+    }
     window.electron.ipcRenderer.once(channel, listener as any);
   },
   sendMessage: (channel, ...args) => {
+    if (!window.electron) {
+      console.error('electron is not defined');
+      return;
+    }
     window.electron.ipcRenderer.sendMessage(channel, args);
   },
 };

@@ -4,10 +4,11 @@ import IPC from '../renderer/ReactIPC';
 import Goal, { GoalProps } from './Goal';
 
 
+export type Metric = 'units' | 'times' | '%' | 'pages' | 'chapters' | 'books' | 'articles' | 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years' | 'lbs' | 'kg' | 'miles' | 'meters' | 'other' | string;
 
 type EventMap = {
-  'levelUp': number;
-  'experienceGained': number;
+  'levelUp': { skill: Skill, level: number };
+  'experienceGained': { skill: Skill, experience: number };
   'skillChanged': Skill;
   'goalAdded': Goal;
   'goalUpdated': Goal;
@@ -15,6 +16,7 @@ type EventMap = {
 }
 
 export type SkillProps = {
+  id?: string;
   name?: string;
   level?: number;
   currentExperience?: number;
@@ -39,6 +41,7 @@ export default class Skill extends Eventful<EventMap> {
   }
 
   private calculateExperienceRequired(level: number) {
+    //f = 50x^2 - 150x + 200 --> 50/3x^3 - 150/2z^2 + 200x
     return Math.floor(50 * Math.pow(level, 2) - 150 * level + 200);
   }
 
@@ -59,7 +62,7 @@ export default class Skill extends Eventful<EventMap> {
     this.level++;
     this.currentExperience = 0;
     this.experienceRequired = this.calculateExperienceRequired(this.level);
-    this.emit('levelUp', this.level);
+    this.emit('levelUp', { skill: this, level: this.level });
   }
 
   private addExperience(experience: number) {
@@ -72,7 +75,7 @@ export default class Skill extends Eventful<EventMap> {
     if (this.currentExperience >= this.experienceRequired) {
       this.levelUp();
     }
-    this.emit('experienceGained', experience);
+    this.emit('experienceGained', { skill: this, experience: experience });
   }
 
 
@@ -100,6 +103,12 @@ export default class Skill extends Eventful<EventMap> {
     return this.currentExperience / this.experienceRequired;
   }
 
+  /* setters */
+
+  public set Name(args: string) {
+    this.name = args;
+  }
+
   /* add goals */
   public addGoal(goal: Goal) {
     this.goals.push(goal);
@@ -124,6 +133,13 @@ export default class Skill extends Eventful<EventMap> {
     }
   }
 
+  /* get total xp */
+  public getTotalExperience() {
+    //take the integral of the formula for max experience
+    //f = 50x^2 - 150x + 200 --> 50/3x^3 - 150/2z^2 + 200x
+    return Math.floor((50 / 3) * Math.pow(this.level, 3) - (150 / 2) * Math.pow(this.level, 2) + 200 * this.level);
+  }
+
   /* Searialize */
   public toJSON() {
     return {
@@ -136,27 +152,31 @@ export default class Skill extends Eventful<EventMap> {
 
 }
 
-type SkillEventMap = {
+export type SkillEventMap = {
   'skillAdded': { skills: Skill[], newSkill: Skill };
+  'skillChanged': Skill;
   'onUpdates': { skills: Skill[] };
   'skillRemoved': Skill;
 }
 
-export class SkillManager extends Eventful<SkillEventMap> {
-  private skills: Skill[] = [];
-  private static instance: SkillManager | undefined;
+export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> extends Eventful<T> {
+  protected skills: Skill[] = [];
 
-  private constructor() {
+  protected constructor() {
     super();
     this.skills.forEach(skill => {
       this.addSkillListeners(skill);
     });
     this.on('skillAdded', ({ newSkill }) => {
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
       this.addSkillListeners(newSkill);
     });
+    this.on('skillChanged', (skill) => {
+      this.emitUpdates();
+      this.addSkillListeners(skill);
+    });
     this.on('skillRemoved', (skill) => {
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
     this.on('onUpdates', ({ skills }) => {
       IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
@@ -164,39 +184,36 @@ export class SkillManager extends Eventful<SkillEventMap> {
     });
   }
 
-  private addSkillListeners(skill: Skill) {
+  //this should be overriden
+  protected emitUpdates() {
+    this.emit('onUpdates', { skills: this.skills });
+  }
 
+  protected addSkillListeners(skill: Skill) {
     const listenToGoals = (goal: Goal) => {
       goal.on('goalProgressChanged', () => {
-        this.emit('onUpdates', { skills: this.skills });
+        this.emitUpdates();
       });
     }
     skill.on('goalAdded', (goal) => {
       listenToGoals(goal);
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
     skill.on('goalUpdated', (goal) => {
       listenToGoals(goal);
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
     skill.on('goalRemoved', (goal) => {
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
     skill.on('levelUp', (level) => {
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
     skill.on('experienceGained', (experience) => {
-      this.emit('onUpdates', { skills: this.skills });
+      this.emitUpdates();
     });
 
     skill.Goals.forEach(listenToGoals);
-  }
-
-  public static getInstance() {
-    if (!this.instance) {
-      this.instance = new SkillManager();
-    }
-    return this.instance;
   }
 
   public get Skills() {
@@ -220,6 +237,18 @@ export class SkillManager extends Eventful<SkillEventMap> {
     this.addSkill(n_skill);
   }
 
+  public updateSkill(skill_id: number, new_skill: SkillProps) {
+    const index = this.skills.findIndex(skill => skill.Id === skill_id);
+    if (index !== -1 && new_skill.name) {
+      this.skills[index].Name = new_skill.name;
+      this.emit('skillChanged', this.skills[index]);
+      return true;
+    } else {
+      Log.log('skillManager:updateSkill', 1, 'skill not found', skill_id);
+      return false;
+    }
+  }
+
   public removeSkill(skill: Skill) {
     const index = this.skills.indexOf(skill);
     if (index !== -1) {
@@ -234,6 +263,24 @@ export class SkillManager extends Eventful<SkillEventMap> {
 
   private serializeSkills() {
     return this.skills.map(skill => skill.toJSON());
+  }
+
+}
+
+export class SkillManager extends SkillContainer {
+  private static instance: SkillManager | undefined;
+
+  private constructor() {
+    super();
+
+  }
+
+
+  public static getInstance() {
+    if (!this.instance) {
+      this.instance = new SkillManager();
+    }
+    return this.instance;
   }
 
 }

@@ -2,17 +2,15 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import IPC from './ReactIPC';
 import { Log } from '../log/log';
-import { SkillManager } from '../model/Skill';
 import { createWaitFunction } from './util/promise';
 import { EnvironmentVariables } from '../main/version';
+import { Profile } from '../model/Profile';
 
-const container = document.getElementById('root') as HTMLElement;
-const root = createRoot(container);
 export var environment: EnvironmentVariables;
+export var profileobj: Profile;
 
 
-
-
+let flags = 0;
 createWaitFunction(
   new Promise(async (resolve) => {
     await new Promise((resolve) => {
@@ -40,19 +38,62 @@ createWaitFunction(
       };
     }
 
+    //load profile
+    await new Promise((resolve) => {
+      IPC.once('storage-request', (...arg) => {
+        //handle profile stuff
+        const [data] = arg;
+        if (!data || Object.keys(data).length === 0) {
+          Log.log('storage:request', 1, 'got a bad packet', data);
+        } else {
+          try {
+            const json = data as any;
+            profileobj = new Profile(json.name, (json).level, (json).currentExperience);
+            Log.log('storage:request', 0, 'loaded profile from storage', data);
+          } catch (e) {
+            Log.log('storage:request', 1, 'failed to load profile from storage with error %s', e, data);
+
+          }
+        }
+        resolve(undefined);
+      });
+      IPC.sendMessage('storage-request', { key: 'profile', value: '' });
+    });
+
+    //load skills
     IPC.once('storage-request', (...arg) => {
       const [data] = arg;
+      let new_profile_flag = false;
+
+      if (!profileobj) {
+        Log.log('storage:request', 1, 'no profile object to load into, for now we will just create a new one but later we will need to handle this better');
+        profileobj = new Profile();
+        new_profile_flag = true;
+        flags |= 0x01;
+      }
+
       if (!data || Object.keys(data).length === 0) {
         Log.log('storage:request', 1, 'got a bad packet', data);
         resolve(undefined);
       } else if (Array.isArray(data)) {
-        for (const skill of data) {
-          SkillManager.getInstance().addSkillFromJSON(skill);
+        try {
+          for (const skill of data) {
+            profileobj.addSkillFromJSON(skill);
+          }
+          Log.log('storage:request', 0, 'loaded skills from storage', data);
+        } catch (e) {
+          Log.log('storage:request', 1, 'failed to load skills from storage', data);
         }
-        Log.log('storage:request', 0, 'loaded skills from storage', data);
+      }
+      if (new_profile_flag) {
+        Log.log('storage:request', 0, 'new profile object created, adjusting to skills');
+        profileobj.adjustProfileToSkills();
       }
       resolve(undefined);
     });
     IPC.sendMessage('storage-request', { key: 'skill', value: '' });
-  }), async () => root.render(<App />));
-
+  }), async () => {
+    const container = document.getElementById('root') as HTMLElement;
+    const root = createRoot(container);
+    root.render(<App flags={flags} />)
+  })

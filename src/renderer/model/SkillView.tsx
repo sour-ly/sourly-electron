@@ -9,7 +9,7 @@ import { useStateUtil } from "../util/state";
 import ProgressBar from "../components/ProgressBar";
 import toRomanNumerals from "../util/roman";
 import { GoalPopUpWrapper } from "./popup/GoalPopup";
-import { SkillDeletePopUp } from "./popup/SkillPopup";
+import { SkillDeletePopUp, SkillPopupWrapper } from "./popup/SkillPopup";
 
 
 const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boolean }) => {
@@ -28,15 +28,17 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
   const collapse_ref = useRef<HTMLDivElement>(null);
   const ctx = useWindow();
   const goalpop = GoalPopUpWrapper({ skill });
+  const skillEdit = SkillPopupWrapper({ tskill: { ...skill.toJSON(), id: `${Number(skill.Id) ?? -1}` }, edit: true });
   const options = useRef(
     [
+      { key: 'edit', element: skillEdit },
       { key: 'add', element: goalpop },
       { key: 'delete', element: useMemo(() => <SkillDeletePopUp skill={skill} />, [skill]) }
     ]);
 
   useEffect(() => {
-    const i = skill.on('levelUp', (arg) => {
-      ctx.notification.notify(`You have leveled up ${skill.Name} to level ${toRomanNumerals(skill.Level)}`);
+    const i = skill.on('levelUp', (args) => {
+      ctx.notification.notify(`You have leveled up "${skill.Name}" to level ${toRomanNumerals(skill.Level)}`);
     });
 
     return () => {
