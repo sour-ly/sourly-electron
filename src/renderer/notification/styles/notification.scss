@@ -61,6 +61,18 @@
       }
     }
 
+    &__bottom {
+      background: #d4d0c8;
+      display: flex;
+      padding: 10px;
+      width: 100%;
+      justify-content: flex-end;
+      text-decoration: underline;
+      color: blue;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
     &__content {
       width: 100%;
       min-height: 50px;

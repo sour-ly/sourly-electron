@@ -56,8 +56,17 @@ export default function App({ flags }: { flags: number }) {
   const [notification, setNotification] = useState<string | null>(null);
   /* notification queue */
   const notification_queue = useRef<Queue<string>>(new Queue<string>()).current;
+  /* notification queue amount */
+  const [notification_amount, setNotificationAmount] = useState(0);
 
   useEffect(() => {
+
+    /* notification queue listeners */
+    const x = notification_queue.on('update', (q) => {
+      setNotificationAmount(q.length);
+    });
+
+
     //change the title of the document
     window.document.title = `Sourly v${version}`;
     const z = profileobj.on('profilelevelUp', (arg) => {
@@ -81,6 +90,9 @@ export default function App({ flags }: { flags: number }) {
     return () => {
       if (z) {
         profileobj.off('onUpdates', z);
+      }
+      if (x) {
+        notification_queue.off('update', x);
       }
     }
   }, []);
@@ -132,13 +144,27 @@ export default function App({ flags }: { flags: number }) {
     })
   }
 
+  function clearNotification() {
+    setNotification(null);
+    while (notification_queue.pop()) { ; }
+  }
+
 
   return (
-    <WindowContext.Provider value={{ notification: { notify: (s: string) => { notify(s); } }, popUp: { open: (ctx) => { openPopUp(ctx); return true; }, close: () => { setPopUpContext({ open: false, context: null }); return true; }, state: ctx_open, update: () => setUpdate(!update) } }}>
+    <WindowContext.Provider value={{
+      notification: {
+        notify: (s: string) => {
+          notify(s);
+        },
+        clear: () => {
+          clearNotification();
+        }
+      }, popUp: { open: (ctx) => { openPopUp(ctx); return true; }, close: () => { setPopUpContext({ open: false, context: null }); return true; }, state: ctx_open, update: () => setUpdate(!update) }
+    }}>
       <div>
         <Router>
           <PopUp open={ctx_open} context={ctx_content} />
-          <NotificationBanner notification={{ state: notification, setState: setNotification }} />
+          <NotificationBanner notification={{ state: notification, setState: setNotification }} amount={notification_amount} />
           <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>
           <Navigator />
           <Routes>

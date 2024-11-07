@@ -2,37 +2,51 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import './styles/notification.scss';
 import PopUp from "../popup/Popup";
 import { Stateful } from "../util/state";
+import { useWindow } from "../App";
 
 export interface INotifcation {
   notify: (message: string) => void;
   notification: string | null;
   Element: (props: { notification: string | null }) => JSX.Element;
+  clear: () => void;
 }
 
 
-function NotificationElement({ notification = "?", ...props }: { notification: string | null, cancelTimer: () => void, init: boolean, setInit: (value: boolean) => void }) {
+function NotificationElement({ notification = "?", amount = 0, ...props }: { notification: string | null, amount?: number, cancelTimer: () => void, init: boolean, setInit: (value: boolean) => void }) {
+
+  const ctx = useWindow();
+
   useEffect(() => {
     if (notification) {
       props.setInit(false);
     }
   }, [notification])
+
   return (
     <div id="notification" className={notification ? 'show' : props.init ? '' : 'hide'} onClick={props.cancelTimer}>
       <div className="notification__top" onClick={() => { }}>
-        <span>ALERT</span>
+        <span>ALERT {amount >= 1 ? `(${amount} MORE)` : ''}</span>
       </div>
       <div className="notification__content">
         <p>{notification}</p>
       </div>
+
+      {amount >= 2 &&
+        <div className="notification__bottom" onClick={ctx.notification.clear}>
+          Clear all alerts
+        </div>
+      }
+
     </div>
   )
 }
 
 type NotificationBannerProps = {
   notification: Stateful<string | null>;
+  amount?: number;
 }
 
-function NotificationBanner({ notification }: NotificationBannerProps) {
+function NotificationBanner({ notification, amount }: NotificationBannerProps) {
 
   const [init, setInit] = useState(true);
   const timeout_ref = useRef<any>();
@@ -61,7 +75,7 @@ function NotificationBanner({ notification }: NotificationBannerProps) {
   }
 
   return (
-    <NotificationElement notification={notification.state} cancelTimer={cancelTimer} init={init} setInit={setInit} />
+    <NotificationElement notification={notification.state} amount={amount} cancelTimer={cancelTimer} init={init} setInit={setInit} />
   )
 
 }

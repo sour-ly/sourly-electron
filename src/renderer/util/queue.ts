@@ -5,6 +5,7 @@ type QueueEventMap<T> = {
   'queue': T;
   'queueintoempty': T;
   'pop': T;
+  'update': Queue<any>;
 }
 
 class Queue<T extends { localeCompare: (a: T) => number }> extends Eventful<QueueEventMap<T>> {
@@ -14,6 +15,9 @@ class Queue<T extends { localeCompare: (a: T) => number }> extends Eventful<Queu
   constructor() {
     super();
     this.data = [];
+    this.on('queue', () => this.emit('update', this));
+    this.on('queueintoempty', () => this.emit('update', this));
+    this.on('pop', () => this.emit('update', this));
   }
 
   queue(message: T) {
@@ -33,7 +37,10 @@ class Queue<T extends { localeCompare: (a: T) => number }> extends Eventful<Queu
   };
 
   pop() {
-    return this.data.shift();
+    const data = this.data.shift();
+    if (data)
+      this.emit('pop', data);
+    return data;
   }
 
   get length() {
