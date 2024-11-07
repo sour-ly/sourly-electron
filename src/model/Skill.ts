@@ -40,6 +40,7 @@ export default class Skill extends Eventful<EventMap> {
   }
 
   private calculateExperienceRequired(level: number) {
+    //f = 50x^2 - 150x + 200 --> 50/3x^3 - 150/2z^2 + 200x
     return Math.floor(50 * Math.pow(level, 2) - 150 * level + 200);
   }
 
@@ -123,6 +124,13 @@ export default class Skill extends Eventful<EventMap> {
       this.emit('goalUpdated', goal);
       this.listenToGoal(goal);
     }
+  }
+
+  /* get total xp */
+  public getTotalExperience() {
+    //take the integral of the formula for max experience
+    //f = 50x^2 - 150x + 200 --> 50/3x^3 - 150/2z^2 + 200x
+    return Math.floor((50 / 3) * Math.pow(this.level, 3) - (150 / 2) * Math.pow(this.level, 2) + 200 * this.level);
   }
 
   /* Searialize */

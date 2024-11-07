@@ -45,7 +45,7 @@ export const useWindow = () => {
 //@BLOCK
 //@TITLE App Entry
 //@DESC This is the main entry point for the application. This is where the main routing is done and the main context is set up. This is basically the heart of the application
-export default function App() {
+export default function App({ flags }: { flags: number }) {
 
   /* for the Context Object */
   const [ctx_open, setCtxOpen] = useState(false);
@@ -61,8 +61,23 @@ export default function App() {
     //change the title of the document
     window.document.title = `Sourly v${version}`;
     const z = profileobj.on('profilelevelUp', (arg) => {
-      notify(`You have leveled up to level ${arg.level}`);
+      open(`You have leveled up to level ${arg.level}`);
     });
+    if (flags & 0x01) {
+      const message = 'Welcome to Sourly! We have detected that you don\'t have a profile, so we have created one for you! (Don\'t worry we have adjusted your profile to match your skills!)'
+      notify(message);
+      /* I don't know if I really want to do this, but I will leave it here for now
+      openPopUp(
+        {
+          content: () => <p>{message}</p>,
+          type: 'dialog',
+          options: {
+            onOkay: () => { setPopUpContext({ open: false, context: null }); },
+            onCancel: () => { }
+          }
+        });
+        */
+    }
     return () => {
       if (z) {
         profileobj.off('onUpdates', z);

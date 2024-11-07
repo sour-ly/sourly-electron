@@ -10,12 +10,12 @@ type SkillEventMapOverride = {
 
 export class Profile extends SkillContainer<SkillEventMapOverride> {
 
-  private level: number = 0;
+  private level: number = 1;
   private currentExperience: number = 0;
 
   constructor(private name: string = "User", level?: number, currentExperience?: number, skills?: Skill[]) {
     super();
-    this.level = level || 0;
+    this.level = level || 1;
     this.currentExperience = currentExperience || 0;
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     this.skills = skills || [];
@@ -24,7 +24,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
   override addSkillListeners(skill: Skill) {
     super.addSkillListeners(skill);
     skill.on('levelUp', (arg) => {
-      this.addExperience(arg.level * 25)
+      this.addExperience(arg.level * 1.5)
     });
     skill.on('experienceGained', (arg) => {
       this.addExperience(arg.experience * .6);
@@ -38,11 +38,6 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.emit('onUpdates', { profile: this, skills: this.skills });
   }
 
-
-  public serialize() {
-    return JSON.stringify({ level: this.level, currentExperience: this.currentExperience });
-  }
-
   public calculateMaxExperience() {
     return 100 * this.level + (Math.pow(this.level - 1, 2) * 5);
   }
@@ -50,18 +45,19 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
   private addExperience(experience: number) {
     this.currentExperience += experience;
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
-    if (this.currentExperience >= this.calculateMaxExperience()) {
+    while (this.currentExperience >= this.calculateMaxExperience()) {
       Log.log('Profile:addExperience', 0, 'leveling up', this.level);
       this.emit('profilelevelUp', { profile: this, level: this.level + 1 });
       this.level++;
-      this.currentExperience = 0;
+      this.currentExperience -= this.calculateMaxExperience();
     }
+    this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
   }
 
   public adjustProfileToSkills() {
     for (const skill of this.skills) {
-      this.addExperience(skill.CurrentExperience * .6);
-      this.addExperience(skill.Level * 25);
+      this.addExperience(skill.getTotalExperience() * .6);
+      this.addExperience(skill.Level * 1.5);
     }
   }
 
@@ -85,6 +81,14 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
   get Skills() {
     return this.skills;
+  }
+
+  public serialize() {
+    return {
+      name: this.name,
+      level: this.level,
+      currentExperience: this.currentExperience,
+    }
   }
 
 }

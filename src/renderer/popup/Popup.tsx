@@ -15,7 +15,7 @@ export type _popup_types = 'dialog' | 'confirm' | 'input';
 export type PopUpWindow<T extends _popup_types = 'confirm'> = {
   type: _popup_types;
   content: () => ReactNode;
-  options?: T extends 'confirm' ? Confirm : T extends 'input' ? Input : Dialog;
+  options?: T extends 'confirm' ? Confirm : T extends 'input' ? Input : T extends 'dialog' ? null : Dialog;
 }
 
 export type ButtonProps = Omit<DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, 'onClick'> & { onClick?: () => void };
@@ -74,6 +74,9 @@ export default function PopUp<T extends _popup_types = 'dialog'>({ open, ...prop
                   <AccentButton text={"Okay"} onClick={props.context.options?.onOkay} />
                   <Button text={"Cancel"} onClick={props.context.options?.onCancel} />
                 </>
+              )}
+              {props.context?.type === 'dialog' && (
+                <AccentButton text={"Okay"} onClick={props.context.options?.onOkay} />
               )}
             </div>
           </div>

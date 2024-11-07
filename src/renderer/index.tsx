@@ -10,6 +10,7 @@ export var environment: EnvironmentVariables;
 export var profileobj: Profile;
 
 
+let flags = 0;
 createWaitFunction(
   new Promise(async (resolve) => {
     await new Promise((resolve) => {
@@ -46,11 +47,12 @@ createWaitFunction(
           Log.log('storage:request', 1, 'got a bad packet', data);
         } else {
           try {
-            const json = JSON.parse(data as unknown as string);
-            profileobj = new Profile((json).level, (json).currentExperience);
+            const json = data as any;
+            profileobj = new Profile(json.name, (json).level, (json).currentExperience);
             Log.log('storage:request', 0, 'loaded profile from storage', data);
           } catch (e) {
-            Log.log('storage:request', 1, 'failed to load profile from storage', data);
+            Log.log('storage:request', 1, 'failed to load profile from storage with error %s', e, data);
+
           }
         }
         resolve(undefined);
@@ -67,6 +69,7 @@ createWaitFunction(
         Log.log('storage:request', 1, 'no profile object to load into, for now we will just create a new one but later we will need to handle this better');
         profileobj = new Profile();
         new_profile_flag = true;
+        flags |= 0x01;
       }
 
       if (!data || Object.keys(data).length === 0) {
@@ -83,6 +86,7 @@ createWaitFunction(
         }
       }
       if (new_profile_flag) {
+        Log.log('storage:request', 0, 'new profile object created, adjusting to skills');
         profileobj.adjustProfileToSkills();
       }
       resolve(undefined);
@@ -91,5 +95,5 @@ createWaitFunction(
   }), async () => {
     const container = document.getElementById('root') as HTMLElement;
     const root = createRoot(container);
-    root.render(<App />)
+    root.render(<App flags={flags} />)
   })
