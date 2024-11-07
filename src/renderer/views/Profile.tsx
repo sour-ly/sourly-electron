@@ -18,7 +18,6 @@ function ProfilePage() {
       if (i) {
         profileobj.off('onUpdates', i);
       }
-
     }
   }, [])
 

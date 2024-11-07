@@ -51,6 +51,9 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
       this.level++;
       this.currentExperience -= this.calculateMaxExperience();
     }
+    if (this.currentExperience < 0) {
+      this.currentExperience = Math.abs(this.currentExperience);
+    }
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
   }
 

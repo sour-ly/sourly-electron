@@ -21,14 +21,17 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
     }
     // @ts-ignore
     const i = this.listeners.get(event)!.push(listener);
-    return i;
+    return i - 1;
   }
 
   off<K extends keyof T>(event: K, idx: number) {
     if (!this.listeners.has(event)) {
       return;
     }
-    this.listeners.set(event, this.listeners.get(event)!.splice(idx, 1));
+    const arr = this.listeners.get(event)!;
+    const new_arr = arr.filter((_, i) => i !== idx);
+
+    this.listeners.set(event, new_arr);
   }
 
   protected emit<K extends keyof T>(event: K, args: T[K]) {

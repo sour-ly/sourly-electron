@@ -1,13 +1,14 @@
 .input--label {
   display: flex;
   flex-direction: column;
-  gap: .2rem;
+  gap: .25rem;
   --padding-tb: .5rem;
-  --border-color: #ffffff;
-  --bg: #f0f0f0;
+  --border-color: #8e8e8e;
+  --border-color-active: #bbbbbb;
+  --bg: #f9f9f9;
 
   label {
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: 500;
     color: var(--text-color);
   }
@@ -15,8 +16,14 @@
   text-area,
   input {
     background: var(--bg) !important;
-    border: 3px solid var(--border-color);
+    border: 2px solid var(--border-color);
     padding: var(--padding-tb) .75rem;
+    transition: border-color 250ms;
+
+    &:focus,
+    &:active {
+      border-color: var(--border-color-active);
+    }
   }
 
   textarea {
@@ -36,7 +43,7 @@
     border-radius: .2rem;
     outline: none;
     font-size: 1.1rem;
-    border-radius: .5rem;
+    border-radius: .2rem;
 
     &::focus,
     &::active {
