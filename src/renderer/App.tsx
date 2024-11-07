@@ -61,7 +61,7 @@ export default function App({ flags }: { flags: number }) {
     //change the title of the document
     window.document.title = `Sourly v${version}`;
     const z = profileobj.on('profilelevelUp', (arg) => {
-      open(`You have leveled up to level ${arg.level}`);
+      notify(`You have leveled up to level ${arg.level}`);
     });
     if (flags & 0x01) {
       const message = 'Welcome to Sourly! We have detected that you don\'t have a profile, so we have created one for you! (Don\'t worry we have adjusted your profile to match your skills!)'
