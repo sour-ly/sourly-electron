@@ -16,6 +16,7 @@ type EventMap = {
 }
 
 export type SkillProps = {
+  id?: string;
   name?: string;
   level?: number;
   currentExperience?: number;
@@ -102,6 +103,12 @@ export default class Skill extends Eventful<EventMap> {
     return this.currentExperience / this.experienceRequired;
   }
 
+  /* setters */
+
+  public set Name(args: string) {
+    this.name = args;
+  }
+
   /* add goals */
   public addGoal(goal: Goal) {
     this.goals.push(goal);
@@ -147,6 +154,7 @@ export default class Skill extends Eventful<EventMap> {
 
 export type SkillEventMap = {
   'skillAdded': { skills: Skill[], newSkill: Skill };
+  'skillChanged': Skill;
   'onUpdates': { skills: Skill[] };
   'skillRemoved': Skill;
 }
@@ -162,6 +170,10 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
     this.on('skillAdded', ({ newSkill }) => {
       this.emitUpdates();
       this.addSkillListeners(newSkill);
+    });
+    this.on('skillChanged', (skill) => {
+      this.emitUpdates();
+      this.addSkillListeners(skill);
     });
     this.on('skillRemoved', (skill) => {
       this.emitUpdates();
@@ -223,6 +235,18 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
       }
     }
     this.addSkill(n_skill);
+  }
+
+  public updateSkill(skill_id: number, new_skill: SkillProps) {
+    const index = this.skills.findIndex(skill => skill.Id === skill_id);
+    if (index !== -1 && new_skill.name) {
+      this.skills[index].Name = new_skill.name;
+      this.emit('skillChanged', this.skills[index]);
+      return true;
+    } else {
+      Log.log('skillManager:updateSkill', 1, 'skill not found', skill_id);
+      return false;
+    }
   }
 
   public removeSkill(skill: Skill) {

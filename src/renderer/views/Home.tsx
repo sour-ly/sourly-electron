@@ -27,7 +27,7 @@ function Home() {
           <SkillView key={skill.Id} skill={skill} skills={skills} />
         )
       })}
-      <SkillPopupWrapper />
+      <SkillPopupWrapper tskill={{}} edit={false} />
     </main>
   );
 }

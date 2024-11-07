@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes, DetailedHTMLProps, useState } from "react";
+import { ButtonHTMLAttributes, DetailedHTMLProps, useEffect, useState } from "react";
 //import Goal, { GoalProps } from "../../../model/Goal";
 import Skill, { SkillManager, SkillProps } from "../../../model/Skill";
 import { useWindow } from "../../App";
@@ -7,16 +7,21 @@ import Input from "../../components/Input";
 import { ButtonProps } from "../../popup/Popup";
 import { profileobj } from "../..";
 
-export function SkillPopupWrapper({ ...props }: ButtonProps) {
-  const [skill, setSkill] = useState<SkillProps>({});
+export function SkillPopupWrapper({ tskill, edit, ...props }: { tskill: SkillProps, edit?: boolean } & ButtonProps) {
+  const [skill, setSkill] = useState<SkillProps>(tskill);
   const change = useStateUtil(setSkill);
   const ctx = useWindow();
 
-
   function saveSkill() {
     setSkill(o => {
-      profileobj.addSkill(new Skill(o.name));
-      ctx.notification.notify(`Skill ${o.name} created!`);
+      console.log('saveSkill', o);
+      if (edit) {
+        if (profileobj.updateSkill(Number(tskill.id ?? -1), { ...o }))
+          ctx.notification.notify(`Skill "${tskill.name}" is now "${o.name}" !`);
+      } else {
+        profileobj.addSkill(new Skill(o.name));
+        ctx.notification.notify(`Skill ${o.name} created!`);
+      }
       return {};
     });
   }
@@ -27,8 +32,8 @@ export function SkillPopupWrapper({ ...props }: ButtonProps) {
     ctx.popUp.open({
       type: 'confirm',
       content: () => (<div>
-        <h1>Add Skill</h1>
-        <Input placeholder="Name" onChange={(e) => change('name', e.currentTarget.value)} />
+        <h1>{edit && 'Edit' || 'Add'} Skill</h1>
+        <Input placeholder="Name" onChange={(e) => change('name', e.currentTarget.value)} value={skill.name} />
       </div>),
       options: {
         onOkay: () => {
@@ -45,7 +50,7 @@ export function SkillPopupWrapper({ ...props }: ButtonProps) {
   }
 
   return (
-    <button className="add_skill" onClick={addSkillPopUp}>Add Skill</button>
+    <button className="add_skill" onClick={addSkillPopUp}>{edit && "Edit" || "Add"} Skill</button>
   )
 }
 
