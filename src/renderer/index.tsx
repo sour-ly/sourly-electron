@@ -9,7 +9,7 @@ import { Profile } from '../model/Profile';
 export var environment: EnvironmentVariables;
 export var profileobj: Profile;
 
-enum SourlyFlags {
+export enum SourlyFlags {
   NEW_PROFILE = 0x01,
   NO_SKILLS = 0x02,
 }
@@ -52,7 +52,7 @@ createWaitFunction(
         } else {
           try {
             const json = data as any;
-            profileobj = new Profile(json.name, (json).level, (json).currentExperience);
+            profileobj = new Profile(json.name, (json).level, (json).currentExperience, [], json.version ?? '0.0.0');
             Log.log('storage:request', 0, 'loaded profile from storage', data);
           } catch (e) {
             Log.log('storage:request', 1, 'failed to load profile from storage with error %s', e, data);
@@ -87,7 +87,7 @@ createWaitFunction(
           }
           Log.log('storage:request', 0, 'loaded skills from storage', data);
         } catch (e) {
-          Log.log('storage:request', 1, 'failed to load skills from storage', data);
+          Log.log('storage:request', 1, 'failed to load skills from storage', data, e);
         }
       }
       if (new_profile_flag) {

@@ -5,14 +5,15 @@ import PopUp, { _popup_types, PopUpWindow } from './popup/Popup';
 import { version } from '../main/version';
 import NotificationBanner, { INotifcation } from './notification/notification';
 import { Anchor } from './components/anchor';
-import { environment, profileobj } from '.';
+import { environment, profileobj, SourlyFlags } from '.';
 import Home from './views/Home';
 import Queue from './util/queue';
 import Navigator from './navigation/Navigation';
 import Settings from './views/Settings';
 import Profile from './views/Profile';
 import ProfilePage from './views/Profile';
-import { MessageScreen } from './messagescreen/MessageScreen';
+import { MessageScreen, MSContext } from './messagescreen/MessageScreen';
+import { VersionPageContext } from './messagescreen/pages/VersionPage';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -59,6 +60,8 @@ export default function App({ flags }: { flags: number }) {
   const notification_queue = useRef<Queue<string>>(new Queue<string>()).current;
   /* notification queue amount */
   const [notification_amount, setNotificationAmount] = useState(0);
+  /* MessageScreen */
+  const [msg_context, setMsgContext] = useState<MSContext | null>(null);
 
   useEffect(() => {
 
@@ -67,26 +70,30 @@ export default function App({ flags }: { flags: number }) {
       setNotificationAmount(q.length);
     });
 
-
     //change the title of the document
     window.document.title = `Sourly v${version}`;
     const z = profileobj.on('profilelevelUp', (arg) => {
       notify(`You have leveled up to level ${arg.level}`);
     });
-    if (flags & 0x01) {
+    /* flag checks */
+    if ((flags & SourlyFlags.NEW_PROFILE) ^ (flags & SourlyFlags.NO_SKILLS)) {
       const message = 'Welcome to Sourly! We have detected that you don\'t have a profile, so we have created one for you! (Don\'t worry we have adjusted your profile to match your skills!)'
       notify(message);
-      /* I don't know if I really want to do this, but I will leave it here for now
-      openPopUp(
-        {
-          content: () => <p>{message}</p>,
-          type: 'dialog',
-          options: {
-            onOkay: () => { setPopUpContext({ open: false, context: null }); },
-            onCancel: () => { }
-          }
-        });
-        */
+    } else if (flags & SourlyFlags.NO_SKILLS) {
+      const message = 'We have detected that you don\'t have any skills, so we have created some for you!'
+      notify(message);
+    } else {
+      const message = 'Welcome back to Sourly!'
+      notify(message);
+    }
+    /* check if the user's version in the `storage.json` file is out of date, if so - present the user with the new patch notes and update their value*/
+    if (profileobj.Version !== version) {
+      setMsgContext({
+        flags: flags, pages: [VersionPageContext], onClose: () => {
+          setMsgContext(null);
+          profileobj.Version = version;
+        }
+      });
     }
     return () => {
       if (z) {
@@ -164,7 +171,7 @@ export default function App({ flags }: { flags: number }) {
     }}>
       <div>
         <Router>
-          <MessageScreen />
+          {msg_context && <MessageScreen {...msg_context} />}
           <PopUp open={ctx_open} context={ctx_content} />
           <NotificationBanner notification={{ state: notification, setState: setNotification }} amount={notification_amount} />
           <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lexend:wght@100..900&family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap');
+
 :root {
 
   --accent: #F46224;
@@ -49,7 +51,28 @@
   --navigation-bar-button-hover-color: #e4e4e4;
   --navigation-bar-button-border-color: #e8e8e8;
 
+  //messagescreen
+  --messagescreen-bg-color: #000000a0;
+  --messagescreen-content-bg-color: #1f1e2c;
+  --messagescreen-content-border-color: #626262;
+  //messagescreen-content
+  --messagescreen-red-color: #ff715b;
+  --messagescreen-purple-color: #b86bff;
+  --messagescreen-blue-color: #1d88ed;
+  //messagescreen-scrollbar
+  --messagescreen-scrollbar-thumb-color: #4a4a4a;
+  --messagescreen-scrollbar-track-color: #2f2f2f;
+
+  //z-index book
 
   font-family: 'Inter', sans-serif;
 
+}
+
+.inter {
+  font-family: 'Inter', sans-serif;
+}
+
+.lexend {
+  font-family: 'Lexend', sans-serif;
 }
