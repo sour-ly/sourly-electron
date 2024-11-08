@@ -9,6 +9,10 @@ import { Profile } from '../model/Profile';
 export var environment: EnvironmentVariables;
 export var profileobj: Profile;
 
+enum SourlyFlags {
+  NEW_PROFILE = 0x01,
+  NO_SKILLS = 0x02,
+}
 
 let flags = 0;
 createWaitFunction(
@@ -69,11 +73,12 @@ createWaitFunction(
         Log.log('storage:request', 1, 'no profile object to load into, for now we will just create a new one but later we will need to handle this better');
         profileobj = new Profile();
         new_profile_flag = true;
-        flags |= 0x01;
+        flags |= SourlyFlags.NEW_PROFILE;
       }
 
       if (!data || Object.keys(data).length === 0) {
-        Log.log('storage:request', 1, 'got a bad packet', data);
+        Log.log('storage:request', 1, 'got a bad packet or no skills', data);
+        flags |= SourlyFlags.NO_SKILLS;
         resolve(undefined);
       } else if (Array.isArray(data)) {
         try {

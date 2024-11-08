@@ -12,6 +12,7 @@ import Navigator from './navigation/Navigation';
 import Settings from './views/Settings';
 import Profile from './views/Profile';
 import ProfilePage from './views/Profile';
+import { MessageScreen } from './messagescreen/MessageScreen';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -163,6 +164,7 @@ export default function App({ flags }: { flags: number }) {
     }}>
       <div>
         <Router>
+          <MessageScreen />
           <PopUp open={ctx_open} context={ctx_content} />
           <NotificationBanner notification={{ state: notification, setState: setNotification }} amount={notification_amount} />
           <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>

@@ -6,25 +6,6 @@
   --side-bar: #212121;
   --stroke-inner: #141414;
   --stroke-outer: #444444;
-  //sidebar
-  --sidebar-width: 22.6429rem;
-  --sidebar-content-width: 20.0000rem;
-  --sidebar-selected: var(--title-bar);
-  --sidebar-icon: var(--accent);
-  --sidebar-icon-size: 1.2rem;
-  --sidebar-label: #4B4B4B;
-  --sidebar-label-weight: 600;
-  --sidebar-label-size: 1.2429rem;
-  --sidebar-item-height: 2.2857rem;
-  --sidebar-item-radius: 0.5000rem;
-  --sidebar-item-active: #363636;
-  --sidebar-item-font-size: 0.8571rem;
-  //window
-  --window-background: #1F1F1F;
-  --window-width: 112.7857rem;
-  --window-height: 55.1429rem;
-  --window-radius: 21px;
-
   /*
   @include media('<=MDLGdesktop') {
     --window-width: 100rem;
@@ -45,19 +26,6 @@
   --button-red: #ff5f57;
   --button-yellow: #ffb502;
   --button-green: #29ca41;
-  //popup
-  --window-popup-min-width: 40.9375rem;
-  --window-popup-min-height: 8.5125rem;
-  --window-popup-max-width: 90.0000rem;
-  --window-popup-max-height: 90.0000rem;
-  --window-popup-background: var(--window-background);
-  --window-popup-stroke: var(--stroke-outer);
-  --window-popup-border-radius: 1.3125rem;
-  --window-popup-padding: 1.5rem 2.0000rem;
-  //topbar
-  --topbar-height: 6.1429rem;
-  --topbar-width: 100%;
-  --topbar-max-width: 90.0714rem;
   //activity
   --progress-bar-height: 0.3571rem;
   --progress-bar-track: #525252;
@@ -68,6 +36,7 @@
   --activity-button-icon-size: 1.7143rem;
   --activity-button-icon-color: #646464;
 
+  //old windows settings
   --o-windows-bg-color: #bcbcbc;
   --o-windows-button-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
   --o-windows-button-active-shadow: inset 1px 1px #0a0a0a, inset -1px -1px #fff, inset 2px 2px grey, inset -2px -2px #dfdfdf;
@@ -75,6 +44,10 @@
 
   //navigation
   --navigation-bar-top: 1.5rem;
+  --navigation-bar-track-color: #f3f3f3;
+  --navigation-bar-button-color: #ffffff;
+  --navigation-bar-button-hover-color: #e4e4e4;
+  --navigation-bar-button-border-color: #e8e8e8;
 
 
   font-family: 'Inter', sans-serif;
