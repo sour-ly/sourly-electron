@@ -63,6 +63,8 @@ export default function App({ flags }: { flags: number }) {
   const [notification_amount, setNotificationAmount] = useState(0);
   /* MessageScreen */
   const [msg_context, setMsgContext] = useState<MSContext | null>(null);
+  /* Message Queue */
+  const msg_queue = useRef<Queue<MSContext>>(new Queue<MSContext>()).current;
 
   useEffect(() => {
 
@@ -88,24 +90,28 @@ export default function App({ flags }: { flags: number }) {
     /* check if the user's version in the `storage.json` file is out of date, if so - present the user with the new patch notes and update their value*/
     console.log(profileobj.Flags, SourlyFlags.SEEN_WELCOME);
     if ((profileobj.Flags & SourlyFlags.SEEN_WELCOME) === 0) {
-      setMsgContext({
+      msg_queue.queue({
         flags: flags, pages: [WelcomePageSlideOneContext], onClose: () => {
-          setMsgContext(null);
+          setMsgContext(msg_queue.pop() ?? null);
           profileobj.Flags ^= SourlyFlags.SEEN_WELCOME;
         }
       }
       );
     }
-    /*
     if (profileobj.Version !== version) {
-      setMsgContext({
+      msg_queue.queue({
         flags: flags, pages: [VersionPageContext], onClose: () => {
-          setMsgContext(null);
+          setMsgContext(msg_queue.pop() ?? null);
           profileobj.Version = version;
         }
       });
     }
-    */
+    /* these are enqueued messages */
+
+    /* start the message queue */
+    setMsgContext(msg_queue.pop() ?? null);
+
+
     return () => {
       if (z) {
         profileobj.off('onUpdates', z);
