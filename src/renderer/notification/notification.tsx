@@ -58,7 +58,7 @@ function NotificationBanner({ notification, amount }: NotificationBannerProps) {
       }
       timeout_ref.current = setTimeout(() => {
         notification.setState(null);
-      }, 5000);
+      }, 5000); // change here to change the duration of the notification
     }
     return () => {
       if (timeout_ref.current) {

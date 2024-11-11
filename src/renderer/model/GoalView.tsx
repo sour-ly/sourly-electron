@@ -25,6 +25,7 @@ export default function GoalView({ goal, skill_id }: { goal: Goal, skill_id: num
       <p className="metric">{goal.Current} / {goal.Target} {goal.Metric}</p>
       <ProgressBar max={goal.Target} value={goal.Current} options={options} />
       <button onClick={() => goal.incrementProgress(1)}>Log</button>
+      <button onClick={() => goal.undo()}>Undo</button>
     </div>
   )
 }

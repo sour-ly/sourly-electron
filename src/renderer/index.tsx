@@ -5,9 +5,11 @@ import { Log } from '../log/log';
 import { createWaitFunction } from './util/promise';
 import { EnvironmentVariables } from '../main/version';
 import { Profile } from '../model/Profile';
+import { sDefault, Settings } from './settings/settings';
 
 export var environment: EnvironmentVariables;
 export var profileobj: Profile;
+export var sourlysettings: Settings;
 
 export enum SourlyFlags {
   NULL = 0x00,
@@ -19,6 +21,7 @@ export enum SourlyFlags {
 let flags = 0;
 createWaitFunction(
   new Promise(async (resolve) => {
+    /* get environment */
     await new Promise((resolve) => {
       IPC.once('environment-response', (...arg) => {
         const [data] = arg;
@@ -43,6 +46,30 @@ createWaitFunction(
         platform: process.platform,
       };
     }
+    /* end get environment */
+
+    /* get settings */
+    await new Promise((resolve) => {
+      IPC.once('storage-request', (...arg) => {
+        //this will be our settings object
+        const [data] = arg;
+        if (!data || Object.keys(data).length === 0) {
+          Log.log('storage:request [settings]', 1, 'got a bad packet (or no entry exists)', data);
+          sourlysettings = sDefault;
+        } else {
+          try {
+            sourlysettings = data as any;
+            Log.log('storage:request [settings]', 0, 'loaded settings from storage', data);
+          } catch (e) {
+            Log.log('storage:request [settings]', 1, 'failed to load settings from storage with error %s', e, data);
+            sourlysettings = sDefault;
+          }
+        }
+        resolve(undefined);
+      })
+      IPC.sendMessage('storage-request', { key: 'settings', value: '' });
+    });
+    /* end get settings */
 
     //load profile
     await new Promise((resolve) => {

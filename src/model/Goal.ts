@@ -36,6 +36,15 @@ export default class Goal extends Eventful<EventMap> {
     }
   }
 
+  public undo() {
+    if (this.progress <= 0) return;
+    if (this.completed) {
+      this.completed = false;
+    }
+    this.progress--;
+    this.emit('goalProgressChanged', { goal: this, amount: -1 });
+  }
+
   public get Name() {
     return this.name;
   }
