@@ -25,9 +25,11 @@ export function VersionPage() {
       </div>
       <div className="messagescreen__content__main__body__section">
         <h2>Fixes:</h2>
-        <p>
-          There were no fixes in this version.
-        </p>
+        <ul>
+          <li>Fixed a notification bug that would show the notification way too many times if the user flip-flopped between the pages</li>
+          <li>Fixed a bug that would not save the users data if they switched between the pages</li>
+        </ul>
+
       </div>
       <div className="messagescreen__content__main__body__section">
         <h2>Next:</h2>
