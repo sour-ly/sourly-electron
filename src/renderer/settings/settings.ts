@@ -1,5 +1,6 @@
 import { Eventful } from "../../event/events";
 import { Log } from "../../log/log";
+import { RemoveNANFromObject } from "../input/filter";
 import IPC from "../ReactIPC";
 
 type StringfulObject = { [key: string]: any };
@@ -35,16 +36,26 @@ class SettingsObject extends Eventful<SettingsObjectEventMap> implements Setting
   }
 
   public set<T extends keyof SettingsObject>(key: T, value: OmittableSettings[T]) {
-    this[key as keyof Omit<SettingsObject, 'Id'>] = value as any;
+    if (key === 'Id') return;
+    const k = key as keyof Omit<SettingsObject, 'Id'>;
+    if (this[k] === undefined) return;
+    if (typeof this[k] === 'number') {
+      if (isNaN(value as any)) return;
+    }
+    this[k] = value as any;
     this.save();
   }
 
   public setAll(props: OmittableSettings) {
-    Object.keys(props).forEach(key => {
-      if (this[key as keyof SettingsObject] === undefined) return;
+    const props_mutated = RemoveNANFromObject(props);
+    Object.keys(props_mutated).forEach(key => {
+      const k = key as keyof Omit<SettingsObject, 'Id'>;
+      if (k as any === 'listeners') return;
+      if (this[k] === undefined) return;
       if (key === 'Id') return;
-      this[key as keyof Omit<SettingsObject, 'Id'>] = props[key as keyof Settings];
+      this[k] = props_mutated[key as keyof Settings];
     });
+
     this.save();
   }
 

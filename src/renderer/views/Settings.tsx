@@ -2,6 +2,8 @@ import './styles/settings.scss';
 import { useEffect, useState } from "react";
 import { environment, sourlysettings } from "..";
 import { useStateUtil } from "../util/state";
+import { DisplayNumber, NumberInputFilter } from '../input/filter';
+import { sDefault } from '../settings/settings';
 
 
 type CheckboxProps = {
@@ -22,9 +24,16 @@ function Checkbox({ state, onChange, label }: CheckboxProps) {
 }
 
 function NumberInput({ value, onChange, label }: { value: number, onChange: (value: number) => void, label: string }) {
+
+  function onBlur(e: React.FocusEvent<HTMLInputElement>) {
+    if (e.target.value === '' || isNaN(value)) {
+      onChange(0);
+    }
+  }
+
   return (
     <label className="number-input">
-      <input type="number" value={value} onChange={(e) => onChange(parseInt(e.target.value))} />
+      <input type="number" value={DisplayNumber(value, { defaultValue: ' ' })} onChange={(e) => onChange(NumberInputFilter(e.target.value, { min: -1, allowNaN: true }))} onBlur={onBlur} />
       <span>{label}</span>
     </label>
   )
@@ -63,6 +72,7 @@ function Settings() {
             label="Notification Duration"
           />
         </div>
+        <button style={{ marginTop: '1rem' }} onClick={() => setSettings({ ...settings_copy, ...sDefault })} className="settings__save">Reset Settings</button>
       </div>
     </main>
   )
