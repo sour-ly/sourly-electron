@@ -5,7 +5,7 @@ import { Log } from '../log/log';
 import { createWaitFunction } from './util/promise';
 import { EnvironmentVariables } from '../main/version';
 import { Profile } from '../model/Profile';
-import { sDefault, Settings } from './settings/settings';
+import SettingsObject, { sDefault, Settings } from './settings/settings';
 
 export var environment: EnvironmentVariables;
 export var profileobj: Profile;
@@ -55,14 +55,14 @@ createWaitFunction(
         const [data] = arg;
         if (!data || Object.keys(data).length === 0) {
           Log.log('storage:request [settings]', 1, 'got a bad packet (or no entry exists)', data);
-          sourlysettings = sDefault;
+          sourlysettings = new SettingsObject();
         } else {
           try {
-            sourlysettings = data as any;
+            sourlysettings = new SettingsObject(data as unknown as Settings);
             Log.log('storage:request [settings]', 0, 'loaded settings from storage', data);
           } catch (e) {
             Log.log('storage:request [settings]', 1, 'failed to load settings from storage with error %s', e, data);
-            sourlysettings = sDefault;
+            sourlysettings = new SettingsObject();;
           }
         }
         resolve(undefined);
