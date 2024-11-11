@@ -10,8 +10,10 @@ export var environment: EnvironmentVariables;
 export var profileobj: Profile;
 
 export enum SourlyFlags {
+  NULL = 0x00,
   NEW_PROFILE = 0x01,
   NO_SKILLS = 0x02,
+  SEEN_WELCOME = 0x04,
 }
 
 let flags = 0;
@@ -52,7 +54,8 @@ createWaitFunction(
         } else {
           try {
             const json = data as any;
-            profileobj = new Profile(json.name, (json).level, (json).currentExperience, [], json.version ?? '0.0.0');
+            profileobj = new Profile(json.name, (json).level, (json).currentExperience, [], json.version ?? '0.0.0', json.flags ?? SourlyFlags.NULL);
+            console.log(profileobj);
             Log.log('storage:request', 0, 'loaded profile from storage', data);
           } catch (e) {
             Log.log('storage:request', 1, 'failed to load profile from storage with error %s', e, data);
@@ -74,6 +77,8 @@ createWaitFunction(
         profileobj = new Profile();
         new_profile_flag = true;
         flags |= SourlyFlags.NEW_PROFILE;
+      } else {
+        flags |= profileobj.Flags;
       }
 
       if (!data || Object.keys(data).length === 0) {

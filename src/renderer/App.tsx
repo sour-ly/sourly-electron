@@ -14,6 +14,7 @@ import Profile from './views/Profile';
 import ProfilePage from './views/Profile';
 import { MessageScreen, MSContext } from './messagescreen/MessageScreen';
 import { VersionPageContext } from './messagescreen/pages/VersionPage';
+import { WelcomePageSlideOneContext } from './messagescreen/pages/WelcomePage';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -80,13 +81,22 @@ export default function App({ flags }: { flags: number }) {
       const message = 'Welcome to Sourly! We have detected that you don\'t have a profile, so we have created one for you! (Don\'t worry we have adjusted your profile to match your skills!)'
       notify(message);
     } else if (flags & SourlyFlags.NO_SKILLS) {
-      const message = 'We have detected that you don\'t have any skills, so we have created some for you!'
-      notify(message);
     } else {
       const message = 'Welcome back to Sourly!'
       notify(message);
     }
     /* check if the user's version in the `storage.json` file is out of date, if so - present the user with the new patch notes and update their value*/
+    console.log(profileobj.Flags, SourlyFlags.SEEN_WELCOME);
+    if ((profileobj.Flags & SourlyFlags.SEEN_WELCOME) === 0) {
+      setMsgContext({
+        flags: flags, pages: [WelcomePageSlideOneContext], onClose: () => {
+          setMsgContext(null);
+          profileobj.Flags ^= SourlyFlags.SEEN_WELCOME;
+        }
+      }
+      );
+    }
+    /*
     if (profileobj.Version !== version) {
       setMsgContext({
         flags: flags, pages: [VersionPageContext], onClose: () => {
@@ -95,6 +105,7 @@ export default function App({ flags }: { flags: number }) {
         }
       });
     }
+    */
     return () => {
       if (z) {
         profileobj.off('onUpdates', z);
