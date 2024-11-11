@@ -1,3 +1,4 @@
+import { Eventful } from "../../event/events";
 import { Log } from "../../log/log";
 import IPC from "../ReactIPC";
 
@@ -16,7 +17,11 @@ export interface Settings extends StringfulObject {
 
 type OmittableSettings = Omit<Omit<Omit<Settings, 'save'>, 'set'>, 'setAll'>;
 
-class SettingsObject implements Settings {
+type SettingsObjectEventMap = {
+  'onUpdate': Settings;
+}
+
+class SettingsObject extends Eventful<SettingsObjectEventMap> implements Settings {
   notification: {
     enabled: boolean
     duration: number;
@@ -24,26 +29,36 @@ class SettingsObject implements Settings {
   theme: 'light' | 'dark';
 
   constructor(props: Omit<Settings, 'save'> = sDefault) {
+    super();
     this.notification = props.notification;
     this.theme = props.theme;
   }
 
   public set<T extends keyof SettingsObject>(key: T, value: OmittableSettings[T]) {
-    this[key as keyof SettingsObject] = value as any;
+    this[key as keyof Omit<SettingsObject, 'Id'>] = value as any;
     this.save();
   }
 
   public setAll(props: OmittableSettings) {
     Object.keys(props).forEach(key => {
       if (this[key as keyof SettingsObject] === undefined) return;
-      this[key as keyof SettingsObject] = props[key as keyof Settings];
+      if (key === 'Id') return;
+      this[key as keyof Omit<SettingsObject, 'Id'>] = props[key as keyof Settings];
     });
     this.save();
   }
 
   public save() {
-    IPC.sendMessage('storage-save', { key: 'settings', value: this });
-    Log.log('settings:save', 0, 'saved settings to storage', this);
+    this.emit('onUpdate', this);
+    IPC.sendMessage('storage-save', { key: 'settings', value: this.toJSON() });
+    Log.log('settings:save', 0, 'saved settings to storage', this.toJSON());
+  }
+
+  public toJSON(): OmittableSettings {
+    return {
+      notification: this.notification,
+      theme: this.theme
+    }
   }
 }
 
