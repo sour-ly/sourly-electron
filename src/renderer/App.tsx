@@ -15,6 +15,7 @@ import ProfilePage from './views/Profile';
 import { MessageScreen, MSContext } from './messagescreen/MessageScreen';
 import { VersionPageContext } from './messagescreen/pages/VersionPage';
 import { WelcomePageSlideOneContext } from './messagescreen/pages/WelcomePage';
+import useSettings from './util/usesettings';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -65,6 +66,8 @@ export default function App({ flags }: { flags: number }) {
   const [msg_context, setMsgContext] = useState<MSContext | null>(null);
   /* Message Queue */
   const msg_queue = useRef<Queue<MSContext>>(new Queue<MSContext>()).current;
+
+  const settings = useSettings();
 
   useEffect(() => {
 

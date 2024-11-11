@@ -54,9 +54,9 @@ function NotificationBanner({ notification, neverTimeout, amount }: Notification
   const timeout_ref = useRef<any>();
   const [settings, _] = useSettings();
 
-  if (!settings.notification.enabled) {
-    return null;
-  }
+  useEffect(() => {
+    console.log('settings [notification]', settings.notification);
+  }, [settings])
 
   useEffect(() => {
     if (notification.state) {
@@ -74,6 +74,11 @@ function NotificationBanner({ notification, neverTimeout, amount }: Notification
       }
     }
   }, [notification.state])
+
+  if (!settings.notification.enabled) {
+    return null;
+  }
+
 
   function cancelTimer() {
     if (timeout_ref.current) {

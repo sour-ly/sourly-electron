@@ -9,7 +9,7 @@ import SettingsObject, { sDefault, Settings } from './settings/settings';
 
 export var environment: EnvironmentVariables;
 export var profileobj: Profile;
-export var sourlysettings: SettingsObject;
+export var sourlysettings: Settings;
 
 export enum SourlyFlags {
   NULL = 0x00,
