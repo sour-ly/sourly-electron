@@ -67,10 +67,8 @@ export default function App({ flags }: { flags: number }) {
   /* Message Queue */
   const msg_queue = useRef<Queue<MSContext>>(new Queue<MSContext>()).current;
 
-  const settings = useSettings();
-
+  /* main init function for the application */
   useEffect(() => {
-
     /* notification queue listeners */
     const x = notification_queue.on('update', (q) => {
       setNotificationAmount(q.length);
@@ -124,6 +122,7 @@ export default function App({ flags }: { flags: number }) {
     }
   }, []);
 
+  /* notification queue listener */
   useEffect(() => {
     if (notification === null) {
       //try to pop the notification
@@ -151,6 +150,7 @@ export default function App({ flags }: { flags: number }) {
     setPopUpContext({ open: true, context: { ...ctx, content: ctx.content } });
   }
 
+  /* strictly for notifications */
   function notify(s: string) {
     //@ts-ignore
     setNotification(o => {
