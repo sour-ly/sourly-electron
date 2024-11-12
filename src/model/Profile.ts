@@ -9,6 +9,14 @@ type SkillEventMapOverride = {
 
 } & Omit<SkillEventMap, 'onUpdates'>
 
+export interface ProfileSkeleton {
+  name: string;
+  level: number;
+  currentExperience: number;
+  version: string;
+  flags: SourlyFlags;
+}
+
 export class Profile extends SkillContainer<SkillEventMapOverride> {
 
   private level: number = 1;
@@ -77,6 +85,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
   // this setter will be used to update the profile name, but do not ever call it directly when the API comes out
   set Name(name: string) {
     this.name = name;
+    this.emit('onUpdates', { profile: this, skills: this.skills });
   }
 
   set Version(version: string) {

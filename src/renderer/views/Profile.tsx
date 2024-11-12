@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
-import { Profile } from "../../model/Profile";
+import { Profile, ProfileSkeleton } from "../../model/Profile";
 import { profileobj } from "..";
 import { useWindow } from "../App";
 import ProductDetailCard from "../components/profile/ProfileDetailCard";
 
 function ProfilePage() {
 
-  const [profile_state, setProfile] = useState<Profile>(profileobj);
+  const [profile_state, setProfile] = useState<ProfileSkeleton>(profileobj.serialize());
   const ctx = useWindow();
 
   useEffect(() => {
     const i = profileobj.on('onUpdates', (arg) => {
-      setProfile(arg.profile);
+      setProfile(arg.profile.serialize())
     });
-
     return () => {
       if (i) {
         profileobj.off('onUpdates', i);
@@ -26,7 +25,7 @@ function ProfilePage() {
   return (
     <main>
       <h1 style={{ marginBottom: '1rem' }}>Profile</h1>
-      <ProductDetailCard profile={profile_state} />
+      <ProductDetailCard profile_obj={profile_state} />
     </main>
   )
 }

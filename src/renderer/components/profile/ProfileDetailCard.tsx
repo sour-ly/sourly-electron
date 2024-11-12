@@ -1,7 +1,10 @@
 import '../styles/profile/profiledetailcard.scss';
 import pfpimage from '../../../../assets/ui/pfp.jpg';
 import ProgressBar from '../ProgressBar';
-import { Profile } from '../../../model/Profile';
+import { Profile, ProfileSkeleton } from '../../../model/Profile';
+import Pencil from '../../../../assets/ui/pencil.svg';
+import { EditUsernameWrapper } from '../../model/popup/ProfilePopup';
+import { profileobj } from '../..';
 
 function ProfilePicture() {
   return (
@@ -44,16 +47,23 @@ export function getLevelText(level: number): string {
 }
 
 type ProductDetailCard = {
-  profile: Profile;
+  profile_obj: ProfileSkeleton;
 }
 
-function ProductDetailCard({ profile }: ProductDetailCard) {
+function ProductDetailCard({ profile_obj }: ProductDetailCard) {
+
+  const profile = profileobj;
+
+
   return (
     <div className="profile-detail-card">
       <div className="profile-detail-card__header">
         <ProfilePicture />
         <div className="profile-detail-card__header__info">
-          <h2>Username</h2>
+          <div className="profile-detail-card__header__info__name">
+            <h2>{profile_obj.name}</h2>
+            <EditUsernameWrapper profile={profile} />
+          </div>
           <div className="profile-detail-card__header__info__level">
             <span>Level {profile.Level} : {getLevelText(profile.Level)}</span>
           </div>

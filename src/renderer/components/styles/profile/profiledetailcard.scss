@@ -18,6 +18,18 @@
       flex-direction: column;
       flex: .95;
 
+      &__name {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+
+        img {
+          width: 1rem;
+          height: 1rem;
+          cursor: pointer;
+        }
+      }
+
       &__progress {
         margin-top: auto;
 
