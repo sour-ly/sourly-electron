@@ -21,6 +21,8 @@ export function VersionPage() {
           <li>Added a new page to show the user how to use the application</li>
           <li>Added a new page to show the user how to use the features of the application</li>
           <li>Added a "flags" feature to the application based on the users <code>storage.json</code></li>
+          <li>Undoing Goals now takes away EXP from the skill and the user</li>
+          <li>Added actual settings to the application - as of now we only have notification settings</li>
         </ul>
       </div>
       <div className="messagescreen__content__main__body__section">
@@ -28,6 +30,7 @@ export function VersionPage() {
         <ul>
           <li>Fixed a notification bug that would show the notification way too many times if the user flip-flopped between the pages</li>
           <li>Fixed a bug that would not save the users data if they switched between the pages</li>
+          <li>Removed "No description" from blank descriptions</li>
         </ul>
 
       </div>
@@ -37,7 +40,6 @@ export function VersionPage() {
           There are a few things that are planned for the next version of the application, such as:
         </p>
         <ul>
-          <li>Undoing Goals and the EXP given to the user</li>
           <li>Marking Skills as "done" and giving the user EXP</li>
           <li>Adding a better settings page</li>
           <li>Very simple Achievement/Badge system</li>

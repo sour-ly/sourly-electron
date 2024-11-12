@@ -39,6 +39,7 @@ export function MessageScreen({ flags, pages, onClose }: MSContext) {
           <img src={Exit} alt="Close" draggable={false} />
         </div>
         <div className="messagescreen__navigation messagescreen__navigation__left">
+          <button onClick={nextPage}>Next</button>
         </div>
         <div className="messagescreen__navigation messagescreen__navigation__right">
         </div>

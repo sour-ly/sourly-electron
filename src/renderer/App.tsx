@@ -14,7 +14,7 @@ import Profile from './views/Profile';
 import ProfilePage from './views/Profile';
 import { MessageScreen, MSContext } from './messagescreen/MessageScreen';
 import { VersionPageContext } from './messagescreen/pages/VersionPage';
-import { WelcomePageSlideOneContext } from './messagescreen/pages/WelcomePage';
+import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from './messagescreen/pages/WelcomePage';
 import useSettings from './util/usesettings';
 
 export type WindowContextType = {
@@ -91,10 +91,10 @@ export default function App({ flags }: { flags: number }) {
       notify(message);
     }
     /* check if the user's version in the `storage.json` file is out of date, if so - present the user with the new patch notes and update their value*/
-    console.log(profileobj.Flags, SourlyFlags.SEEN_WELCOME);
+    // if flags & SEEN_WELCOME is 0, then show the welcome screen 0bx0xx & 0b0100 = 0b0000
     if ((profileobj.Flags & SourlyFlags.SEEN_WELCOME) === 0) {
       msg_queue.queue({
-        flags: flags, pages: [WelcomePageSlideOneContext], onClose: () => {
+        flags: flags, pages: [WelcomePageSlideOneContext, WelcomePageSlideTwoContext], onClose: () => {
           setMsgContext(msg_queue.pop() ?? null);
           profileobj.Flags ^= SourlyFlags.SEEN_WELCOME;
         }
@@ -113,7 +113,6 @@ export default function App({ flags }: { flags: number }) {
 
     /* start the message queue */
     setMsgContext(msg_queue.pop() ?? null);
-
 
     return () => {
       if (z) {
