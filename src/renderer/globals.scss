@@ -44,6 +44,16 @@
   --o-windows-button-active-shadow: inset 1px 1px #0a0a0a, inset -1px -1px #fff, inset 2px 2px grey, inset -2px -2px #dfdfdf;
   --o-windows-button-disabled-shadow: inset 1px 1px #0a0a0a, inset -1px -1px #fff, inset 2px 2px grey, inset -2px -2px #dfdfdf;
 
+  //popup
+  --window-popup-min-width: 30rem;
+  --window-popup-max-width: 60rem;
+  --window-popup-min-height: 10rem;
+  --window-popup-max-height: 20rem;
+  --window-popup-background: #1e1e1e;
+  --window-popup-border-radius: 0.5571rem;
+  --window-popup-padding: 2.0714rem;
+  --window-popup-stroke: #9f9f9f;
+
   //navigation
   --navigation-bar-top: 1.5rem;
   --navigation-bar-track-color: #f3f3f3;

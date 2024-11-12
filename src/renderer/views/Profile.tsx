@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import { Profile, ProfileSkeleton } from "../../model/Profile";
+import { ProfileSkeleton } from "../../model/Profile";
 import { profileobj } from "..";
-import { useWindow } from "../App";
 import ProductDetailCard from "../components/profile/ProfileDetailCard";
 
 function ProfilePage() {
 
   const [profile_state, setProfile] = useState<ProfileSkeleton>(profileobj.serialize());
-  const ctx = useWindow();
 
   useEffect(() => {
     const i = profileobj.on('onUpdates', (arg) => {

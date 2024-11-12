@@ -5,9 +5,9 @@ type InputProps = {
   placeholder: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value?: string;
-}
+} & React.HTMLProps<HTMLInputElement>;
 
-export default function Input({ placeholder, onChange, value }: InputProps) {
+export default function Input({ placeholder, onChange, value, ...props }: InputProps) {
   const [val, setVal] = useState(value ?? '');
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function Input({ placeholder, onChange, value }: InputProps) {
   }
 
   return (
-    <div className="input--label">
+    <div className="input--label" {...props}>
       <label>{placeholder}</label>
       <input type="text" placeholder={placeholder} onChange={_onChange} value={val} />
     </div>
