@@ -23,6 +23,7 @@ export function VersionPage() {
           <li>Added a "flags" feature to the application based on the users <code>storage.json</code></li>
           <li>Undoing Goals now takes away EXP from the skill and the user</li>
           <li>Added actual settings to the application - as of now we only have notification settings</li>
+          <li>Added the ability for users to edit their username</li>
         </ul>
       </div>
       <div className="messagescreen__content__main__body__section">
