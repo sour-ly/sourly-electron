@@ -2,6 +2,8 @@ import { MSCompatiableScreen } from "../MessageScreen"
 import '../styles/pageslideone.scss';
 import AddSkill from '../../../../assets/images/welcome-screen-add-skill.png';
 import AddSkillPopUp from '../../../../assets/images/welcome-screen-add-skill-popup.png';
+import AddGoal from '../../../../assets/images/welcome-screen-add-goal.png';
+import AddGoalPopUp from '../../../../assets/images/welcome-screen-add-goal-popup.png';
 
 
 function WelcomePageSlideOne() {
@@ -40,6 +42,20 @@ function WelcomePageSlideTwo() {
         <img className="add-image" src={AddSkill} draggable={false} />
         <p style={{ fontWeight: 300 }}>To create a skill, click on the "Add Skill" button at the bottom of the Home Page. You will be prompted to enter a name for your skill. Once you have entered a name, click "Create".</p>
         <img className="add-image" src={AddSkillPopUp} draggable={false} />
+        <p>Creating a Goal:</p>
+        <img className="add-image" src={AddGoal} draggable={false} />
+        <p style={{ fontWeight: 300 }}>To create a goal for a skill, click on the three dots stacked on top of each other and click on "Add Goal" </p>
+        <img className="add-image" src={AddGoalPopUp} draggable={false} />
+        <p style={{ fontWeight: 300 }}>You will be prompted to enter a name for your goal, a target, and a unit. Once you have entered all the information, click "Create".</p>
+        <ul>
+          <li>Name - The name of the goal</li>
+          <li>Target - The target amount you want to reach</li>
+          <li>Unit - The unit of measurement for the goal</li>
+          <li>Metric - You can choose between a preset list of metrics with the dropdown, if you wanted to track something else, you can select "Other" and type in your own metric</li>
+          <li>Goal - The amount or the finish line of the goal. This defines when the goal is complete.</li>
+          <li>Reward - The reward for completing the goal. This is the amount of EXP you will receive for completing the goal.</li>
+        </ul>
+        <p>To see this screen again, click on the three dots stacked on top of each other and click on "Help".</p>
       </div>
     </>
   )

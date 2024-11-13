@@ -12,7 +12,7 @@ import Navigator from './navigation/Navigation';
 import Settings from './views/Settings';
 import Profile from './views/Profile';
 import ProfilePage from './views/Profile';
-import { MessageScreen, MSContext } from './messagescreen/MessageScreen';
+import { MessageScreen, MSCompatiableScreen, MSContext } from './messagescreen/MessageScreen';
 import { VersionPageContext } from './messagescreen/pages/VersionPage';
 import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from './messagescreen/pages/WelcomePage';
 import useSettings from './util/usesettings';
@@ -20,6 +20,13 @@ import useSettings from './util/usesettings';
 export type WindowContextType = {
   popUp: WindowPopUp;
   notification: Omit<Omit<INotifcation, 'Element'>, 'notification'>;
+  msgScreen: MessageScreenPopUp;
+}
+
+export type MessageScreenPopUp = {
+  open: (...ctx: MSCompatiableScreen[]) => boolean;
+  close: () => boolean;
+  state: boolean;
 }
 
 export type WindowPopUp = {
@@ -176,9 +183,29 @@ export default function App({ flags }: { flags: number }) {
     while (notification_queue.pop()) { ; }
   }
 
+  function openMessageScreen(ctx: MSContext) {
+    if (ctx === null) {
+      return;
+    }
+    setMsgContext(ctx);
+  }
+
 
   return (
     <WindowContext.Provider value={{
+      msgScreen: {
+        open: (...ctx: MSCompatiableScreen[]) => {
+          openMessageScreen(
+            { flags: flags, pages: [...ctx], onClose: () => { setMsgContext(null) } }
+          );
+          return true;
+        },
+        close: () => {
+          setMsgContext(null);
+          return true;
+        },
+        state: msg_context !== null,
+      },
       notification: {
         notify: (s: string) => {
           notify(s);

@@ -6,6 +6,7 @@ import { useStateUtil } from "../../util/state";
 import Input from "../../components/Input";
 import { ButtonProps } from "../../popup/Popup";
 import { profileobj } from "../..";
+import { WelcomePageSlideTwoContext } from "../../messagescreen/pages/WelcomePage";
 
 export function SkillPopupWrapper({ tskill, edit, ...props }: { tskill: SkillProps, edit?: boolean } & ButtonProps) {
   const [skill, setSkill] = useState<SkillProps>(tskill);
@@ -86,3 +87,17 @@ export function SkillDeletePopUp({ skill, ...props }: { skill: Skill } & ButtonP
 }
 
 
+/* I know this isnt a popup but its close enough */
+
+export function SkillHelpMenu(props: DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>) {
+  const ctx = useWindow();
+
+
+  function helpMenu() {
+    ctx.msgScreen.open(WelcomePageSlideTwoContext);
+  }
+
+  return (
+    <button {...props} className={"help_skill " + props.className} onClick={helpMenu}>Help</button>
+  )
+}

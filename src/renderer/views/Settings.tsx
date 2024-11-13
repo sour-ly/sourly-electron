@@ -4,6 +4,8 @@ import { environment, sourlysettings } from "..";
 import { useStateUtil } from "../util/state";
 import { DisplayNumber, NumberInputFilter } from '../input/filter';
 import { sDefault } from '../settings/settings';
+import { useWindow } from '../App';
+import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from '../messagescreen/pages/WelcomePage';
 
 
 type CheckboxProps = {
@@ -41,6 +43,8 @@ function NumberInput({ value, onChange, label }: { value: number, onChange: (val
 
 function Settings() {
 
+  /* window context */
+  const ctx = useWindow();
   const settings = sourlysettings;
   const [settings_copy, setSettings] = useState(settings);
   const change = useStateUtil(setSettings);
@@ -72,7 +76,10 @@ function Settings() {
             label="Notification Duration"
           />
         </div>
-        <button style={{ marginTop: '1rem' }} onClick={() => setSettings({ ...settings_copy, ...sDefault })} className="settings__save">Reset Settings</button>
+        <div className="settings__content__section">
+          <button style={{ marginTop: '1rem' }} onClick={() => ctx.msgScreen.open(WelcomePageSlideOneContext, WelcomePageSlideTwoContext)} className="settings__save">See Welcome Screen</button>
+          <button style={{ marginTop: '1rem' }} onClick={() => setSettings({ ...settings_copy, ...sDefault })} className="settings__save">Reset Settings</button>
+        </div>
       </div>
     </main>
   )
