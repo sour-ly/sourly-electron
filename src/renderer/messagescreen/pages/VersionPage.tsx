@@ -24,6 +24,7 @@ export function VersionPage() {
           <li>Undoing Goals now takes away EXP from the skill and the user</li>
           <li>Added actual settings to the application - as of now we only have notification settings</li>
           <li>Added the ability for users to edit their username</li>
+          <li>Added Help Page for the Skills</li>
         </ul>
       </div>
       <div className="messagescreen__content__main__body__section">
