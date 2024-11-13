@@ -1,7 +1,7 @@
 import { Eventful } from "../event/events";
 
 type EventMap = {
-  'goalProgressChanged': { goal: Goal, amount: number };
+  'goalProgressChanged': { goal: Goal, amount: number, revertCompletion?: boolean };
   'completed': Goal;
 }
 
@@ -34,6 +34,17 @@ export default class Goal extends Eventful<EventMap> {
     } else {
       this.emit('goalProgressChanged', { goal: this, amount: amount });
     }
+  }
+
+  public undo() {
+    if (this.progress <= 0) return;
+    if (this.completed) {
+      this.completed = false;
+      this.emit('goalProgressChanged', { goal: this, amount: -1, revertCompletion: true });
+    } else {
+      this.emit('goalProgressChanged', { goal: this, amount: -1 });
+    }
+    this.progress--;
   }
 
   public get Name() {

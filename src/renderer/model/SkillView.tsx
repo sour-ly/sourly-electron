@@ -9,7 +9,8 @@ import { useStateUtil } from "../util/state";
 import ProgressBar from "../components/ProgressBar";
 import toRomanNumerals from "../util/roman";
 import { GoalPopUpWrapper } from "./popup/GoalPopup";
-import { SkillDeletePopUp, SkillPopupWrapper } from "./popup/SkillPopup";
+import { SkillDeletePopUp, SkillHelpMenu, SkillPopupWrapper } from "./popup/SkillPopup";
+import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from "../messagescreen/pages/WelcomePage";
 
 
 const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boolean }) => {
@@ -33,7 +34,8 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
     [
       { key: 'edit', element: skillEdit },
       { key: 'add', element: goalpop },
-      { key: 'delete', element: useMemo(() => <SkillDeletePopUp skill={skill} />, [skill]) }
+      { key: 'delete', element: useMemo(() => <SkillDeletePopUp skill={skill} />, [skill]) },
+      { key: 'help', element: useMemo(() => <SkillHelpMenu />, []) }
     ]);
 
   useEffect(() => {

@@ -3,7 +3,7 @@ nav.navigation {
   left: 50%;
   top: 1.5rem;
   transform: translateX(-50%);
-  background: #f3f3f3;
+  background: var(--navigation-bar-track-color);
   border-radius: 2rem;
   z-index: 99;
   width: fit-content;
@@ -43,8 +43,8 @@ nav.navigation {
     &.effect,
     &.effect-2 {
       position: absolute;
-      background: #ffffff;
-      border: 1px solid #e8e8e8;
+      background: var(--navigation-bar-button-color);
+      border: 1px solid var(--navigation-bar-button-border-color);
       top: .025rem;
       --spot: 0;
       left: calc(125px * var(--spot) + .05rem);
@@ -57,7 +57,7 @@ nav.navigation {
     &.effect-2 {
       --opacity: 0;
       opacity: var(--opacity);
-      background: #e4e4e4;
+      background: var(--navigation-bar-button-hover-color);
       z-index: 100;
     }
 
@@ -66,8 +66,8 @@ nav.navigation {
     }
 
     &.active {
-      background: #ffffff;
-      border: 1px solid #e8e8e8;
+      background: var(--navigation-bar-button-hover-color);
+      border: 1px solid var(--navigation-bar-button-border-color);
     }
 
     img {
@@ -95,7 +95,6 @@ nav.navigation {
         color: #aca89a;
       }
 
-      &:active {}
     }
   }
 }

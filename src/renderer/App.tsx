@@ -5,17 +5,28 @@ import PopUp, { _popup_types, PopUpWindow } from './popup/Popup';
 import { version } from '../main/version';
 import NotificationBanner, { INotifcation } from './notification/notification';
 import { Anchor } from './components/anchor';
-import { environment, profileobj } from '.';
+import { environment, profileobj, SourlyFlags } from '.';
 import Home from './views/Home';
 import Queue from './util/queue';
 import Navigator from './navigation/Navigation';
 import Settings from './views/Settings';
 import Profile from './views/Profile';
 import ProfilePage from './views/Profile';
+import { MessageScreen, MSCompatiableScreen, MSContext } from './messagescreen/MessageScreen';
+import { VersionPageContext } from './messagescreen/pages/VersionPage';
+import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from './messagescreen/pages/WelcomePage';
+import useSettings from './util/usesettings';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
   notification: Omit<Omit<INotifcation, 'Element'>, 'notification'>;
+  msgScreen: MessageScreenPopUp;
+}
+
+export type MessageScreenPopUp = {
+  open: (...ctx: MSCompatiableScreen[]) => boolean;
+  close: () => boolean;
+  state: boolean;
 }
 
 export type WindowPopUp = {
@@ -58,35 +69,56 @@ export default function App({ flags }: { flags: number }) {
   const notification_queue = useRef<Queue<string>>(new Queue<string>()).current;
   /* notification queue amount */
   const [notification_amount, setNotificationAmount] = useState(0);
+  /* MessageScreen */
+  const [msg_context, setMsgContext] = useState<MSContext | null>(null);
+  /* Message Queue */
+  const msg_queue = useRef<Queue<MSContext>>(new Queue<MSContext>()).current;
 
+  /* main init function for the application */
   useEffect(() => {
-
     /* notification queue listeners */
     const x = notification_queue.on('update', (q) => {
       setNotificationAmount(q.length);
     });
-
 
     //change the title of the document
     window.document.title = `Sourly v${version}`;
     const z = profileobj.on('profilelevelUp', (arg) => {
       notify(`You have leveled up to level ${arg.level}`);
     });
-    if (flags & 0x01) {
+    /* flag checks */
+    if ((flags & SourlyFlags.NEW_PROFILE) ^ (flags & SourlyFlags.NO_SKILLS)) {
       const message = 'Welcome to Sourly! We have detected that you don\'t have a profile, so we have created one for you! (Don\'t worry we have adjusted your profile to match your skills!)'
       notify(message);
-      /* I don't know if I really want to do this, but I will leave it here for now
-      openPopUp(
-        {
-          content: () => <p>{message}</p>,
-          type: 'dialog',
-          options: {
-            onOkay: () => { setPopUpContext({ open: false, context: null }); },
-            onCancel: () => { }
-          }
-        });
-        */
+    } else if (flags & SourlyFlags.NO_SKILLS) {
+    } else {
+      const message = 'Welcome back to Sourly!'
+      notify(message);
     }
+    /* check if the user's version in the `storage.json` file is out of date, if so - present the user with the new patch notes and update their value*/
+    // if flags & SEEN_WELCOME is 0, then show the welcome screen 0bx0xx & 0b0100 = 0b0000
+    if ((profileobj.Flags & SourlyFlags.SEEN_WELCOME) === 0) {
+      msg_queue.queue({
+        flags: flags, pages: [WelcomePageSlideOneContext, WelcomePageSlideTwoContext], onClose: () => {
+          setMsgContext(msg_queue.pop() ?? null);
+          profileobj.Flags ^= SourlyFlags.SEEN_WELCOME;
+        }
+      }
+      );
+    }
+    if (profileobj.Version !== version) {
+      msg_queue.queue({
+        flags: flags, pages: [VersionPageContext], onClose: () => {
+          setMsgContext(msg_queue.pop() ?? null);
+          profileobj.Version = version;
+        }
+      });
+    }
+    /* these are enqueued messages */
+
+    /* start the message queue */
+    setMsgContext(msg_queue.pop() ?? null);
+
     return () => {
       if (z) {
         profileobj.off('onUpdates', z);
@@ -97,6 +129,7 @@ export default function App({ flags }: { flags: number }) {
     }
   }, []);
 
+  /* notification queue listener */
   useEffect(() => {
     if (notification === null) {
       //try to pop the notification
@@ -124,6 +157,7 @@ export default function App({ flags }: { flags: number }) {
     setPopUpContext({ open: true, context: { ...ctx, content: ctx.content } });
   }
 
+  /* strictly for notifications */
   function notify(s: string) {
     //@ts-ignore
     setNotification(o => {
@@ -149,9 +183,29 @@ export default function App({ flags }: { flags: number }) {
     while (notification_queue.pop()) { ; }
   }
 
+  function openMessageScreen(ctx: MSContext) {
+    if (ctx === null) {
+      return;
+    }
+    setMsgContext(ctx);
+  }
+
 
   return (
     <WindowContext.Provider value={{
+      msgScreen: {
+        open: (...ctx: MSCompatiableScreen[]) => {
+          openMessageScreen(
+            { flags: flags, pages: [...ctx], onClose: () => { setMsgContext(null) } }
+          );
+          return true;
+        },
+        close: () => {
+          setMsgContext(null);
+          return true;
+        },
+        state: msg_context !== null,
+      },
       notification: {
         notify: (s: string) => {
           notify(s);
@@ -163,6 +217,7 @@ export default function App({ flags }: { flags: number }) {
     }}>
       <div>
         <Router>
+          {msg_context && <MessageScreen {...msg_context} />}
           <PopUp open={ctx_open} context={ctx_content} />
           <NotificationBanner notification={{ state: notification, setState: setNotification }} amount={notification_amount} />
           <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>

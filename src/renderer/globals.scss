@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lexend:wght@100..900&family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap');
+
 :root {
 
   --accent: #F46224;
@@ -6,25 +8,6 @@
   --side-bar: #212121;
   --stroke-inner: #141414;
   --stroke-outer: #444444;
-  //sidebar
-  --sidebar-width: 22.6429rem;
-  --sidebar-content-width: 20.0000rem;
-  --sidebar-selected: var(--title-bar);
-  --sidebar-icon: var(--accent);
-  --sidebar-icon-size: 1.2rem;
-  --sidebar-label: #4B4B4B;
-  --sidebar-label-weight: 600;
-  --sidebar-label-size: 1.2429rem;
-  --sidebar-item-height: 2.2857rem;
-  --sidebar-item-radius: 0.5000rem;
-  --sidebar-item-active: #363636;
-  --sidebar-item-font-size: 0.8571rem;
-  //window
-  --window-background: #1F1F1F;
-  --window-width: 112.7857rem;
-  --window-height: 55.1429rem;
-  --window-radius: 21px;
-
   /*
   @include media('<=MDLGdesktop') {
     --window-width: 100rem;
@@ -45,19 +28,6 @@
   --button-red: #ff5f57;
   --button-yellow: #ffb502;
   --button-green: #29ca41;
-  //popup
-  --window-popup-min-width: 40.9375rem;
-  --window-popup-min-height: 8.5125rem;
-  --window-popup-max-width: 90.0000rem;
-  --window-popup-max-height: 90.0000rem;
-  --window-popup-background: var(--window-background);
-  --window-popup-stroke: var(--stroke-outer);
-  --window-popup-border-radius: 1.3125rem;
-  --window-popup-padding: 1.5rem 2.0000rem;
-  //topbar
-  --topbar-height: 6.1429rem;
-  --topbar-width: 100%;
-  --topbar-max-width: 90.0714rem;
   //activity
   --progress-bar-height: 0.3571rem;
   --progress-bar-track: #525252;
@@ -68,15 +38,51 @@
   --activity-button-icon-size: 1.7143rem;
   --activity-button-icon-color: #646464;
 
+  //old windows settings
   --o-windows-bg-color: #bcbcbc;
   --o-windows-button-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
   --o-windows-button-active-shadow: inset 1px 1px #0a0a0a, inset -1px -1px #fff, inset 2px 2px grey, inset -2px -2px #dfdfdf;
   --o-windows-button-disabled-shadow: inset 1px 1px #0a0a0a, inset -1px -1px #fff, inset 2px 2px grey, inset -2px -2px #dfdfdf;
 
+  //popup
+  --window-popup-min-width: 30rem;
+  --window-popup-max-width: 60rem;
+  --window-popup-min-height: 10rem;
+  --window-popup-max-height: 80vw;
+  --window-popup-background: #1e1e1e;
+  --window-popup-border-radius: 0.5571rem;
+  --window-popup-padding: 2.0714rem;
+  --window-popup-stroke: #9f9f9f;
+
   //navigation
   --navigation-bar-top: 1.5rem;
+  --navigation-bar-track-color: #f3f3f3;
+  --navigation-bar-button-color: #ffffff;
+  --navigation-bar-button-hover-color: #e4e4e4;
+  --navigation-bar-button-border-color: #e8e8e8;
 
+  //messagescreen
+  --messagescreen-bg-color: #000000a0;
+  --messagescreen-content-bg-color: #1f1e2c;
+  --messagescreen-content-border-color: #626262;
+  //messagescreen-content
+  --messagescreen-red-color: #ff715b;
+  --messagescreen-purple-color: #b86bff;
+  --messagescreen-blue-color: #1d88ed;
+  //messagescreen-scrollbar
+  --messagescreen-scrollbar-thumb-color: #4a4a4a;
+  --messagescreen-scrollbar-track-color: #2f2f2f;
+
+  //z-index book
 
   font-family: 'Inter', sans-serif;
 
+}
+
+.inter {
+  font-family: 'Inter', sans-serif;
+}
+
+.lexend {
+  font-family: 'Lexend', sans-serif;
 }

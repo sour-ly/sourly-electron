@@ -1,4 +1,5 @@
 import { Log } from "../log/log";
+import { SourlyFlags } from "../renderer";
 import IPC from "../renderer/ReactIPC";
 import Skill, { SkillContainer, SkillEventMap } from "./Skill";
 
@@ -8,12 +9,20 @@ type SkillEventMapOverride = {
 
 } & Omit<SkillEventMap, 'onUpdates'>
 
+export interface ProfileSkeleton {
+  name: string;
+  level: number;
+  currentExperience: number;
+  version: string;
+  flags: SourlyFlags;
+}
+
 export class Profile extends SkillContainer<SkillEventMapOverride> {
 
   private level: number = 1;
   private currentExperience: number = 0;
 
-  constructor(private name: string = "User", level?: number, currentExperience?: number, skills?: Skill[]) {
+  constructor(private name: string = "User", level?: number, currentExperience?: number, skills?: Skill[], private version: string = "0.0.0", private flags: SourlyFlags = SourlyFlags.NULL) {
     super();
     this.level = level || 1;
     this.currentExperience = currentExperience || 0;
@@ -69,9 +78,19 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     return this.name;
   }
 
+  get Version() {
+    return this.version;
+  }
+
   // this setter will be used to update the profile name, but do not ever call it directly when the API comes out
   set Name(name: string) {
     this.name = name;
+    this.emit('onUpdates', { profile: this, skills: this.skills });
+  }
+
+  set Version(version: string) {
+    this.version = version;
+    this.emit('onUpdates', { profile: this, skills: this.skills });
   }
 
   get Level() {
@@ -86,11 +105,22 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     return this.skills;
   }
 
+  get Flags() {
+    return this.flags;
+  }
+
+  set Flags(flags: SourlyFlags) {
+    this.flags = flags;
+    this.emit('onUpdates', { profile: this, skills: this.skills });
+  }
+
   public serialize() {
     return {
       name: this.name,
       level: this.level,
       currentExperience: this.currentExperience,
+      version: this.version,
+      flags: this.flags,
     }
   }
 

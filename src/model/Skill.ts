@@ -50,19 +50,33 @@ export default class Skill extends Eventful<EventMap> {
       this.addExperience(goal.Reward);
     });
     goal.on('goalProgressChanged', (args) => {
-      const { amount, goal } = args;
-      if (amount > 0) {
-        this.addExperience(amount * (goal.Reward * .05));
+      const { amount, goal, revertCompletion } = args;
+      if (goal.Completed && !revertCompletion) {
+        return;
       }
+      else if (revertCompletion) {
+        this.addExperience(-goal.Reward);
+      } else
+        this.addExperience(amount * (goal.Reward * .05));
     });
   }
 
 
   private levelUp() {
     this.level++;
-    this.currentExperience = 0;
     this.experienceRequired = this.calculateExperienceRequired(this.level);
     this.emit('levelUp', { skill: this, level: this.level });
+  }
+
+  private levelDown() {
+    //go down a level
+    if (this.level <= 1) {
+      return;
+    }
+    //go down a alevel
+    this.level--;
+    //reset the max experience
+    this.experienceRequired = this.calculateExperienceRequired(this.level);
   }
 
   private addExperience(experience: number) {
@@ -73,7 +87,24 @@ export default class Skill extends Eventful<EventMap> {
     this.currentExperience += experience;
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     if (this.currentExperience >= this.experienceRequired) {
-      this.levelUp();
+      //check if we need to level up still
+      while (this.currentExperience >= this.experienceRequired) {
+        this.currentExperience -= this.experienceRequired;
+        this.levelUp();
+      }
+    } else if (this.currentExperience < 0) {
+      //should give us the experience we need to get to the previous level
+      this.levelDown();
+      this.currentExperience = this.experienceRequired + this.currentExperience;
+      //check if we need to go down another level
+      while (this.currentExperience < 0) {
+        if (this.level <= 1) {
+          this.currentExperience = 0;
+          break;
+        }
+        this.levelDown();
+        this.currentExperience = this.experienceRequired + this.currentExperience;
+      }
     }
     this.emit('experienceGained', { skill: this, experience: experience });
   }

@@ -3,6 +3,7 @@ import './styles/notification.scss';
 import PopUp from "../popup/Popup";
 import { Stateful } from "../util/state";
 import { useWindow } from "../App";
+import useSettings from "../util/usesettings";
 
 export interface INotifcation {
   notify: (message: string) => void;
@@ -43,22 +44,29 @@ function NotificationElement({ notification = "?", amount = 0, ...props }: { not
 
 type NotificationBannerProps = {
   notification: Stateful<string | null>;
+  neverTimeout?: boolean;
   amount?: number;
 }
 
-function NotificationBanner({ notification, amount }: NotificationBannerProps) {
+function NotificationBanner({ notification, neverTimeout, amount }: NotificationBannerProps) {
 
   const [init, setInit] = useState(true);
   const timeout_ref = useRef<any>();
+  const [settings, _] = useSettings();
+
+  useEffect(() => {
+    console.log('settings [notification]', settings.notification);
+  }, [settings])
 
   useEffect(() => {
     if (notification.state) {
+      if (neverTimeout) return;
       if (timeout_ref.current) {
         clearTimeout(timeout_ref.current);
       }
       timeout_ref.current = setTimeout(() => {
         notification.setState(null);
-      }, 5000);
+      }, settings.notification.duration); // change here to change the duration of the notification
     }
     return () => {
       if (timeout_ref.current) {
@@ -66,6 +74,11 @@ function NotificationBanner({ notification, amount }: NotificationBannerProps) {
       }
     }
   }, [notification.state])
+
+  if (!settings.notification.enabled) {
+    return null;
+  }
+
 
   function cancelTimer() {
     if (timeout_ref.current) {
