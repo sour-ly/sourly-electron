@@ -1,3 +1,4 @@
+import { version } from "../../../main/version";
 import { MSCompatiableScreen } from "../MessageScreen";
 
 export function VersionPage() {
@@ -56,6 +57,6 @@ export function VersionPage() {
 }
 
 export const VersionPageContext: MSCompatiableScreen = {
-  header: [{ text: "New Version: ", color: "" }, { text: "0.0.7", color: "red" }],
+  header: [{ text: "New Version: ", color: "" }, { text: version, color: "red" }],
   body: <VersionPage />,
 }

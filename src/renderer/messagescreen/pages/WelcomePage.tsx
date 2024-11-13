@@ -4,13 +4,14 @@ import AddSkill from '../../../../assets/images/welcome-screen-add-skill.png';
 import AddSkillPopUp from '../../../../assets/images/welcome-screen-add-skill-popup.png';
 import AddGoal from '../../../../assets/images/welcome-screen-add-goal.png';
 import AddGoalPopUp from '../../../../assets/images/welcome-screen-add-goal-popup.png';
+import { version } from "../../../main/version";
 
 
 function WelcomePageSlideOne() {
   return (
     <>
       <div className="messagescreen__content__main__body__section">
-        <p style={{ fontWeight: 400 }}>Welcome to Sourly (alpha)</p>
+        <p style={{ fontWeight: 400 }}>Welcome to Sourly (alpha - v{version})</p>
         <p style={{ fontWeight: 300 }}>
           Sour-ly aims to be a multi-platform application that allows users to create, log, and track the progress on their skills through gamification. Sour-ly rewards users with EXP and levels up their skills (and themselves) as they progress. Skills can be anything from learning a new language, to improving your social skills, or even learning how to play an instrument. Skills are leveled up by assigning goals to them. Completing goals will reward the user and the skill with EXP.
         </p>
