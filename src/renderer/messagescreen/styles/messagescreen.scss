@@ -33,6 +33,33 @@
     }
   }
 
+  &__navigation {
+    position: absolute;
+    z-index: 10000;
+    top: 50%;
+    transform: translateY(-50%);
+
+    &__left {
+
+      left: 1.5rem;
+
+      img {
+        transform: rotate(180deg);
+      }
+    }
+
+    &__right {
+      right: 1.5rem;
+    }
+
+    img {
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      filter: invert(1);
+    }
+  }
+
   &__close {
     position: absolute;
     width: 32px;
@@ -127,6 +154,8 @@
 
 
         &__section {
+          width: 100%;
+          overflow-x: hidden;
 
           &:not(:first-child) {
             margin-top: 1.5rem;

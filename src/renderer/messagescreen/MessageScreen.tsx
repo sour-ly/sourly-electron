@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react';
 import { environment } from '..';
 import './styles/messagescreen.scss';
 import Exit from '../../../assets/ui/exit.svg';
+import Next from '../../../assets/ui/next.svg';
 
 
 export type MSCompatiableScreen = {
@@ -31,6 +32,12 @@ export function MessageScreen({ flags, pages, onClose }: MSContext) {
     }
   }
 
+  function prevPage() {
+    if (current_page - 1 >= 0) {
+      setCurrentPage(current_page - 1);
+    }
+  }
+
 
   return (
     <div className="messagescreen">
@@ -39,9 +46,14 @@ export function MessageScreen({ flags, pages, onClose }: MSContext) {
           <img src={Exit} alt="Close" draggable={false} />
         </div>
         <div className="messagescreen__navigation messagescreen__navigation__left">
-          <button onClick={nextPage}>Next</button>
+          {current_page > 0 &&
+            <img src={Next} onClick={prevPage} />
+          }
         </div>
         <div className="messagescreen__navigation messagescreen__navigation__right">
+          {current_page < pages.length - 1 &&
+            <img src={Next} onClick={nextPage} />
+          }
         </div>
         <div className="messagescreen__content__main lexend">
           <div className="messagescreen__content__main__header">

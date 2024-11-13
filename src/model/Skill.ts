@@ -50,8 +50,14 @@ export default class Skill extends Eventful<EventMap> {
       this.addExperience(goal.Reward);
     });
     goal.on('goalProgressChanged', (args) => {
-      const { amount, goal } = args;
-      this.addExperience(amount * (goal.Reward * .05));
+      const { amount, goal, revertCompletion } = args;
+      if (goal.Completed && !revertCompletion) {
+        return;
+      }
+      else if (revertCompletion) {
+        this.addExperience(-goal.Reward);
+      } else
+        this.addExperience(amount * (goal.Reward * .05));
     });
   }
 
