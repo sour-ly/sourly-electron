@@ -4,6 +4,7 @@ body {
   font-family: 'Roboto', sans-serif;
   margin: 0 auto;
   padding: 0;
+  overflow-x: hidden
 }
 
 div#root {
@@ -12,7 +13,7 @@ div#root {
   display: flex;
   justify-content: center;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 main {
