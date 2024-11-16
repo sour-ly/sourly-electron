@@ -1,39 +1,52 @@
 #notification {
   position: fixed;
-  top: -100px;
+  opacity: 0;
+
+  top: 27px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
+  border-radius: 2rem;
+  overflow: hidden;
+  background: #ffffff;
+  border: 2px solid #3f434723;
+  min-height: 40px;
 
   @keyframes slideIn {
     from {
-      top: -100px;
+      opacity: 0;
+      width: 0%;
     }
 
     to {
-      top: 10px;
+      opacity: 1;
+      width: 50%;
     }
   }
 
   @keyframes slideOut {
     from {
-      top: 10px;
+      opacity: 1;
+      width: 50%;
     }
 
     to {
-      top: -100px;
+      opacity: 0;
+      width: 0%;
     }
   }
 
   width: 95%;
   z-index: 9999;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  //box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   animation-fill-mode: forwards;
+  /*
   border-top: 2px solid #dde2db;
   border-left: 2px solid #dde2db;
   border-right: 2px ridge #3f434798;
   border-bottom: 2px ridge #3f434798;
+  */
 
   &.show {
     animation: slideIn 0.5s;
@@ -46,23 +59,9 @@
   }
 
   .notification {
-    &__top {
-      height: 10px;
-      padding: 10px 0;
-      width: 100%;
-      background: linear-gradient(90deg, rgba(48, 52, 128, 1) 0%, rgba(88, 112, 177, 1) 50%, rgba(166, 189, 227, 1) 100%);
-      display: flex;
-      align-items: center;
 
-      span {
-        color: white;
-        font-weight: bold;
-        padding: 0 10px;
-      }
-    }
 
     &__bottom {
-      background: #d4d0c8;
       display: flex;
       padding: 10px;
       width: 100%;
@@ -74,13 +73,18 @@
     }
 
     &__content {
-      width: 100%;
-      min-height: 50px;
+      flex: 1;
       color: black;
-      background-color: #d4d0c8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: .1rem;
 
       p {
-        padding: 10px;
+        //never break words
+        white-space: nowrap;
+        font-weight: 500;
+        font-size: 1.05rem;
       }
     }
   }

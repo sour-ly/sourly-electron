@@ -31,9 +31,7 @@ export function VersionPage() {
       <div className="messagescreen__content__main__body__section">
         <h2>Fixes:</h2>
         <ul>
-          <li>Fixed a notification bug that would show the notification way too many times if the user flip-flopped between the pages</li>
-          <li>Fixed a bug that would not save the users data if they switched between the pages</li>
-          <li>Removed "No description" from blank descriptions</li>
+          <li>Fixed a weird overflow bug that happens on the Settings Page</li>
         </ul>
 
       </div>

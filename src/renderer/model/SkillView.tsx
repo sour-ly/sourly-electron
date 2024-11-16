@@ -11,6 +11,7 @@ import toRomanNumerals from "../util/roman";
 import { GoalPopUpWrapper } from "./popup/GoalPopup";
 import { SkillDeletePopUp, SkillHelpMenu, SkillPopupWrapper } from "./popup/SkillPopup";
 import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from "../messagescreen/pages/WelcomePage";
+import { absorb } from "../util/click";
 
 
 const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boolean }) => {
@@ -40,7 +41,6 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
 
   useEffect(() => {
     const i = skill.on('levelUp', (args) => {
-      ctx.notification.notify(`You have leveled up "${skill.Name}" to level ${toRomanNumerals(skill.Level)}`);
     });
 
     return () => {
@@ -72,7 +72,7 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
       <div className="skillview__title"
         onClick={() => toggle()}
       >
-        <h1>{skill.Name} {toRomanNumerals(skill.Level)}: {skill.CurrentExperience} EXP</h1>
+        <h1 onClick={absorb}>{skill.Name} {toRomanNumerals(skill.Level)}: {skill.CurrentExperience} EXP</h1>
         <ProgressBar max={skill.ExperienceRequired} value={skill.CurrentExperience} options={options.current} />
         {skill.Goals.length > 0 && collapsed && <span className="expand-message">Click to expand</span>}
       </div>

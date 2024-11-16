@@ -5,15 +5,20 @@ import { Stateful } from "../util/state";
 import { useWindow } from "../App";
 import useSettings from "../util/usesettings";
 
+export type NotificationObject = {
+  message: string,
+  event: 'none' | 'confetti' | 'confetti-noise'
+}
+
 export interface INotifcation {
-  notify: (message: string) => void;
-  notification: string | null;
+  notify: (message: string | NotificationObject) => void;
+  notification: NotificationObject | null;
   Element: (props: { notification: string | null }) => JSX.Element;
   clear: () => void;
 }
 
 
-function NotificationElement({ notification = "?", amount = 0, ...props }: { notification: string | null, amount?: number, cancelTimer: () => void, init: boolean, setInit: (value: boolean) => void }) {
+function NotificationElement({ notification, amount = 0, ...props }: { notification?: NotificationObject | null, amount?: number, cancelTimer: () => void, init: boolean, setInit: (value: boolean) => void }) {
 
   const ctx = useWindow();
 
@@ -23,15 +28,19 @@ function NotificationElement({ notification = "?", amount = 0, ...props }: { not
     }
   }, [notification])
 
+  //<span>ALERT {amount >= 1 ? `(${amount} MORE)` : ''}</span>
+
   return (
     <div id="notification" className={notification ? 'show' : props.init ? '' : 'hide'} onClick={props.cancelTimer}>
-      <div className="notification__top" onClick={() => { }}>
-        <span>ALERT {amount >= 1 ? `(${amount} MORE)` : ''}</span>
-      </div>
       <div className="notification__content">
-        <p>{notification}</p>
+        <p>{notification?.message}</p>
       </div>
-
+      <div className="notification__effect">
+        {
+          notification?.event === 'confetti' &&
+          <h2>🎉</h2>
+        }
+      </div>
       {amount >= 2 &&
         <div className="notification__bottom" onClick={ctx.notification.clear}>
           Clear all alerts
@@ -43,7 +52,7 @@ function NotificationElement({ notification = "?", amount = 0, ...props }: { not
 }
 
 type NotificationBannerProps = {
-  notification: Stateful<string | null>;
+  notification: Stateful<NotificationObject | null>;
   neverTimeout?: boolean;
   amount?: number;
 }
@@ -88,7 +97,7 @@ function NotificationBanner({ notification, neverTimeout, amount }: Notification
   }
 
   return (
-    <NotificationElement notification={notification.state} amount={amount} cancelTimer={cancelTimer} init={init} setInit={setInit} />
+    <NotificationElement notification={notification.state ?? null} amount={amount} cancelTimer={cancelTimer} init={init} setInit={setInit} />
   )
 
 }

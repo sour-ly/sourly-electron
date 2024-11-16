@@ -3,7 +3,7 @@ import './App.scss';
 import React, { useEffect, useRef, useState } from 'react';
 import PopUp, { _popup_types, PopUpWindow } from './popup/Popup';
 import { version } from '../main/version';
-import NotificationBanner, { INotifcation } from './notification/notification';
+import NotificationBanner, { INotifcation, NotificationObject } from './notification/notification';
 import { Anchor } from './components/anchor';
 import { environment, profileobj, SourlyFlags } from '.';
 import Home from './views/Home';
@@ -64,9 +64,9 @@ export default function App({ flags }: { flags: number }) {
   /* useless, will remove later */
   const [update, setUpdate] = useState<boolean>(false);
   /* for the Notification Object {gets rerendered too often}*/
-  const [notification, setNotification] = useState<string | null>(null);
+  const [notification, setNotification] = useState<NotificationObject | null>(null);
   /* notification queue */
-  const notification_queue = useRef<Queue<string>>(new Queue<string>()).current;
+  const notification_queue = useRef<Queue<NotificationObject>>(new Queue<NotificationObject>()).current;
   /* notification queue amount */
   const [notification_amount, setNotificationAmount] = useState(0);
   /* MessageScreen */
@@ -158,12 +158,16 @@ export default function App({ flags }: { flags: number }) {
   }
 
   /* strictly for notifications */
-  function notify(s: string) {
+  function notify(s: string | NotificationObject) {
     //@ts-ignore
     setNotification(o => {
       // if the notification is not null, and the new notification is also not null, then queue the notification
       if (s !== null && o !== null) {
-        notification_queue.queue(s);
+        if (typeof s === 'string') {
+          notification_queue.queue({ message: s, event: 'none' });
+        } else {
+          notification_queue.queue(s);
+        }
         return o;
       } else if (s === null && o !== null) { // if the new notification is null, and the old notification is not null, then check if the queue is empty, if it is, then set the notification to null
         if (notification_queue.length === 0) {
@@ -173,6 +177,9 @@ export default function App({ flags }: { flags: number }) {
       }
       // if the new notification is not null, then set the notification to the new notification
       else {
+        if (typeof s === 'string') {
+          return { message: s, event: 'none' };
+        }
         return s;
       }
     })
