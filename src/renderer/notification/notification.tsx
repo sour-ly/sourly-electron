@@ -52,13 +52,14 @@ function NotificationElement({ notification, amount = 0, ...props }: { notificat
       <div className="notification__content">
         <p>{notification?.message}</p>
       </div>
-      <canvas ref={c_ref} className="notification__effect">
-      </canvas>
-      {amount >= 2 &&
-        <div className="notification__bottom" onClick={ctx.notification.clear}>
-          Clear all alerts
+      {amount >= 1 &&
+        <div className="notification__alert">
+          <span>{amount}</span>
         </div>
       }
+      <canvas ref={c_ref} className="notification__effect">
+      </canvas>
+
 
     </div>
   )
