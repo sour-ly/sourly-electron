@@ -2,16 +2,18 @@
   position: fixed;
   opacity: 0;
 
-  top: 27px;
+  bottom: 27px;
+  width: 600px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   border-radius: 2rem;
-  overflow: hidden;
   background: #ffffff;
   border: 2px solid #3f434723;
   min-height: 40px;
+
+  box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.09);
 
   @keyframes slideIn {
     from {
@@ -21,14 +23,14 @@
 
     to {
       opacity: 1;
-      width: 50%;
+      width: 600px;
     }
   }
 
   @keyframes slideOut {
     from {
       opacity: 1;
-      width: 50%;
+      width: 600px;
     }
 
     to {
@@ -56,6 +58,16 @@
   &.hide {
     animation: slideOut 0.5s;
     animation-fill-mode: forwards;
+  }
+
+  canvas {
+    position: absolute;
+    top: -150px;
+    left: 0;
+    width: 600px;
+    height: 300px;
+    z-index: 90;
+    pointer-events: none;
   }
 
   .notification {

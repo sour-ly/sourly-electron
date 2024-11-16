@@ -214,7 +214,7 @@ export default function App({ flags }: { flags: number }) {
         state: msg_context !== null,
       },
       notification: {
-        notify: (s: string) => {
+        notify: (s: string | NotificationObject) => {
           notify(s);
         },
         clear: () => {
