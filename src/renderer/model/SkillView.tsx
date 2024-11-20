@@ -8,6 +8,8 @@ import toRomanNumerals from "../util/roman";
 import { GoalPopUpWrapper } from "./popup/GoalPopup";
 import { SkillDeletePopUp, SkillHelpMenu, SkillPopupWrapper } from "./popup/SkillPopup";
 import { absorb } from "../util/click";
+import OptionDropdown from "../components/OptionDropdown";
+import { Button } from "../components/Button";
 
 
 const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boolean }) => {
@@ -25,12 +27,10 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
   const [collapsed, setCollapsed] = useState(true);
   const collapse_ref = useRef<HTMLDivElement>(null);
   const ctx = useWindow();
-  const goalpop = GoalPopUpWrapper({ skill });
   const skillEdit = SkillPopupWrapper({ tskill: { ...skill.toJSON(), id: `${Number(skill.Id) ?? -1}` }, edit: true });
   const options = useRef(
     [
       { key: 'edit', element: skillEdit },
-      { key: 'add', element: goalpop },
       { key: 'delete', element: useMemo(() => <SkillDeletePopUp skill={skill} />, [skill]) },
       { key: 'help', element: useMemo(() => <SkillHelpMenu />, []) }
     ]);
@@ -65,23 +65,33 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
   }
 
   return (
-    <div className="skillview">
+    <div className="skillview card"
+
+      onClick={() => toggle()}
+    >
       <div className="skillview__title"
-        onClick={() => toggle()}
       >
         <div className="skillview__icon">
         </div>
-        <h1 onClick={absorb}>{skill.Name} {toRomanNumerals(skill.Level)}: {skill.CurrentExperience} EXP</h1>
-        <ProgressBar max={skill.ExperienceRequired} value={skill.CurrentExperience} options={options.current} />
+        <div className="skillview__title__header">
+          <h1 onClick={absorb}>{skill.Name} {toRomanNumerals(skill.Level)}: {skill.CurrentExperience} EXP</h1>
+          <OptionDropdown options={options.current} className="skillview__dot_container" />
+        </div>
+        <ProgressBar max={skill.ExperienceRequired} value={skill.CurrentExperience} />
         {/*skill.Goals.length > 0 && collapsed && <span className="expand-message">Click to expand</span>*/}
       </div>
       <div className={`collapsible ${collapsed ? 'collapsed' : 'open'}`} ref={collapse_ref}>
         <div className="skillview__description">
         </div>
-        <div className="skillview__goals">
-          {skill.Goals.sort(sort_goals_by_completion).map((goal) => {
-            return <GoalView key={goal.Id} skill_id={skill.Id} goal={goal} />
-          })}
+        <div className="skillview__goals scrollbar horizontal slight">
+          <div className="skillview__goals__container">
+            {skill.Goals.sort(sort_goals_by_completion).map((goal) => {
+              return <GoalView key={goal.Id} skill_id={skill.Id} goal={goal} />
+            })}
+          </div>
+        </div>
+        <div className="skillview__footer">
+          <GoalPopUpWrapper skill={skill} />
         </div>
       </div>
     </div>

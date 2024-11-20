@@ -51,7 +51,7 @@ export function SkillPopupWrapper({ tskill, edit, ...props }: { tskill: SkillPro
   }
 
   return (
-    <button className="add_skill" onClick={addSkillPopUp}>{edit && "Edit" || "Add"} Skill</button>
+    (<button className="add_skill" onClick={addSkillPopUp}>{edit && "Edit" || "Add"} Skill</button>)
   )
 }
 

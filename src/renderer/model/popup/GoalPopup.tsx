@@ -6,6 +6,8 @@ import { useStateUtil } from "../../util/state";
 import Input from "../../components/Input";
 import { ButtonProps } from "../../popup/Popup";
 import { Dropdown } from "../../components/Dropdown";
+import { Button } from "../../components/Button";
+import Plus from "../../../../assets/ui/plus.svg";
 
 
 const MetricOptions: Metric[] = [
@@ -130,9 +132,10 @@ export function GoalPopUpWrapper({ skill, goalt, ...props }: { skill?: Skill, go
     });
   }
 
-  return (
+  return goalt && (
     <button {...props} className={"add_goal " + props.className} onClick={addGoalPopUp}>{goalt && 'Edit' || 'Add'} Goal</button>
-  )
+  ) ||
+    (<Button onClick={addGoalPopUp} type="outline"><img src={Plus} alt="plus" /> <span>{goalt && 'Edit' || 'Add'} Goal</span></Button>)
 
 }
 

@@ -1,0 +1,38 @@
+button.button {
+
+  width: 100%;
+  height: 24px;
+  border-radius: 46px;
+  text-align: left;
+  padding-left: 13px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+
+  span {
+    display: inline-block;
+    transform: translateY(0px);
+  }
+
+  img {
+    filter: invert(45%) sepia(78%) saturate(2850%) hue-rotate(349deg) brightness(102%) contrast(91%);
+    width: 11px;
+    height: 11px;
+    transform: translateY(1px);
+    margin-right: 5px;
+  }
+
+  &.solid {
+    background: var(--accent);
+    color: white;
+    border: none;
+  }
+
+  &.outline {
+    background: none;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+
+  }
+
+}

@@ -126,8 +126,34 @@ export default function App({ flags }: { flags: number }) {
       if (x) {
         notification_queue.off('update', x);
       }
+
     }
   }, []);
+
+  /* check if msg_context is null*/
+  useEffect(() => {
+    if (msg_context === null) {
+      document.body.style.overflow = 'auto';
+      return;
+    } else {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    }
+  }, [msg_context])
+
+  /* check if popUp is open or not for anti-scroll */
+  useEffect(() => {
+    if (ctx_open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    }
+  }, [ctx_open])
 
   /* notification queue listener */
   useEffect(() => {
@@ -194,7 +220,10 @@ export default function App({ flags }: { flags: number }) {
     if (ctx === null) {
       return;
     }
-    setMsgContext(ctx);
+    msg_queue.queue(ctx);
+    if (msg_context === null) {
+      setMsgContext(msg_queue.pop() ?? null);
+    }
   }
 
 

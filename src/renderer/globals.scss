@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lexend:wght@100..900&family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+//replace this
 
 :root {
 
@@ -73,6 +74,12 @@
   --messagescreen-scrollbar-thumb-color: #4a4a4a;
   --messagescreen-scrollbar-track-color: #2f2f2f;
 
+  --card-shadow: 0px 0px 24px -10px rgba(0, 0, 0, 0.05);
+  --card-border-radius: 4px;
+  //card settings -- light
+  --card-background-light: #ffffff;
+  --card-border-light: #f5f5f5;
+
   //z-index book
 
   font-family: 'Inter', sans-serif;
@@ -85,4 +92,45 @@
 
 .lexend {
   font-family: 'Lexend', sans-serif;
+}
+
+.card {
+  border: 1px solid var(--card-border-light);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.scrollbar {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--messagescreen-scrollbar-thumb-color);
+    border-radius: 20px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--messagescreen-scrollbar-track-color);
+    border-radius: 20px;
+  }
+
+  &.horizontal {
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+  }
+
+  &.slight {
+    &::-webkit-scrollbar-thumb {
+      background: #e2e2e2;
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f0f0f0;
+      border-radius: 10px;
+    }
+  }
+
 }

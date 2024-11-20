@@ -53,7 +53,7 @@ function NotificationElement({ notification, amount = 0, ...props }: { notificat
         <p>{notification?.message}</p>
       </div>
       {amount >= 1 &&
-        <div className="notification__alert">
+        <div className="notification__alert" onClick={() => ctx.notification.clear()}>
           <span>{amount}</span>
         </div>
       }

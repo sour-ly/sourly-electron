@@ -6,6 +6,7 @@ import { SkillManager } from '../../model/Skill';
 import { GoalDeletePopUp, GoalPopUpWrapper } from './popup/GoalPopup';
 import { Options } from '../components/OptionDropdown';
 import { profileobj } from '..';
+import { absorb } from '../util/click';
 
 
 export default function GoalView({ goal, skill_id }: { goal: Goal, skill_id: number }) {
@@ -19,13 +20,13 @@ export default function GoalView({ goal, skill_id }: { goal: Goal, skill_id: num
   ] as Options
 
   return (
-    <div className={`goalview ${goal.Completed && 'done'}`}>
+    <div className={`goalview ${goal.Completed && 'done'} card`} onClick={absorb}>
       <h2>{goal.Name} </h2>
       <p>{goal.Description.trim().length === 0 ? 'No Description' : goal.Description}</p>
-      <p className="metric">{goal.Current} / {goal.Target} {goal.Metric}</p>
-      <ProgressBar max={goal.Target} value={goal.Current} options={options} />
-      <button onClick={() => goal.incrementProgress(1)}>Log</button>
-      <button onClick={() => goal.undo()}>Undo</button>
+      <ProgressBar max={goal.Target} value={goal.Current} />
+      <div className="goalview__footer">
+        {goal.Completed ? <p>Completed</p> : <p>{goal.Current} / {goal.Target} {goal.Metric}</p>}
+      </div>
     </div>
   )
 }
