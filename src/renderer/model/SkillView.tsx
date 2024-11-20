@@ -2,15 +2,11 @@ import Skill from "../../model/Skill";
 import './styles/skillview.scss';
 import GoalView from "./GoalView";
 import { useWindow } from "../App";
-import Input from "../components/Input";
-import Goal, { GoalProps } from "../../model/Goal";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useStateUtil } from "../util/state";
 import ProgressBar from "../components/ProgressBar";
 import toRomanNumerals from "../util/roman";
 import { GoalPopUpWrapper } from "./popup/GoalPopup";
 import { SkillDeletePopUp, SkillHelpMenu, SkillPopupWrapper } from "./popup/SkillPopup";
-import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from "../messagescreen/pages/WelcomePage";
 import { absorb } from "../util/click";
 
 
@@ -26,7 +22,7 @@ const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boo
 //TODO debug why collapsable isn't listening to skill
 export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) {
 
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const collapse_ref = useRef<HTMLDivElement>(null);
   const ctx = useWindow();
   const goalpop = GoalPopUpWrapper({ skill });
@@ -73,9 +69,11 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
       <div className="skillview__title"
         onClick={() => toggle()}
       >
+        <div className="skillview__icon">
+        </div>
         <h1 onClick={absorb}>{skill.Name} {toRomanNumerals(skill.Level)}: {skill.CurrentExperience} EXP</h1>
         <ProgressBar max={skill.ExperienceRequired} value={skill.CurrentExperience} options={options.current} />
-        {skill.Goals.length > 0 && collapsed && <span className="expand-message">Click to expand</span>}
+        {/*skill.Goals.length > 0 && collapsed && <span className="expand-message">Click to expand</span>*/}
       </div>
       <div className={`collapsible ${collapsed ? 'collapsed' : 'open'}`} ref={collapse_ref}>
         <div className="skillview__description">
