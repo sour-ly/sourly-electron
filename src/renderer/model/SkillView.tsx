@@ -60,7 +60,6 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
   }, [collapsed, skills])
 
   function toggle() {
-    if (skill.Goals.length === 0) return;
     setCollapsed(!collapsed);
   }
 
