@@ -5,6 +5,8 @@ body {
   margin: 0 auto;
   padding: 0;
   overflow-x: hidden !important;
+  background: var(--bg);
+  color: var(--text-color);
 }
 
 div#root {

@@ -16,6 +16,7 @@ import { MessageScreen, MSCompatiableScreen, MSContext } from './messagescreen/M
 import { VersionPageContext } from './messagescreen/pages/VersionPage';
 import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from './messagescreen/pages/WelcomePage';
 import useSettings from './util/usesettings';
+import { adjustTheme } from './util/darkmode';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -76,6 +77,10 @@ export default function App({ flags }: { flags: number }) {
 
   /* main init function for the application */
   useEffect(() => {
+
+    /* simply call the adjustTheme function */
+    adjustTheme();
+
     /* notification queue listeners */
     const x = notification_queue.on('update', (q) => {
       setNotificationAmount(q.length);

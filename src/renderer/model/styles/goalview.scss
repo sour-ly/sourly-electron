@@ -6,6 +6,7 @@
   aspect-ratio: 230 / 125;
   box-sizing: border-box;
   transition: all 0.3s ease;
+  background: var(--card-inner-background);
 
   &:hover {
     cursor: pointer;
@@ -47,6 +48,10 @@
       font-weight: 600;
       text-align: right;
     }
+  }
+
+  .progress-bar__dots {
+    width: .95rem;
   }
 
   .progress-bar__container {}

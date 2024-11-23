@@ -8,11 +8,10 @@
 
 .skillview {
 
-
+  background: var(--card-background);
   padding: 17px 19px;
 
 
-  border-bottom: 1.5px solid #ccc;
 
   & {
     &:not(:last-child) {
@@ -58,10 +57,11 @@
     flex-direction: column;
     gap: 4px;
     position: sticky;
-    background: white;
+    background: var(--card-background);
     z-index: 5;
     top: 0;
     height: 34px;
+    color: var(--text-color);
 
     &__clickframe {
       position: absolute;
