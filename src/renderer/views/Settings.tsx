@@ -7,6 +7,7 @@ import { sDefault } from '../settings/settings';
 import { useWindow } from '../App';
 import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from '../messagescreen/pages/WelcomePage';
 import { VersionPageContext } from '../messagescreen/pages/VersionPage';
+import { Button } from '../components/Button';
 
 
 type CheckboxProps = {
@@ -86,10 +87,10 @@ function Settings() {
           />
         </div>
         <div className="settings__content__section">
-          <button style={{ marginTop: '1rem' }} onClick={() => ctx.msgScreen.open(WelcomePageSlideOneContext, WelcomePageSlideTwoContext)} className="settings__welcome">See Welcome Screen</button>
+          <Button style={{ marginTop: '1rem' }} type="outline" onClick={() => ctx.msgScreen.open(WelcomePageSlideOneContext, WelcomePageSlideTwoContext)} className="settings__welcome">See Welcome Screen</Button>
 
-          <button style={{ marginTop: '1rem' }} onClick={() => ctx.msgScreen.open(VersionPageContext)} className="settings__notes">See Version Notes</button>
-          <button style={{ marginTop: '1rem' }} onClick={() => setSettings({ ...settings_copy, ...sDefault })} className="settings__save">Reset Settings</button>
+          <Button style={{ marginTop: '1rem' }} type="outline" onClick={() => ctx.msgScreen.open(VersionPageContext)} className="settings__notes">See Version Notes</Button>
+          <Button style={{ marginTop: '1rem' }} type="outline" onClick={() => setSettings({ ...settings_copy, ...sDefault })} className="settings__save">Reset Settings</Button>
         </div>
       </div>
     </main>
