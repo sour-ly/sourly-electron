@@ -10,6 +10,7 @@ import { SkillDeletePopUp, SkillHelpMenu, SkillPopupWrapper } from "./popup/Skil
 import { absorb } from "../util/click";
 import OptionDropdown from "../components/OptionDropdown";
 import { Button } from "../components/Button";
+import { truncateDecimal } from "../util/truncate";
 
 
 const sort_goals_by_completion = (a: { Completed: boolean }, b: { Completed: boolean }) => {
@@ -73,7 +74,7 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
         <div className="skillview__icon">
         </div>
         <div className="skillview__title__header">
-          <h1 onClick={absorb}>{skill.Name} {toRomanNumerals(skill.Level)}: {skill.CurrentExperience} EXP</h1>
+          <h1 onClick={absorb}>{skill.Name} {toRomanNumerals(skill.Level)}: {truncateDecimal(skill.CurrentExperience, 1)} EXP</h1>
           <OptionDropdown options={options.current} className="skillview__dot_container" />
         </div>
         <ProgressBar max={skill.ExperienceRequired} value={skill.CurrentExperience} />

@@ -115,10 +115,17 @@
   --profile-detail-card-bg: var(--profile-detail-card-bg-light);
   --profile-detail-card-border: var(--profile-detail-card-border-light);
 
+  //option
+  --option-filter-light: invert(0%) sepia(96%) saturate(3968%) hue-rotate(255deg) brightness(99%) contrast(100%);
+  --option-filter-dark: invert(41%) sepia(0%) saturate(1815%) hue-rotate(226deg) brightness(92%) contrast(90%);
+  //defaults
+  --option-filter: var(--option-filter-light);
 
 
   //z-index book
   font-family: 'Inter', sans-serif;
+
+  transition: all 0.3s;
 
   /*
   //default settings -- check global var if darkmode
@@ -149,6 +156,8 @@
   --profile-detail-card-bg: var(--profile-detail-card-bg-dark);
   --profile-detail-card-border: var(--profile-detail-card-border-dark);
 
+  //option
+  --option-filter: var(--option-filter-dark);
 }
 
 .inter {

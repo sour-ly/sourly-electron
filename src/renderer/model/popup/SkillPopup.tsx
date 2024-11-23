@@ -1,12 +1,14 @@
 import { ButtonHTMLAttributes, DetailedHTMLProps, useEffect, useState } from "react";
 //import Goal, { GoalProps } from "../../../model/Goal";
 import Skill, { SkillManager, SkillProps } from "../../../model/Skill";
+import Plus from "../../../../assets/ui/plus.svg";
 import { useWindow } from "../../App";
 import { useStateUtil } from "../../util/state";
 import Input from "../../components/Input";
 import { ButtonProps } from "../../popup/Popup";
 import { profileobj } from "../..";
 import { WelcomePageSlideTwoContext } from "../../messagescreen/pages/WelcomePage";
+import { Button } from "../../components/Button";
 
 export function SkillPopupWrapper({ tskill, edit, ...props }: { tskill: SkillProps, edit?: boolean } & ButtonProps) {
   const [skill, setSkill] = useState<SkillProps>(tskill);
@@ -51,7 +53,11 @@ export function SkillPopupWrapper({ tskill, edit, ...props }: { tskill: SkillPro
   }
 
   return (
-    (<button className="add_skill" onClick={addSkillPopUp}>{edit && "Edit" || "Add"} Skill</button>)
+    edit &&
+    (<button className="add_skill" onClick={addSkillPopUp}>{edit && "Edit" || "Add"} Skill</button>) ||
+    (
+      <Button onClick={addSkillPopUp} type="outline"><img src={Plus} alt="plus" /> <span>{edit && 'Edit' || 'Add'} Skill</span></Button>
+    )
   )
 }
 
