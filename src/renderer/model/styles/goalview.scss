@@ -19,6 +19,13 @@
   }
 
 
+  &.done {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+
+
   &__title {
     display: flex;
     justify-content: space-between;
@@ -47,6 +54,7 @@
     p {
       font-weight: 600;
       text-align: right;
+      user-select: none;
     }
   }
 
