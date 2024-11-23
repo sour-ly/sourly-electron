@@ -17,15 +17,8 @@ export function VersionPage() {
         </p>
         <h3> TL;DR </h3>
         <ul>
-          <li>Added a <code>MessageScreen</code> component to the application</li>
-          <li>Added a new page to show the user what has changed</li>
-          <li>Added a new page to show the user how to use the application</li>
-          <li>Added a new page to show the user how to use the features of the application</li>
-          <li>Added a "flags" feature to the application based on the users <code>storage.json</code></li>
-          <li>Undoing Goals now takes away EXP from the skill and the user</li>
-          <li>Added actual settings to the application - as of now we only have notification settings</li>
-          <li>Added the ability for users to edit their username</li>
-          <li>Added Help Page for the Skills</li>
+          <li>Added Dark Mode</li>
+          <li>Huge UI overhaul</li>
         </ul>
       </div>
       <div className="messagescreen__content__main__body__section">
