@@ -33,9 +33,9 @@ export function SkillPopupWrapper({ tskill, edit, ...props }: { tskill: SkillPro
   function addSkillPopUp() {
     props.onClick && props.onClick();
     ctx.popUp.open({
-      type: 'confirm',
+      type: 'save',
+      title: edit && 'Edit Skill' || 'Add Skill',
       content: () => (<div>
-        <h1>{edit && 'Edit' || 'Add'} Skill</h1>
         <Input placeholder="Name" onChange={(e) => change('name', e.currentTarget.value)} value={skill.name} />
       </div>),
       options: {
@@ -68,9 +68,9 @@ export function SkillDeletePopUp({ skill, ...props }: { skill: Skill } & ButtonP
     props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
+      title: "Are you sure?",
       content: () =>
       (<div>
-        <h1>Delete Skill</h1>
         <p>Are you sure you want to delete this skill?</p>
       </div>),
       options: {

@@ -51,15 +51,51 @@
   --o-windows-button-active-shadow: inset 1px 1px #0a0a0a, inset -1px -1px #fff, inset 2px 2px grey, inset -2px -2px #dfdfdf;
   --o-windows-button-disabled-shadow: inset 1px 1px #0a0a0a, inset -1px -1px #fff, inset 2px 2px grey, inset -2px -2px #dfdfdf;
 
+  /* INPUT */
+  --input-bg-light: #ffffff;
+  --input-bg-dark: #1F1F1F;
+  --input-border-light: #DADADA;
+  --input-border-active-light: #F46224;
+  --input-border-dark: #383838;
+  --input-border-active-dark: #F46224;
+
+  /* INPUT::TEXT */
+  --input-text-light: #363636;
+  --input-text-placeholder-light: #D7D7D7;
+  --input-text-dark: #FFFFFF;
+  --input-text-placeholder-dark: #373737;
+
+  /* INPUT DEFAULTS DO NOT CHANGE */
+  --input-bg: var(--input-bg-light);
+  --input-border: var(--input-border-light);
+  --input-border-active: var(--input-border-active-light);
+  --input-text: var(--input-text-light);
+  --input-text-placeholder: var(--input-text-placeholder-light);
+
+  /* DROPDOWN */
+  --dropdown-bg: var(--input-bg);
+  --dropdown-text-nonselected: #9B9191;
+  --dropdown-text-selected: #FA450A;
+  --dropdown-item-selected: #FFE0D6;
+
+
+
   //popup
-  --window-popup-min-width: 30rem;
-  --window-popup-max-width: 60rem;
-  --window-popup-min-height: 10rem;
+  --window-popup-min-width: 381px;
+  --window-popup-max-width: 381px;
+  --window-popup-min-height: 264px;
   --window-popup-max-height: 80vw;
-  --window-popup-background: #1e1e1e;
+
+  --window-popup-border-color-light: #e7e7e7;
+  --window-popup-border-color-dark: #212121;
+
+  //default to light
+  --window-popup-background: var(--card-background);
+  --window-popup-border-color: var(--window-popup-border-color-light);
+
   --window-popup-border-radius: 0.5571rem;
-  --window-popup-padding: 2.0714rem;
-  --window-popup-stroke: #9f9f9f;
+  --window-popup-padding: 20px 22px;
+  --window-popup-stroke: var(--window-popup-border-color);
 
   //navigation
   --navigation-bar-track-color-light: #f3f3f3;
@@ -158,6 +194,15 @@
 
   //option
   --option-filter: var(--option-filter-dark);
+
+  //popup
+  --window-popup-border-color: var(--window-popup-border-color-dark);
+
+  //inputs
+  --input-bg: var(--input-bg-dark);
+  --input-border: var(--input-border-dark);
+  --input-text: var(--input-text-dark);
+  --input-text-placeholder: var(--input-text-placeholder-dark);
 }
 
 .inter {

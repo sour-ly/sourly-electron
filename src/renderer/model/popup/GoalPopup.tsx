@@ -66,7 +66,6 @@ function AddPage({ goal, change, edit }: { goal: GoalProps, change: (key: any, v
 
   return (
     <div className="popup__add">
-      <h1>{edit ? "Edit Goal" : "Add Goal"}</h1>
       <Input placeholder="Name" onChange={(e) => setGoal('name', e.currentTarget.value)} value={goal_copy.name} />
       <Input placeholder="Description" onChange={(e) => setGoal('description', e.currentTarget.value)} value={goal_copy.description} />
       <Dropdown
@@ -113,7 +112,8 @@ export function GoalPopUpWrapper({ skill, goalt, ...props }: { skill?: Skill, go
     const addPage = (<AddPage goal={goal} change={change} edit={goalt !== undefined} />);
     //props.onClick && props.onClick();
     ctx.popUp.open({
-      type: 'confirm',
+      type: 'save',
+      title: goalt ? 'Edit Goal' : 'Add Goal',
       content: () => addPage,
       options: {
         onOkay: () => {

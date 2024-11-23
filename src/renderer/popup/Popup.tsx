@@ -10,11 +10,12 @@ type PopUpProps<T extends _popup_types = 'dialog'> = {
   context: PopUpWindow<T> | null
 }
 
-export type _popup_types = 'dialog' | 'confirm' | 'input';
+export type _popup_types = 'dialog' | 'confirm' | 'input' | 'save';
 
 export type PopUpWindow<T extends _popup_types = 'confirm'> = {
   type: _popup_types;
   content: () => ReactNode;
+  title?: string;
   options?: T extends 'confirm' ? Confirm : T extends 'input' ? Input : T extends 'dialog' ? null : Dialog;
 }
 
@@ -65,6 +66,8 @@ export default function PopUp<T extends _popup_types = 'dialog'>({ open, ...prop
       <div className="popup__window__wrapper">
         <div className="popup__window">
           <div className="popup__window__controls">
+            <h2>{props.context?.title ?? "PopUp"}</h2>
+            <div className="popup__window__controls__close" onClick={() => { props.context?.options?.onCancel(); }} />
           </div>
           <div className="popup__window__content">
             {props.context?.content()}
@@ -72,8 +75,11 @@ export default function PopUp<T extends _popup_types = 'dialog'>({ open, ...prop
               {(props.context?.type === 'confirm' || props.context?.type === 'input') && (
                 <>
                   <AccentButton text={"Okay"} onClick={props.context.options?.onOkay} />
-                  <Button text={"Cancel"} onClick={props.context.options?.onCancel} />
+                  <Button text={"No"} onClick={props.context.options?.onCancel} />
                 </>
+              )}
+              {props.context?.type === 'save' && (
+                <AccentButton text={"Save"} onClick={props.context.options?.onOkay} />
               )}
               {props.context?.type === 'dialog' && (
                 <AccentButton text={"Okay"} onClick={props.context.options?.onOkay} />

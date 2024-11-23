@@ -1,23 +1,24 @@
 .dropdown {
   position: relative;
   --menu--max-width: 240px;
-  background-color: #fff;
-  border: 1px solid black;
-  color: black;
-  --padding-tb: .5rem;
-  --border-color: #8e8e8e;
-  --border-color-active: #bbbbbb;
-  --bg: #f9f9f9;
-  padding: var(--padding-tb) .7rem;
+  --padding-tb: 5.6px;
+  --border-color: var(--input-border);
+  --border-color-active: var(--input-border-active);
+  --bg: var(--input-bg);
+  background: var(--bg) !important;
+  padding: var(--padding-tb) 10px;
   border-radius: .2rem;
-  border: 2px solid var(--border-color);
+  border: .5px solid var(--border-color);
   font-size: .8rem;
+  box-sizing: border-box;
 
   &__container {
     label {
-      font-size: 1.25rem;
       display: block;
-      margin-bottom: .25rem;
+      font-size: 16px;
+      font-weight: 400;
+      margin-bottom: 5px;
+      color: var(--text-color);
     }
   }
 
@@ -30,17 +31,20 @@
   &__menu {
     display: none;
     position: absolute;
+    top: calc(100% + 5px);
     right: 0;
-    border: 1px solid black;
-    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    background-color: var(--bg) !important;
     width: 100%;
     min-height: 4px;
-    max-height: 256px;
+    max-height: 140px;
     overflow-y: auto;
     overflow-x: hidden;
-    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     pointer-events: auto !important;
     z-index: 1000;
+    padding: 10.27px;
+    box-sizing: border-box;
 
     /* scrollbar */
 
@@ -92,13 +96,17 @@
 
     button,
     div {
-      background-color: #fff;
+      padding: 10px;
+      width: 100%;
+      background-color: var(--bg);
       border: none;
       cursor: pointer;
       margin: 0 !important;
       text-align: left;
-      color: #000;
+      color: var(--dropdown-text-nonselected);
       font-size: 1rem;
+      border-radius: 5px;
+      box-sizing: border-box;
     }
 
     &.open {
@@ -113,8 +121,8 @@
     width: 100%;
 
     &:hover {
-      color: #FFF;
-      background-color: navy;
+      color: var(--dropdown-text-selected);
+      background-color: var(--dropdown-item-selected);
     }
   }
 }
