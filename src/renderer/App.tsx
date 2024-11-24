@@ -19,6 +19,8 @@ import useSettings from './util/usesettings';
 import { adjustTheme } from './util/darkmode';
 import { ProtectedRoute } from './protected/ProtectedRoute';
 import { Login } from './views/Login';
+import { Authentication } from '../api/auth';
+import { APIMethods } from '../api/api';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -61,6 +63,9 @@ export const useWindow = () => {
 //@DESC This is the main entry point for the application. This is where the main routing is done and the main context is set up. This is basically the heart of the application
 export default function App({ flags }: { flags: number }) {
 
+  /* placeholder for now but -- loading logic */
+  const [loading, setLoading] = useState(true);
+
   /* for the Context Object */
   const [ctx_open, setCtxOpen] = useState(false);
   const [ctx_content, setCtxContent] = useState<PopUpWindow | null>(null);
@@ -79,6 +84,17 @@ export default function App({ flags }: { flags: number }) {
 
   /* main init function for the application */
   useEffect(() => {
+
+
+    /* grab the user's login data */
+    APIMethods.getLoginState().then((login) => {
+      if (login.null) {
+        //Authentication.logout();
+      } else {
+        Authentication.loginState.setState(login);
+      }
+      setLoading(false);
+    });
 
     /* simply call the adjustTheme function */
     adjustTheme();
@@ -260,21 +276,26 @@ export default function App({ flags }: { flags: number }) {
     }}>
       <div>
         <Router>
-          {msg_context && <MessageScreen {...msg_context} />}
-          <PopUp open={ctx_open} context={ctx_content} />
-          <NotificationBanner notification={{ state: notification, setState: setNotification }} amount={notification_amount} />
-          <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>
-          <Navigator />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          </Routes>
-          <div className="feedback" style={{ borderTop: '1px solid black', paddingTop: '10px', marginTop: '25px' }}>
-            Please leave feedback on <Anchor href="https://forms.gle/TQHj89A2EwuxytaMA" text={"Google Forms"} />
-          </div>
+          {(loading ? <div className="loading">Loading...</div> : (
+            <>
+              {msg_context && <MessageScreen {...msg_context} />}
+              <PopUp open={ctx_open} context={ctx_content} />
+              <NotificationBanner notification={{ state: notification, setState: setNotification }} amount={notification_amount} />
+              <div className="version">{environment.mode === 'development' && 'd.'}v{environment.version}</div>
+              <Navigator />
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              </Routes>
+              <div className="feedback" style={{ borderTop: '1px solid black', paddingTop: '10px', marginTop: '25px' }}>
+                Please leave feedback on <Anchor href="https://forms.gle/TQHj89A2EwuxytaMA" text={"Google Forms"} />
+              </div>
+            </>
+          ))}
         </Router>
+
       </div>
     </WindowContext.Provider>
   );

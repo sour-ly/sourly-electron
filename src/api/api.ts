@@ -4,6 +4,7 @@ import { Profile } from "../model/Profile";
 import { SourlyFlags } from "../renderer";
 import IPC from "../renderer/ReactIPC";
 import { Stateful } from "../renderer/util/state";
+import { LoginState } from "./auth";
 
 export namespace API {
   const BASE_URL = endpoint;
@@ -38,6 +39,26 @@ namespace Offline {
   type GetSkillProps = {
     profileobj: Stateful<Profile | undefined>;
     flags: SourlyFlags
+  }
+
+  export async function getLoginState(): Promise<LoginState> {
+    return new Promise((resolve) => {
+      IPC.once('storage-request', (...arg) => {
+        const [data] = arg;
+        if (!data || Object.keys(data).length === 0) {
+          Log.log('storage:request', 1, 'got a bad packet', data);
+        } else {
+          try {
+            const json = data as any;
+            resolve(json as LoginState);
+          } catch (e) {
+            Log.log('storage:request', 1, 'failed to load login state from storage with error %s', e, data);
+          }
+        }
+        resolve({ null: true, username: '', offline: true });
+      });
+      IPC.sendMessage('storage-request', { key: 'login', value: '' });
+    })
   }
 
   export async function getProfile({ profileobj, flags }: GetSkillProps, callback: () => void = () => { }): Promise<Profile> {
@@ -117,6 +138,10 @@ export namespace APIMethods {
   type GetSkillProps = {
     profileobj: Stateful<Profile | undefined>;
     flags: SourlyFlags
+  }
+
+  export async function getLoginState(): Promise<LoginState> {
+    return await Offline.getLoginState();
   }
 
   export async function getSkillsOffline({ profileobj, flags }: GetSkillProps): Promise<void> {
