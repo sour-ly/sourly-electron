@@ -195,9 +195,11 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
 
   protected constructor() {
     super();
-    this.skills.forEach(skill => {
-      this.addSkillListeners(skill);
-    });
+    if (this.skills.length > 0) {
+      this.skills.forEach(skill => {
+        this.addSkillListeners(skill);
+      });
+    }
     this.on('skillAdded', ({ newSkill }) => {
       this.emitUpdates();
       this.addSkillListeners(newSkill);

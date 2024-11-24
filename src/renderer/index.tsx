@@ -6,16 +6,22 @@ import { createWaitFunction } from './util/promise';
 import { EnvironmentVariables } from '../main/version';
 import { Profile } from '../model/Profile';
 import SettingsObject, { sDefault, Settings } from './settings/settings';
+import { APIMethods } from '../api/api';
 
 export var environment: EnvironmentVariables;
 export var profileobj: Profile;
 export var sourlysettings: Settings;
+
+export function setProfile(p: Profile) {
+  profileobj = p;
+}
 
 export enum SourlyFlags {
   NULL = 0x00,
   NEW_PROFILE = 0x01,
   NO_SKILLS = 0x02,
   SEEN_WELCOME = 0x04,
+  IGNORE = 0x08,
 }
 
 let flags = 0;
@@ -71,7 +77,7 @@ createWaitFunction(
     });
     /* end get settings */
 
-    //load profile
+    /*
     await new Promise((resolve) => {
       IPC.once('storage-request', (...arg) => {
         //handle profile stuff
@@ -95,40 +101,27 @@ createWaitFunction(
     });
 
     //load skills
-    IPC.once('storage-request', (...arg) => {
-      const [data] = arg;
-      let new_profile_flag = false;
-
-      if (!profileobj) {
-        Log.log('storage:request', 1, 'no profile object to load into, for now we will just create a new one but later we will need to handle this better');
-        profileobj = new Profile();
-        new_profile_flag = true;
-        flags |= SourlyFlags.NEW_PROFILE;
-      } else {
-        flags |= profileobj.Flags;
-      }
-
-      if (!data || Object.keys(data).length === 0) {
-        Log.log('storage:request', 1, 'got a bad packet or no skills', data);
-        flags |= SourlyFlags.NO_SKILLS;
-        resolve(undefined);
-      } else if (Array.isArray(data)) {
-        try {
-          for (const skill of data) {
-            profileobj.addSkillFromJSON(skill);
+    await APIMethods.getSkillsOffline({
+      profileobj: {
+        state: profileobj,
+        setState: (n) => {
+          if (n instanceof Profile) {
+            profileobj = n;
+          } else {
+            Log.log('getSkillsOffline', 1, 'got a bad packet', n);
           }
-          Log.log('storage:request', 0, 'loaded skills from storage', data);
-        } catch (e) {
-          Log.log('storage:request', 1, 'failed to load skills from storage', data, e);
+          return n;
         }
-      }
-      if (new_profile_flag) {
-        Log.log('storage:request', 0, 'new profile object created, adjusting to skills');
-        profileobj.adjustProfileToSkills();
-      }
-      resolve(undefined);
+      },
+      flags: flags
     });
-    IPC.sendMessage('storage-request', { key: 'skill', value: '' });
+
+    */
+
+    //create a dummy profile just until the user logs in
+    profileobj = new Profile('Guest', 1, 0, [], environment.version, SourlyFlags.IGNORE);
+    resolve(undefined);
+
   }), async () => {
     const container = document.getElementById('root') as HTMLElement;
     const root = createRoot(container);

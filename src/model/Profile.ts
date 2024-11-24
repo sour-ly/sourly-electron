@@ -28,6 +28,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.currentExperience = currentExperience || 0;
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     this.skills = skills || [];
+    console.log('Profile:constructor', this.serialize());
   }
 
   override addSkillListeners(skill: Skill) {
@@ -44,7 +45,11 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
   }
 
   override emitUpdates() {
-    this.emit('onUpdates', { profile: this, skills: this.skills });
+    if ((this.flags & SourlyFlags.IGNORE)) {
+      console.log('Profile:emitUpdates', this.serialize(), this);
+    } else {
+      this.emit('onUpdates', { profile: this, skills: this.skills });
+    }
   }
 
   public calculateMaxExperience() {
@@ -85,12 +90,12 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
   // this setter will be used to update the profile name, but do not ever call it directly when the API comes out
   set Name(name: string) {
     this.name = name;
-    this.emit('onUpdates', { profile: this, skills: this.skills });
+    this.emitUpdates();
   }
 
   set Version(version: string) {
     this.version = version;
-    this.emit('onUpdates', { profile: this, skills: this.skills });
+    this.emitUpdates();
   }
 
   get Level() {
@@ -111,7 +116,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
   set Flags(flags: SourlyFlags) {
     this.flags = flags;
-    this.emit('onUpdates', { profile: this, skills: this.skills });
+    this.emitUpdates();
   }
 
   public serialize() {

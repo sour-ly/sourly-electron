@@ -26,7 +26,7 @@ export default function Input({ placeholder, onChange, value, ...props }: InputP
   return (
     <div className="input--label" {...props}>
       <label>{placeholder}</label>
-      <input type="text" placeholder={placeholder} onChange={_onChange} value={val} />
+      <input type={props.type || "text"} placeholder={placeholder} onChange={_onChange} value={val} />
     </div>
   )
 }
