@@ -8,6 +8,7 @@ import { useWindow } from '../App';
 import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from '../messagescreen/pages/WelcomePage';
 import { VersionPageContext } from '../messagescreen/pages/VersionPage';
 import { Button } from '../components/Button';
+import { Authentication } from '../../api/auth';
 
 
 type CheckboxProps = {
@@ -91,6 +92,7 @@ function Settings() {
 
           <Button style={{ marginTop: '1rem' }} type="outline" onClick={() => ctx.msgScreen.open(VersionPageContext)} className="settings__notes">See Version Notes</Button>
           <Button style={{ marginTop: '1rem' }} type="outline" onClick={() => setSettings({ ...settings_copy, ...sDefault })} className="settings__save">Reset Settings</Button>
+          <Button style={{ marginTop: '1rem' }} type="solid" onClick={() => Authentication.logout()} className="settings__save">Logout</Button>
         </div>
       </div>
     </main>

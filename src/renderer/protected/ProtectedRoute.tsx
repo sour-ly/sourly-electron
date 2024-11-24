@@ -14,6 +14,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const navigation = useNavigate();
 
   useEffect(() => {
+
+    const l = Authentication.on('logout', () => {
+      navigation('/login');
+    });
+
     const x = async () => {
       const refreshed = await Authentication.refresh();
       if (!refreshed) {
@@ -22,6 +27,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
     x();
 
+    return () => {
+      Authentication.off('logout', l);
+    }
   }, [])
 
 
