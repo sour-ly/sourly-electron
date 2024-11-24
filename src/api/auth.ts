@@ -1,7 +1,3 @@
-import { Profile } from "../model/Profile";
-import { profileobj, setProfile } from "../renderer";
-import { APIMethods } from "./api";
-
 export namespace Authentication {
 
 
@@ -14,19 +10,9 @@ export namespace Authentication {
     return true;
   }
 
-  export function offlineMode(callback: () => void) {
+  export function offlineMode() {
     bOfflineMode = true;
     //call this function to simulate offline mode
-    APIMethods.getSkillsOffline({
-      profileobj: {
-        state: profileobj,
-        setState: (p) => {
-          if (p instanceof Profile)
-            setProfile(p)
-        }
-      },
-      flags: profileobj.Flags,
-    }).finally(callback);
   }
 
   export async function refresh(): Promise<boolean> {

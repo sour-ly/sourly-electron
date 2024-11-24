@@ -6,11 +6,10 @@ import { profileobj } from "..";
 
 function Home() {
 
-  const [skills, setSkills] = useState<Skill[]>(profileobj?.Skills ?? []);
+  const [skills, setSkills] = useState<Skill[]>(profileobj.Skills);
 
   useEffect(() => {
     const i = profileobj.on('onUpdates', (skill) => {
-      console.log('updating skills');
       setSkills(_ => {
         return [...skill.skills];
       })
