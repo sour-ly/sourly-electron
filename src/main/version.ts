@@ -7,4 +7,6 @@ export type EnvironmentVariables = {
 
 type Version = `${number}.${number}.${number}`;
 
-export const version: Version = "0.0.8";
+export const version: Version = "0.1.0";
+
+export const endpoint = 'http://localhost:3000';
