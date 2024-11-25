@@ -214,7 +214,6 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
     });
     this.on('onUpdates', ({ skills }) => {
       //IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
-      Log.log('skillManager:onUpdates', 0, 'saved skills to storage', this.serializeSkills());
     });
   }
 
@@ -257,6 +256,7 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
   /* skill methods */
 
   public addSkill(skill: Skill) {
+    //lets abstract this to the API
     this.skills.push(skill);
     this.emit('skillAdded', { skills: this.skills, newSkill: skill });
   }

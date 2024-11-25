@@ -22,6 +22,7 @@ import { Login } from './views/Login';
 import { Authentication } from '../api/auth';
 import { APIMethods } from '../api/api';
 import { Signup } from './views/Signup';
+import { refresh } from 'electron-debug';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -86,9 +87,8 @@ export default function App({ flags }: { flags: number }) {
   /* main init function for the application */
   useEffect(() => {
 
-
     /* grab the user's login data */
-    APIMethods.getLoginState().then((login) => {
+    APIMethods.getLoginState().then(async (login) => {
       if (login.null) {
         //Authentication.logout();
       } else {

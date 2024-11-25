@@ -1,4 +1,5 @@
 import { APIMethods } from "../api/api";
+import { Authentication } from "../api/auth";
 import { Log } from "../log/log";
 import { SourlyFlags } from "../renderer";
 import IPC from "../renderer/ReactIPC";
@@ -30,6 +31,31 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     this.skills = skills || [];
     console.log('Profile:constructor', this.serialize());
+    this.on('skillAdded', ({ newSkill }) => {
+      if (!newSkill) return;
+      /*
+      APIMethods.saveSkills(newSkill.toJSON(), 'create').then((r) => {
+        if (r) {
+          if (Authentication.getOfflineMode()) {
+            Log.log('Profile:onUpdates::saveSkills', 0, 'saved skills to storage', this.serialize());
+          } else {
+            Log.log('Profile:onUpdates::saveSkills', 0, 'saved skills to online', this.serialize());
+          }
+        } else {
+          //need to refresh or retry
+          Log.log('Profile:onUpdates::saveSkills', 1, 'failed to save skills to storage', this.serialize());
+        }
+      });
+      */
+    });
+    this.on('onUpdates', () => {
+      console.log('Profile:onUpdates', this.serialize());
+      APIMethods.saveProfile(this.serialize());
+
+
+      //IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
+    });
+
   }
 
   override addSkillListeners(skill: Skill) {
@@ -39,11 +65,6 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     });
     skill.on('experienceGained', (arg) => {
       this.addExperience(arg.experience * .6);
-    });
-    this.on('onUpdates', () => {
-      APIMethods.saveProfile(this.serialize());
-      APIMethods.saveSkills(super.serializeSkills());
-      //IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
     });
   }
 

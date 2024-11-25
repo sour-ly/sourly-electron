@@ -1,11 +1,59 @@
 import { Log } from "../log/log";
 import { endpoint } from "../main/version";
 import { Profile } from "../model/Profile";
-import { SkillManager } from "../model/Skill";
+import Skill, { SkillManager } from "../model/Skill";
 import { SourlyFlags } from "../renderer";
 import IPC from "../renderer/ReactIPC";
 import { Stateful } from "../renderer/util/state";
 import { Authentication, LoginState } from "./auth";
+
+
+namespace APITypes {
+
+  export type APIError = {
+    error: string;
+    message: string;
+  }
+
+  export type LoginResponse = {
+    user_id: number;
+    accessToken: string;
+    refreshToken: string;
+  };
+
+  export type RefreshResponse = {
+    accessToken: string;
+    refreshToken: string;
+  }
+
+  export type User = {
+    id: number;
+    username: string;
+    name: string;
+    level: number;
+    currentExp: number;
+    createdAt: string;
+  }
+
+  /*
+   *type Skill struct {
+  ID         int            `json:"id"`
+  Name       string         `json:"name"`
+  Level      int            `json:"level"`
+  CurrentExp int            `json:"currentExp"`
+  CreatedAt  time.Time      `json:"created_at"`
+  Goals      []dbtypes.Goal `json:"goals"`
+ } */
+
+  export type Skill = {
+    id: number;
+    name: string;
+    level: number;
+    currentExp: number;
+    created_at: string;
+    goals: any[];
+  }
+}
 
 export namespace API {
   const BASE_URL = endpoint;
@@ -14,21 +62,40 @@ export namespace API {
     "Content-Type": "application/json"
   }
 
-  export async function get<T>(url: string): Promise<T> {
+  export async function get<T>(url: string, header: HeadersInit): Promise<T | APITypes.APIError> {
     return fetch(BASE_URL + url, {
       method: "GET",
-      headers: headers,
+      headers: { ...headers, ...header },
+      credentials: 'include',
     }).then((res) => res.json()) as Promise<T>;
   }
 
-  export async function post<T>(url: string, body: any): Promise<T> {
+  export async function post<T>(url: string, body: any, header: HeadersInit = {}): Promise<T | APITypes.APIError> {
     return fetch(BASE_URL + url, {
       method: "POST",
       headers: {
         ...headers,
+        ...header
       },
+      credentials: 'include',
       body: JSON.stringify(body),
-    }).then((res) => res.json()) as Promise<T>;
+    }).then((res) => res.json()) as Promise<T | APITypes.APIError>;
+  }
+
+  export async function login(username: string, password: string): Promise<LoginState> {
+    const r = await post<APITypes.LoginResponse>('auth/login', { username, password });
+    if ('error' in r) {
+      return { null: true, userid: -1, offline: false, username: r.error, accessToken: r.message, refreshToken: '' };
+    }
+    return { null: false, userid: r.user_id, offline: false, username, accessToken: r.accessToken, refreshToken: r.refreshToken };
+  }
+
+  export async function refresh(headers: HeadersInit): Promise<APITypes.RefreshResponse> {
+    const r = await get<APITypes.LoginResponse>('auth/refresh', headers);
+    if ('error' in r) {
+      return { accessToken: r.error, refreshToken: '' };
+    }
+    return { accessToken: r.accessToken, refreshToken: r.refreshToken };
   }
 
 }
@@ -38,7 +105,7 @@ export namespace API {
 namespace Offline {
 
   type GetSkillProps = {
-    profileobj: Stateful<SkillManager | undefined>;
+    profileobj: Stateful<Profile | undefined>;
     flags: SourlyFlags
   }
 
@@ -133,15 +200,71 @@ namespace Offline {
 }
 
 
-export namespace APIMethods {
+type GetSkillProps = {
+  profileobj: Stateful<Profile | undefined>;
+  flags: SourlyFlags
+}
+namespace Online {
 
 
-  type GetSkillProps = {
-    profileobj: Stateful<Profile | undefined>;
-    flags: SourlyFlags
+  //protected, need to have a token to access this
+  function token() {
+    return { accessToken: Authentication.loginState.state().accessToken, refreshToken: Authentication.loginState.state().refreshToken };
   }
 
+  function header() {
+    Authentication.authCookies();
+    return {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token().accessToken}`,
+    }
+  }
+
+
+  export async function getProfile(): Promise<APITypes.User> {
+    const r = await API.get<APITypes.User>(`protected/user/profile?user_name=${Authentication.loginState.state().username}`, header());
+    if ('error' in r) {
+      throw new Error(r.message);
+    }
+    return r;
+  }
+
+  export function setProfile({ profileobj, flags }: GetSkillProps, user_obj: APITypes.User) {
+    const npfp = new Profile(user_obj.name, user_obj.level, user_obj.currentExp, [], '0.1.0', SourlyFlags.SEEN_WELCOME);
+    profileobj.setState(npfp);
+  }
+
+  export function refreshToken() {
+    return API.refresh(header());
+  }
+
+  export async function refreshFirst<T>(callback: () => T): Promise<T | undefined> {
+    const r = await Authentication.refresh();
+    if (!r) {
+
+      return undefined;
+    }
+    //handle the refresh token
+    return await callback();
+  }
+
+  export async function addSkills(name: string) {
+    return await API.post(`protected/skill/add`, {
+      name
+    }, header());
+  }
+
+  export async function getSkills() {
+    return await API.get<APITypes.Skill[]>(`protected/skill/`, header());
+  }
+
+}
+
+
+export namespace APIMethods {
+
   export async function getLoginState(): Promise<LoginState> {
+
     return await Offline.getLoginState();
   }
 
@@ -159,26 +282,71 @@ export namespace APIMethods {
     IPC.sendMessage('storage-save', { key: 'profile', value: profile });
   }
 
+  //online stuff
+  //
+
   export async function getSkills({ profileobj, flags }: GetSkillProps): Promise<void> {
     if (Authentication.getOfflineMode()) {
       await getSkillsOffline({ profileobj, flags });
       return;
+    } else {
+      const user = await Online.getProfile();
+      Online.setProfile({ profileobj, flags }, user);
+      if (!profileobj.state) {
+        throw new Error('profile object is still undefined');
+      }
+      const skills = await Online.getSkills();
+      if ('error' in skills) {
+        return;
+      }
+      skills.map(skill => {
+        return {
+          name: skill.name,
+          level: skill.level,
+          currentExperience: skill.currentExp,
+          goals: []
+        }
+      }).forEach((o) => {
+        if (!profileobj.state) {
+          throw new Error('profile object is still undefined');
+        }
+        profileobj.state.addSkillFromJSON(o);
+      });
+      //get skills from the server
     }
   }
 
-  export async function saveSkills(skills: object): Promise<void> {
+  export async function saveSkills(skills: any, onlineFlags: 'create' | 'update' = 'create'): Promise<boolean> {
     if (Authentication.getOfflineMode()) {
       await saveSkillsOffline(skills);
-      return;
+      return true;
+    } else {
+      if (onlineFlags === 'create') {
+        //create the skill
+        await Online.addSkills(skills.name);
+        return true;
+      }
     }
+    return false;
   }
+
 
   export async function saveProfile(profile: object): Promise<void> {
     if (Authentication.getOfflineMode()) {
       await saveProfileOffline(profile);
       return;
+    } else {
+      const user = await Online.getProfile();
+      return;
     }
   }
 
-
+  export async function refresh() {
+    if (Authentication.getOfflineMode()) {
+      return;
+    }
+    return Online.refreshToken();
+  }
 }
+
+

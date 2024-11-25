@@ -5,6 +5,11 @@ export type Stateful<T> = {
   setState: React.Dispatch<React.SetStateAction<T>>;
 };
 
+export type ReactlessState<T> = {
+  state: () => T;
+  setState: React.Dispatch<React.SetStateAction<T>>;
+}
+
 type ExpectedInput<T> = React.Dispatch<React.SetStateAction<T>>;
 
 export function useStateUtil<T extends object>(setState: ExpectedInput<T>): (key: keyof T, value: T[keyof T]) => void {
