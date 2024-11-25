@@ -21,6 +21,7 @@ import { ProtectedRoute } from './protected/ProtectedRoute';
 import { Login } from './views/Login';
 import { Authentication } from '../api/auth';
 import { APIMethods } from '../api/api';
+import { Signup } from './views/Signup';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -285,6 +286,7 @@ export default function App({ flags }: { flags: number }) {
               <Navigator />
               <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
                 <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

@@ -1,3 +1,4 @@
+import { APIMethods } from '../api/api';
 import { Eventful } from '../event/events';
 import { Log } from '../log/log';
 import IPC from '../renderer/ReactIPC';
@@ -212,7 +213,7 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
       this.emitUpdates();
     });
     this.on('onUpdates', ({ skills }) => {
-      IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
+      //IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
       Log.log('skillManager:onUpdates', 0, 'saved skills to storage', this.serializeSkills());
     });
   }
@@ -294,7 +295,7 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
     return this.skills.find(skill => skill.Id === id);
   }
 
-  private serializeSkills() {
+  protected serializeSkills() {
     return this.skills.map(skill => skill.toJSON());
   }
 

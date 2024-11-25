@@ -11,7 +11,6 @@ import { absorb } from '../util/click';
 
 export default function GoalView({ goal, skill_id }: { goal: Goal, skill_id: number }) {
 
-  const ctx = useWindow();
   const goalpop = GoalPopUpWrapper({ goalt: goal, skill: profileobj.getSkillById(skill_id) });
 
   const options = [

@@ -1,3 +1,4 @@
+import { APIMethods } from "../api/api";
 import { Log } from "../log/log";
 import { SourlyFlags } from "../renderer";
 import IPC from "../renderer/ReactIPC";
@@ -40,7 +41,9 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
       this.addExperience(arg.experience * .6);
     });
     this.on('onUpdates', () => {
-      IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
+      APIMethods.saveProfile(this.serialize());
+      APIMethods.saveSkills(super.serializeSkills());
+      //IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
     });
   }
 

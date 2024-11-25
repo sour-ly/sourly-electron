@@ -17,6 +17,7 @@ export function VersionPage() {
         </p>
         <h3> TL;DR </h3>
         <ul>
+          <li>Added API</li>
           <li>Added Dark Mode</li>
           <li>Huge UI overhaul</li>
         </ul>

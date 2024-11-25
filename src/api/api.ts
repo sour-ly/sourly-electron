@@ -1,10 +1,11 @@
 import { Log } from "../log/log";
 import { endpoint } from "../main/version";
 import { Profile } from "../model/Profile";
+import { SkillManager } from "../model/Skill";
 import { SourlyFlags } from "../renderer";
 import IPC from "../renderer/ReactIPC";
 import { Stateful } from "../renderer/util/state";
-import { LoginState } from "./auth";
+import { Authentication, LoginState } from "./auth";
 
 export namespace API {
   const BASE_URL = endpoint;
@@ -37,7 +38,7 @@ export namespace API {
 namespace Offline {
 
   type GetSkillProps = {
-    profileobj: Stateful<Profile | undefined>;
+    profileobj: Stateful<SkillManager | undefined>;
     flags: SourlyFlags
   }
 
@@ -149,5 +150,35 @@ export namespace APIMethods {
     console.log('getSkillsOffline', profile);
     await Offline.getSkills({ profileobj: { state: profile, setState: profileobj.setState }, flags });
   }
+
+  async function saveSkillsOffline(skills: object): Promise<void> {
+    IPC.sendMessage('storage-save', { key: 'skill', value: skills });
+  }
+
+  async function saveProfileOffline(profile: object): Promise<void> {
+    IPC.sendMessage('storage-save', { key: 'profile', value: profile });
+  }
+
+  export async function getSkills({ profileobj, flags }: GetSkillProps): Promise<void> {
+    if (Authentication.getOfflineMode()) {
+      await getSkillsOffline({ profileobj, flags });
+      return;
+    }
+  }
+
+  export async function saveSkills(skills: object): Promise<void> {
+    if (Authentication.getOfflineMode()) {
+      await saveSkillsOffline(skills);
+      return;
+    }
+  }
+
+  export async function saveProfile(profile: object): Promise<void> {
+    if (Authentication.getOfflineMode()) {
+      await saveProfileOffline(profile);
+      return;
+    }
+  }
+
 
 }

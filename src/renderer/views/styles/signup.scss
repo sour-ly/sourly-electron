@@ -1,0 +1,27 @@
+main.signup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  p {
+    margin-top: .5rem;
+  }
+
+  .signup__container {
+    padding: 20px 20px 15px 20px;
+
+    &__inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    &__links {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+  }
+}
