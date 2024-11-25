@@ -286,10 +286,14 @@ export namespace APIMethods {
   //
 
   export async function getSkills({ profileobj, flags }: GetSkillProps): Promise<void> {
+    //see if the user is online
     if (Authentication.getOfflineMode()) {
       await getSkillsOffline({ profileobj, flags });
       return;
     } else {
+      //get the profile
+      //refresh before we do anything
+      await Authentication.refresh(false);
       const user = await Online.getProfile();
       Online.setProfile({ profileobj, flags }, user);
       if (!profileobj.state) {
