@@ -340,7 +340,6 @@ export namespace APIMethods {
       await saveProfileOffline(profile);
       return;
     } else {
-      const user = await Online.getProfile();
       return;
     }
   }

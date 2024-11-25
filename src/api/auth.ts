@@ -162,6 +162,7 @@ export namespace Authentication {
   export function logout() {
     bLoggedIn = false;
     bOfflineMode = false;
+    setProfile(new Profile());
     loginState.setState({ null: true, offline: false, username: '' });
     emit('logout', undefined);
   }

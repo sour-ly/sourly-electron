@@ -185,6 +185,7 @@ export default class Skill extends Eventful<EventMap> {
 }
 
 export type SkillEventMap = {
+  'skillCreated': { newSkill: Skill };
   'skillAdded': { skills: Skill[], newSkill: Skill };
   'skillChanged': Skill;
   'onUpdates': { skills: Skill[] };
@@ -201,6 +202,10 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
         this.addSkillListeners(skill);
       });
     }
+    this.on('skillCreated', ({ newSkill }) => {
+      this.emitUpdates();
+      this.addSkillListeners(newSkill);
+    });
     this.on('skillAdded', ({ newSkill }) => {
       this.emitUpdates();
       this.addSkillListeners(newSkill);
@@ -255,10 +260,14 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
 
   /* skill methods */
 
-  public addSkill(skill: Skill) {
+  public addSkill(skill: Skill, create: boolean = true) {
     //lets abstract this to the API
     this.skills.push(skill);
-    this.emit('skillAdded', { skills: this.skills, newSkill: skill });
+    if (create) {
+      this.emit('skillCreated', { newSkill: skill });
+    } else {
+      this.emit('skillAdded', { skills: this.skills, newSkill: skill });
+    }
   }
 
   public addSkillFromJSON(skill: SkillProps) {
@@ -268,7 +277,7 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
         n_skill.addGoal(new Goal(goal.name, goal.description, goal.progress, goal.reward ?? 0, goal.metric, goal.target, goal.completed));
       }
     }
-    this.addSkill(n_skill);
+    this.addSkill(n_skill, false);
   }
 
   public updateSkill(skill_id: number, new_skill: SkillProps) {
