@@ -230,8 +230,15 @@ namespace Online {
   }
 
   export function setProfile({ profileobj, flags }: GetSkillProps, user_obj: APITypes.User) {
-    const npfp = new Profile(user_obj.name, user_obj.level, user_obj.currentExp, [], '0.1.0', SourlyFlags.SEEN_WELCOME);
-    profileobj.setState(npfp);
+    if (!profileobj.state) {
+      profileobj.setState(new Profile());
+    };
+    if (!profileobj.state) {
+      throw new Error('profile object is still undefined');
+    }
+    profileobj.state.Name = user_obj.name;
+    profileobj.state.Level = user_obj.level;
+    profileobj.state.CurrentExperience = user_obj.currentExp;
   }
 
   export function refreshToken() {

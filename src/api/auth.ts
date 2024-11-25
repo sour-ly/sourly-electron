@@ -44,7 +44,6 @@ export namespace Authentication {
           offlineMode(() => { }, false);
         } else if (state.accessToken) {
           bLoggedIn = true;
-          onlineMode(() => { }, false);
         }
         IPC.sendMessage('storage-save', { key: 'login', value: state });
       })

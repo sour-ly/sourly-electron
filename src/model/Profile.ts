@@ -137,6 +137,14 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.emitUpdates();
   }
 
+  set Level(level: number) {
+    this.level = level;
+  }
+
+  set CurrentExperience(currentExperience: number) {
+    this.currentExperience = currentExperience;
+  }
+
   get Level() {
     return this.level;
   }

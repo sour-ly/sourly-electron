@@ -26,8 +26,8 @@ export function Login() {
 
   useEffect(() => {
     const x = async () => {
-      const refreshed = await Authentication.refresh();
-      if (refreshed) {
+      const r = Authentication.getLoggedIn();
+      if (r) {
         //navigate to the main page
         navigation('/');
       }

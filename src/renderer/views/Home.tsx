@@ -10,7 +10,6 @@ function Home() {
 
   useEffect(() => {
     const i = profileobj.on('onUpdates', (skill) => {
-      console.log('updating skills');
       setSkills(_ => {
         return [...skill.skills];
       })
