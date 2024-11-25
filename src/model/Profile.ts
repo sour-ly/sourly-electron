@@ -66,7 +66,10 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.on('onUpdates', () => {
       console.log('Profile:onUpdates', this.serialize());
       APIMethods.saveProfile(this.serialize());
-
+      if (Authentication.getOfflineMode()) {
+        Log.log('Profile:onUpdates', 0, 'saved profile to storage', this.serialize());
+        APIMethods.saveSkills(this.serializeSkills());
+      }
 
       //IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
     });
