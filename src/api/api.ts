@@ -1,9 +1,10 @@
 import { Log } from "../log/log";
 import { endpoint } from "../main/version";
 import { Profile } from "../model/Profile";
-import Skill, { SkillManager } from "../model/Skill";
+import Skill, { SkillManager, SkillProps } from "../model/Skill";
 import { SourlyFlags } from "../renderer";
 import IPC from "../renderer/ReactIPC";
+import Queue from "../renderer/util/queue";
 import { Stateful } from "../renderer/util/state";
 import { Authentication, LoginState } from "./auth";
 
@@ -31,8 +32,8 @@ namespace APITypes {
     username: string;
     name: string;
     level: number;
-    currentExp: number;
-    createdAt: string;
+    current_exp: number;
+    created_at: string;
   }
 
   /*
@@ -97,6 +98,36 @@ export namespace API {
     }
     return { accessToken: r.accessToken, refreshToken: r.refreshToken };
   }
+
+  type AsyncFunction = <T>() => Promise<APITypes.APIError | T>;
+
+  class APIQueue extends Queue<AsyncFunction> {
+
+    constructor() {
+      super();
+      //a few things need to be done: listen for first queues (when the list is empty), and then call next until the list is empty
+      super.on('queueintoempty', this.next.bind(this));
+
+    }
+
+
+    //strictly internal use by APIQueue
+    private async next() {
+      const nextObj = this.pop();
+      if (nextObj) {
+        await nextObj();
+        await this.next(); //recurse until the queue is empty -- if for some reason any stack overflows happen, we will need to handle this differently
+      } else {
+        return;
+      }
+    }
+
+  }
+
+  const queueObject = new APIQueue();
+  export const queue = queueObject.queue.bind(queueObject);
+  //dequeue should be called by the main process...
+  export const dequeue = queueObject.pop.bind(queueObject);
 
 }
 
@@ -238,7 +269,8 @@ namespace Online {
     }
     profileobj.state.Name = user_obj.name;
     profileobj.state.Level = user_obj.level;
-    profileobj.state.CurrentExperience = user_obj.currentExp;
+    profileobj.state.CurrentExperience = user_obj.current_exp;
+    profileobj.state.Flags = flags ^ SourlyFlags.IGNORE;
   }
 
   export function refreshToken() {
@@ -302,6 +334,7 @@ export namespace APIMethods {
       //refresh before we do anything
       await Authentication.refresh(false);
       const user = await Online.getProfile();
+      console.log(user);
       Online.setProfile({ profileobj, flags }, user);
       if (!profileobj.state) {
         throw new Error('profile object is still undefined');
@@ -310,20 +343,20 @@ export namespace APIMethods {
       if ('error' in skills) {
         return;
       }
-      skills.map(skill => {
+      const skillProps: SkillProps[] = skills.map(skill => {
         return {
+          id: `${skill.id}`,
           name: skill.name,
           level: skill.level,
           currentExperience: skill.currentExp,
           goals: []
         }
-      }).forEach((o) => {
-        if (!profileobj.state) {
-          throw new Error('profile object is still undefined');
-        }
-        profileobj.state.addSkillFromJSON(o);
-      });
-      //get skills from the server
+      })
+      //changed method to set entire array rather than adding.
+      const skillObject = skillProps.map(s => Profile.castSkillFromJSON(s));
+      if (profileobj.state) {
+        profileobj.state.Skills = skillObject;
+      }
     }
   }
 

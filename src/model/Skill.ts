@@ -271,13 +271,18 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
   }
 
   public addSkillFromJSON(skill: SkillProps) {
+    const n_skill = SkillManager.castSkillFromJSON(skill);
+    this.addSkill(n_skill, false);
+  }
+
+  public static castSkillFromJSON(skill: SkillProps) {
     const n_skill = (new Skill(skill.name, skill.level, skill.currentExperience));
     if (skill.goals) {
       for (const goal of skill.goals) {
         n_skill.addGoal(new Goal(goal.name, goal.description, goal.progress, goal.reward ?? 0, goal.metric, goal.target, goal.completed));
       }
     }
-    this.addSkill(n_skill, false);
+    return n_skill;
   }
 
   public updateSkill(skill_id: number, new_skill: SkillProps) {

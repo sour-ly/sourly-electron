@@ -44,6 +44,7 @@ export namespace Authentication {
           offlineMode(() => { }, false);
         } else if (state.accessToken) {
           bLoggedIn = true;
+          onlineMode(() => { }, false);
         }
         IPC.sendMessage('storage-save', { key: 'login', value: state });
       })
@@ -118,7 +119,7 @@ export namespace Authentication {
   export async function onlineMode(callback: () => void, eventful: boolean = true) {
     await refresh(false);
     bOfflineMode = false;
-    APIMethods.getSkills({
+    await APIMethods.getSkills({
       profileobj: {
         state: profileobj,
         setState: (p) => {

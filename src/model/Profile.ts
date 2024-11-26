@@ -48,6 +48,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     });
     this.on('skillAdded', ({ newSkill }) => {
       if (!newSkill) return;
+      this.emitUpdates();
       /*
       APIMethods.saveSkills(newSkill.toJSON(), 'create').then((r) => {
         if (r) {
@@ -88,7 +89,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
   override emitUpdates() {
     if ((this.flags & SourlyFlags.IGNORE)) {
-      console.log('Profile:emitUpdates', this.serialize(), this);
+      console.log('Profile:emitUpdates::IGNORED', this.serialize(), this);
     } else {
       this.emit('onUpdates', { profile: this, skills: this.skills });
     }
@@ -158,6 +159,13 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
   get Skills() {
     return this.skills;
+  }
+
+  set Skills(skills: Skill[]) {
+    this.skills = [];
+    for (const skill of skills) {
+      this.addSkill(skill, false);
+    }
   }
 
   get Flags() {
