@@ -92,42 +92,52 @@ export namespace API {
   }
 
   export async function refresh(headers: HeadersInit): Promise<APITypes.RefreshResponse> {
-    const r = await get<APITypes.LoginResponse>('auth/refresh', headers);
-    if ('error' in r) {
-      return { accessToken: r.error, refreshToken: '' };
+    try {
+      const r = await get<APITypes.LoginResponse>('auth/refresh', headers);
+      if ('error' in r) {
+        return { accessToken: r.error, refreshToken: '' };
+      }
+      return { accessToken: r.accessToken, refreshToken: r.refreshToken };
     }
-    return { accessToken: r.accessToken, refreshToken: r.refreshToken };
+    catch (e) {
+      return { accessToken: '', refreshToken: '' };
+    }
   }
 
-  type AsyncFunction = <T>() => Promise<APITypes.APIError | T>;
+  type AsyncFunction = () => Promise<any | APITypes.APIError>;
 
   class APIQueue extends Queue<AsyncFunction> {
 
     constructor() {
       super();
       //a few things need to be done: listen for first queues (when the list is empty), and then call next until the list is empty
-      super.on('queueintoempty', this.next.bind(this));
-
+      this.on('queueintoempty', () => {
+        this.next();
+      });
     }
 
+    public async queueAndWait(fn: AsyncFunction): ReturnType<AsyncFunction> {
+      const promise = new Promise((resolve) => {
+        this.once('pop', async (data) => {
+          resolve(await data());
+        });
+      })
+      this.queue(fn);
+      return await promise;
+    }
 
     //strictly internal use by APIQueue
     private async next() {
-      const nextObj = this.pop();
-      if (nextObj) {
-        await nextObj();
-        await this.next(); //recurse until the queue is empty -- if for some reason any stack overflows happen, we will need to handle this differently
-      } else {
-        return;
-      }
+      const f = this.pop();
     }
 
   }
 
   const queueObject = new APIQueue();
-  export const queue = queueObject.queue.bind(queueObject);
+  export const queueAndWait = queueObject.queueAndWait.bind(queueObject);
   //dequeue should be called by the main process...
   export const dequeue = queueObject.pop.bind(queueObject);
+
 
 }
 
@@ -333,17 +343,16 @@ export namespace APIMethods {
       //get the profile
       //refresh before we do anything
       await Authentication.refresh(false);
-      const user = await Online.getProfile();
-      console.log(user);
+      const user = await API.queueAndWait(async () => await Online.getProfile());
       Online.setProfile({ profileobj, flags }, user);
       if (!profileobj.state) {
         throw new Error('profile object is still undefined');
       }
-      const skills = await Online.getSkills();
+      const skills = await API.queueAndWait(async () => await Online.getSkills());
       if ('error' in skills) {
         return;
       }
-      const skillProps: SkillProps[] = skills.map(skill => {
+      const skillProps: SkillProps[] = skills.map((skill: APITypes.Skill) => {
         return {
           id: `${skill.id}`,
           name: skill.name,

@@ -95,7 +95,7 @@ export namespace Authentication {
   export const authCookies = () => {
     document.cookie = `access_token=${loginState.state().accessToken}`;
     document.cookie = `refresh_token=${loginState.state().refreshToken}`;
-    document.cookie = `userid=${loginState.state().userid}`;
+    document.cookie = `user_id=${loginState.state().userid}`;
     return ''
   }
 
@@ -103,13 +103,13 @@ export namespace Authentication {
 
   //this is supposed to act as a mock for the actual authentication, this namespace will contain the actual implementation for the authentication but also will handle all
   export async function login(login: string, password: string): Promise<true | string> {
-    const api_resp = await API.login(login, password);
+    const api_resp = await API.queueAndWait(async () => await API.login(login, password));
     if (api_resp.null) {
       return api_resp.accessToken ?? '';
     } else {
       bLoggedIn = true;
       loginState.setState({ null: false, offline: false, userid: api_resp.userid, username: login, accessToken: api_resp.accessToken, refreshToken: api_resp.refreshToken });
-      onlineMode(() => {
+      await onlineMode(() => {
         //do nothing
       });
       return true;
@@ -117,25 +117,32 @@ export namespace Authentication {
   }
 
   export async function onlineMode(callback: () => void, eventful: boolean = true) {
-    await refresh(false);
+    const resp = await API.queueAndWait(async () => {
+      return await refresh(false);
+    })
+    if (!resp) {
+      logout();
+      return;
+    }
     bOfflineMode = false;
-    await APIMethods.getSkills({
-      profileobj: {
-        state: profileobj,
-        setState: (p) => {
-          if (p instanceof Profile)
-            setProfile(p)
-        }
-      },
-      flags: profileobj.Flags,
-    }).finally(() => {
-      if (profileobj.Name === 'User') return;
-      if (eventful)
-        loginState.setState({ ...loginState.state(), offline: false });
-      else
-        authEvents.LoginStateEventless = ({ ...loginState.state(), offline: false });
-      callback();
-    });
+    await API.queueAndWait(async () =>
+      await APIMethods.getSkills({
+        profileobj: {
+          state: profileobj,
+          setState: (p) => {
+            if (p instanceof Profile)
+              setProfile(p)
+          }
+        },
+        flags: profileobj.Flags,
+      }).finally(() => {
+        if (profileobj.Name === 'User') return;
+        if (eventful)
+          loginState.setState({ ...loginState.state(), offline: false });
+        else
+          authEvents.LoginStateEventless = ({ ...loginState.state(), offline: false });
+        callback();
+      }));
   }
 
   export function offlineMode(callback: () => void, eventful: boolean = true) {
@@ -171,10 +178,9 @@ export namespace Authentication {
     if (bOfflineMode) {
       return true;
     }
-
-    const tokens = await APIMethods.refresh();
+    const tokens = await API.queueAndWait(async () => await APIMethods.refresh());
     if (!tokens) return false;
-    if (tokens?.accessToken === "") {
+    if (tokens?.accessToken === "" || tokens?.accessToken === "no-user-id") {
       return false;
     }
     if (eventful)

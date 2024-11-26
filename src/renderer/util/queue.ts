@@ -24,6 +24,11 @@ class Queue<T> extends Eventful<QueueEventMap<T>> {
     Log.log('queue', 0, 'queueing message', message);
     //place the message in the queue
     this.data.push(message);
+    if (this.data.length === 1) {
+      this.emit('queueintoempty', message);
+    } else {
+      this.emit('queue', message);
+    }
   };
 
   pop() {

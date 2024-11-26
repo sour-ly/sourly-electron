@@ -34,6 +34,13 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
     this.listeners.set(event, new_arr);
   }
 
+  once<K extends keyof T>(event: K, listener: Listener<T[K]>) {
+    const idx = this.on(event, (args) => {
+      listener(args);
+      this.off(event, idx);
+    });
+  }
+
   protected emit<K extends keyof T>(event: K, args: T[K]) {
     if (!this.listeners.has(event)) {
       return;
