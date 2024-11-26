@@ -1,6 +1,7 @@
 import './styles/optiondropdown.scss';
 import React, { useEffect } from "react";
 import dots from '../../../assets/ui/dots.svg';
+import { absorb } from '../util/click';
 
 
 //avoid using this for stateful components
@@ -59,7 +60,7 @@ export default function OptionDropdown({ options, ...props }: OptionDropdownProp
   }
 
   return (
-    <div ref={ref} {...props} className={"option-dropdown " + props.className} onClick={e => e.stopPropagation()}>
+    <div ref={ref} {...props} className={"option-dropdown " + props.className} onClick={absorb}>
       <img src={dots} onClick={toggleDropdown} alt="dots" className="progress-bar__dots" />
       {open && (
         <div className={`option-dropdown__menu ${open && 'open' || ''}`}>

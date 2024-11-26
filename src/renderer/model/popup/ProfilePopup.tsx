@@ -12,7 +12,6 @@ type EditUsernameProps = {
 export function EditUsername({ value, change }: EditUsernameProps) {
   return (
     <div>
-      <h1>Change Username</h1>
       <Input style={{ marginTop: '.6rem' }} value={value} onChange={e => change(e.currentTarget.value)} placeholder={`Username`} />
     </div>
   );
@@ -24,7 +23,8 @@ export function EditUsernameWrapper({ profile }: { profile: Profile }) {
 
   function openUsernameEdit() {
     window.popUp.open({
-      type: 'input',
+      type: 'save',
+      title: 'Change Username',
       content: () => <EditUsername value={username} change={setUsername} />,
       options: {
         onOkay: () => {

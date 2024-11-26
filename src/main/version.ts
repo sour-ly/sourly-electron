@@ -7,4 +7,4 @@ export type EnvironmentVariables = {
 
 type Version = `${number}.${number}.${number}`;
 
-export const version: Version = "0.0.7";
+export const version: Version = "0.0.8";

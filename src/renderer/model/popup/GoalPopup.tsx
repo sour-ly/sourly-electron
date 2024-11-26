@@ -6,6 +6,8 @@ import { useStateUtil } from "../../util/state";
 import Input from "../../components/Input";
 import { ButtonProps } from "../../popup/Popup";
 import { Dropdown } from "../../components/Dropdown";
+import { Button } from "../../components/Button";
+import Plus from "../../../../assets/ui/plus.svg";
 
 
 const MetricOptions: Metric[] = [
@@ -64,7 +66,6 @@ function AddPage({ goal, change, edit }: { goal: GoalProps, change: (key: any, v
 
   return (
     <div className="popup__add">
-      <h1>{edit ? "Edit Goal" : "Add Goal"}</h1>
       <Input placeholder="Name" onChange={(e) => setGoal('name', e.currentTarget.value)} value={goal_copy.name} />
       <Input placeholder="Description" onChange={(e) => setGoal('description', e.currentTarget.value)} value={goal_copy.description} />
       <Dropdown
@@ -111,7 +112,8 @@ export function GoalPopUpWrapper({ skill, goalt, ...props }: { skill?: Skill, go
     const addPage = (<AddPage goal={goal} change={change} edit={goalt !== undefined} />);
     //props.onClick && props.onClick();
     ctx.popUp.open({
-      type: 'confirm',
+      type: 'save',
+      title: goalt ? 'Edit Goal' : 'Add Goal',
       content: () => addPage,
       options: {
         onOkay: () => {
@@ -130,9 +132,10 @@ export function GoalPopUpWrapper({ skill, goalt, ...props }: { skill?: Skill, go
     });
   }
 
-  return (
+  return goalt && (
     <button {...props} className={"add_goal " + props.className} onClick={addGoalPopUp}>{goalt && 'Edit' || 'Add'} Goal</button>
-  )
+  ) ||
+    (<Button onClick={addGoalPopUp} type="outline"><img src={Plus} alt="plus" /> <span>{goalt && 'Edit' || 'Add'} Goal</span></Button>)
 
 }
 
@@ -145,9 +148,9 @@ export function GoalDeletePopUp({ goal, skill, ...props }: { goal: Goal, skill?:
     props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
+      title: 'Delete Goal',
       content: () =>
       (<div className="popup__delete">
-        <h1>Delete Goal</h1>
         <p>Are you sure you want to delete this goal?</p>
       </div>),
       options: {

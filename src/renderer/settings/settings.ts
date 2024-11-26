@@ -2,6 +2,7 @@ import { Eventful } from "../../event/events";
 import { Log } from "../../log/log";
 import { RemoveNANFromObject } from "../input/filter";
 import IPC from "../ReactIPC";
+import { adjustTheme } from "../util/darkmode";
 
 type StringfulObject = { [key: string]: any };
 
@@ -54,6 +55,9 @@ class SettingsObject extends Eventful<SettingsObjectEventMap> implements Setting
       if (this[k] === undefined) return;
       if (key === 'Id') return;
       this[k] = props_mutated[key as keyof Settings];
+      if (k === 'theme') {
+        adjustTheme();
+      }
     });
 
     this.save();

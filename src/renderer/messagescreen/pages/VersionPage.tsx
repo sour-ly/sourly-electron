@@ -7,35 +7,22 @@ export function VersionPage() {
       <div className="messagescreen__content__main__body__section">
         <h2>Whats New?:</h2>
         <p>
-          This is the seventh version of the application (alpha), this version is a minor update that adds a few things, and fixes a few things.
+          There was some bug fixes but the main focus of this update was to rehaul the UI of the application. The application now has a dark mode and has a more intuitive UI.
         </p>
         <p>
-          The first thing was to add... well this page. This page serves as a way to show the user what has changed and what has been added to the application. I think this is a good way to keep the user informed about what is going on with the application.
-        </p>
-        <p>
-          This page could contain a lot of information, such as images, videos, gifs, and other things that could be used to show the user content. This is also planned to be used as a way to show the user how to use the application, and how to use the features of the applic
+          Some of the remaining challenges is undoing Goals. This has become more out of the way for the user rather than being a straight up button.
         </p>
         <h3> TL;DR </h3>
         <ul>
-          <li>Added a <code>MessageScreen</code> component to the application</li>
-          <li>Added a new page to show the user what has changed</li>
-          <li>Added a new page to show the user how to use the application</li>
-          <li>Added a new page to show the user how to use the features of the application</li>
-          <li>Added a "flags" feature to the application based on the users <code>storage.json</code></li>
-          <li>Undoing Goals now takes away EXP from the skill and the user</li>
-          <li>Added actual settings to the application - as of now we only have notification settings</li>
-          <li>Added the ability for users to edit their username</li>
-          <li>Added Help Page for the Skills</li>
+          <li>Added Dark Mode</li>
+          <li>Huge UI overhaul</li>
         </ul>
       </div>
       <div className="messagescreen__content__main__body__section">
         <h2>Fixes:</h2>
         <ul>
-          <li>Fixed a notification bug that would show the notification way too many times if the user flip-flopped between the pages</li>
-          <li>Fixed a bug that would not save the users data if they switched between the pages</li>
-          <li>Removed "No description" from blank descriptions</li>
+          <li>Fixed a weird overflow bug that happens on the Settings Page</li>
         </ul>
-
       </div>
       <div className="messagescreen__content__main__body__section">
         <h2>Next:</h2>
@@ -44,13 +31,14 @@ export function VersionPage() {
         </p>
         <ul>
           <li>Marking Skills as "done" and giving the user EXP</li>
-          <li>Adding a better settings page</li>
           <li>Very simple Achievement/Badge system</li>
           <li>Migrating to a new online {"<-->"} offline system</li>
           <li>Adding avatars to the application</li>
-          <li>Adding a way to change the theme of the application</li>
           <li>History</li>
         </ul>
+        <p>Currently, version 0.1.0 is planned to be the last version of the application that will be offline. After that, the application will be migrated to a new online {"<-->"} offline system. </p>
+        <p>There is no ETA for the next version, but it is planned to be released in the next few months.</p>
+        <p>Thank you for using the application!</p>
       </div>
     </>
   );

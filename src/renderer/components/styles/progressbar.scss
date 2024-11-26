@@ -15,6 +15,7 @@
     width: 1.5rem;
     height: auto;
     transform: translateX(33%);
+    filter: var(--option-filter);
   }
 
   &__dot_container {

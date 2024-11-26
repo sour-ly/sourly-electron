@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useRef, useState } from 'react';
 import { environment } from '..';
 import './styles/messagescreen.scss';
 import Exit from '../../../assets/ui/exit.svg';

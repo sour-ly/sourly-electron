@@ -1,12 +1,14 @@
 import { ButtonHTMLAttributes, DetailedHTMLProps, useEffect, useState } from "react";
 //import Goal, { GoalProps } from "../../../model/Goal";
 import Skill, { SkillManager, SkillProps } from "../../../model/Skill";
+import Plus from "../../../../assets/ui/plus.svg";
 import { useWindow } from "../../App";
 import { useStateUtil } from "../../util/state";
 import Input from "../../components/Input";
 import { ButtonProps } from "../../popup/Popup";
 import { profileobj } from "../..";
 import { WelcomePageSlideTwoContext } from "../../messagescreen/pages/WelcomePage";
+import { Button } from "../../components/Button";
 
 export function SkillPopupWrapper({ tskill, edit, ...props }: { tskill: SkillProps, edit?: boolean } & ButtonProps) {
   const [skill, setSkill] = useState<SkillProps>(tskill);
@@ -31,9 +33,9 @@ export function SkillPopupWrapper({ tskill, edit, ...props }: { tskill: SkillPro
   function addSkillPopUp() {
     props.onClick && props.onClick();
     ctx.popUp.open({
-      type: 'confirm',
+      type: 'save',
+      title: edit && 'Edit Skill' || 'Add Skill',
       content: () => (<div>
-        <h1>{edit && 'Edit' || 'Add'} Skill</h1>
         <Input placeholder="Name" onChange={(e) => change('name', e.currentTarget.value)} value={skill.name} />
       </div>),
       options: {
@@ -51,7 +53,11 @@ export function SkillPopupWrapper({ tskill, edit, ...props }: { tskill: SkillPro
   }
 
   return (
-    <button className="add_skill" onClick={addSkillPopUp}>{edit && "Edit" || "Add"} Skill</button>
+    edit &&
+    (<button className="add_skill" onClick={addSkillPopUp}>{edit && "Edit" || "Add"} Skill</button>) ||
+    (
+      <Button onClick={addSkillPopUp} type="outline"><img src={Plus} alt="plus" /> <span>{edit && 'Edit' || 'Add'} Skill</span></Button>
+    )
   )
 }
 
@@ -62,9 +68,9 @@ export function SkillDeletePopUp({ skill, ...props }: { skill: Skill } & ButtonP
     props.onClick && props.onClick();
     ctx.popUp.open({
       type: 'confirm',
+      title: "Are you sure?",
       content: () =>
       (<div>
-        <h1>Delete Skill</h1>
         <p>Are you sure you want to delete this skill?</p>
       </div>),
       options: {

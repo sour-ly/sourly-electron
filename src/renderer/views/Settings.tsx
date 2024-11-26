@@ -7,6 +7,7 @@ import { sDefault } from '../settings/settings';
 import { useWindow } from '../App';
 import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from '../messagescreen/pages/WelcomePage';
 import { VersionPageContext } from '../messagescreen/pages/VersionPage';
+import { Button } from '../components/Button';
 
 
 type CheckboxProps = {
@@ -65,6 +66,14 @@ function Settings() {
           <p style={{ marginTop: '.3rem' }}>Platform: {environment.platform}</p>
         </div>
         <div className="settings__content__section">
+          <p className="label">Theme Settings</p>
+          <Checkbox state={settings_copy.theme === 'dark'} onChange={(state) => {
+            change('theme', !state ? 'light' : 'dark')
+          }}
+            label="Enable Dark Mode"
+          />
+        </div>
+        <div className="settings__content__section">
           <p className="label">Notification Settings</p>
           <Checkbox state={!settings_copy.notification.enabled} onChange={(state) => {
             change('notification', { ...settings_copy.notification, enabled: !state })
@@ -78,10 +87,10 @@ function Settings() {
           />
         </div>
         <div className="settings__content__section">
-          <button style={{ marginTop: '1rem' }} onClick={() => ctx.msgScreen.open(WelcomePageSlideOneContext, WelcomePageSlideTwoContext)} className="settings__welcome">See Welcome Screen</button>
+          <Button style={{ marginTop: '1rem' }} type="outline" onClick={() => ctx.msgScreen.open(WelcomePageSlideOneContext, WelcomePageSlideTwoContext)} className="settings__welcome">See Welcome Screen</Button>
 
-          <button style={{ marginTop: '1rem' }} onClick={() => ctx.msgScreen.open(VersionPageContext)} className="settings__notes">See Version Notes</button>
-          <button style={{ marginTop: '1rem' }} onClick={() => setSettings({ ...settings_copy, ...sDefault })} className="settings__save">Reset Settings</button>
+          <Button style={{ marginTop: '1rem' }} type="outline" onClick={() => ctx.msgScreen.open(VersionPageContext)} className="settings__notes">See Version Notes</Button>
+          <Button style={{ marginTop: '1rem' }} type="outline" onClick={() => setSettings({ ...settings_copy, ...sDefault })} className="settings__save">Reset Settings</Button>
         </div>
       </div>
     </main>

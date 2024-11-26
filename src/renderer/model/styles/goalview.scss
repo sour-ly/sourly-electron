@@ -1,35 +1,67 @@
 .goalview {
-  padding: 0 35px;
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
+  width: 230px;
+  height: 125px;
+  max-height: 125px;
+  padding: 14px;
+  aspect-ratio: 230 / 125;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  background: var(--card-inner-background);
+
+  &:hover {
+    cursor: pointer;
+    border: 1px solid var(--accent);
+  }
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.4;
+  }
+
 
   &.done {
-    text-decoration: line-through;
-    opacity: 0.2;
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
-  &:not(:first-child) {
-    margin-top: 2rem;
+
+
+  &__title {
+    display: flex;
+    justify-content: space-between;
+
+    h2 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
   }
 
-  h2::before {
-    content: '↳ ';
-    font-size: 1.5em;
-  }
 
   p {
-    &:not(.metric) {
-      margin: 0;
+    font-size: 9px;
+    font-weight: 400;
+    line-height: 1.4;
+    height: 100%;
+    max-height: 50px;
+    overflow: hidden;
+    margin: 0 !important;
+    margin-top: 3.5px !important;
+  }
 
-      &::before {
-        content: '';
-      }
-    }
+  &__footer {
 
-    &.metric {
-
-      margin-left: 15px;
+    p {
+      font-weight: 600;
+      text-align: right;
+      user-select: none;
     }
   }
+
+  .progress-bar__dots {
+    width: .95rem;
+  }
+
+  .progress-bar__container {}
+
 }

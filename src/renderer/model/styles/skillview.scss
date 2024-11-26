@@ -2,17 +2,15 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 25px;
-
+  gap: 12px;
 }
 
 .skillview {
 
+  background: var(--card-background);
+  padding: 17px 19px;
 
-  padding-bottom: 20px;
 
-
-  border-bottom: 1.5px solid #ccc;
 
   & {
     &:not(:last-child) {
@@ -20,21 +18,49 @@
     }
   }
 
+  &__title__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+  }
+
+  &__dot_container {}
+
+
 
   &__goals {
-    margin-top: 20px;
+    margin-top: 30px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: .5rem;
+
+    &__container {
+      display: flex;
+      width: 100%;
+      gap: 12px;
+
+      &>div {
+        flex: 0 0 auto;
+      }
+    }
   }
 
   &__title {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 4px;
     position: sticky;
-    background: white;
+    background: var(--card-background);
     z-index: 5;
     top: 0;
-    padding-top: 10px;
-    height: 135px;
+    height: 34px;
+    color: var(--text-color);
 
     &__clickframe {
       position: absolute;
@@ -47,11 +73,7 @@
     }
   }
 
-  p {
-    &::before {
-      content: '- '
-    }
-  }
+
 
   span.expand-message {
     display: block;
@@ -65,16 +87,21 @@
 
   .collapsible {
     max-height: 0px;
-    transition: max-height 0.3s ease;
+    transition: max-height 0.3s ease, padding-bottom 0.3s linear;
     overflow: hidden;
     --collapsible-height: 1000px;
     padding-bottom: 20px;
 
     &.open {
       max-height: var(--collapsible-height);
+      padding-bottom: 0px;
     }
 
 
+  }
+
+  &__footer {
+    margin-top: 16px;
   }
 
 
