@@ -91,6 +91,7 @@ export default function App({ flags }: { flags: number }) {
     APIMethods.getLoginState().then(async (login) => {
       if (login.null) {
         //Authentication.logout();
+        setLoading(false);
       } else {
         Authentication.loginState.setState({
           state: login,
