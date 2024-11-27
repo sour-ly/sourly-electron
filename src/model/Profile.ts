@@ -31,7 +31,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     this.skills = skills || [];
     console.log('Profile:constructor', this.serialize());
-    this.on('skillCreated', ({ newSkill }) => {
+    this.on('skillCreated', ({ newSkill, absorb }) => {
       if (!newSkill) return;
       APIMethods.saveSkills(newSkill.toJSON(), 'create').then((r) => {
         if (r) {
@@ -43,26 +43,13 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
         } else {
           //need to refresh or retry
           Log.log('Profile:onUpdates::saveSkills', 1, 'failed to save skills to storage', this.serialize());
+          absorb();
         }
       });
     });
     this.on('skillAdded', ({ newSkill }) => {
       if (!newSkill) return;
       this.emitUpdates();
-      /*
-      APIMethods.saveSkills(newSkill.toJSON(), 'create').then((r) => {
-        if (r) {
-          if (Authentication.getOfflineMode()) {
-            Log.log('Profile:onUpdates::saveSkills', 0, 'saved skills to storage', this.serialize());
-          } else {
-            Log.log('Profile:onUpdates::saveSkills', 0, 'saved skills to online', this.serialize());
-          }
-        } else {
-          //need to refresh or retry
-          Log.log('Profile:onUpdates::saveSkills', 1, 'failed to save skills to storage', this.serialize());
-        }
-      });
-      */
     });
     this.on('onUpdates', () => {
       console.log('Profile:onUpdates', this.serialize());
@@ -71,7 +58,6 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
         Log.log('Profile:onUpdates', 0, 'saved profile to storage', this.serialize());
         APIMethods.saveSkills(this.serializeSkills());
       }
-
       //IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
     });
 
@@ -92,6 +78,16 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
           Log.log('Profile:addSkillListeners::addGoal', 0, 'added goal to online', goal.toJSON());
         } else {
           Log.log('Profile:addSkillListeners::addGoal', 1, 'failed to add goal to online', goal.toJSON());
+        }
+      })
+    });
+    skill.on('goalRemoved', (goal) => {
+      APIMethods.removeGoal(goal.Id).then((r) => {
+        //TODO: remove goal from skill and have a fallback where it will retry or undo the action
+        if (r) {
+          Log.log('Profile:addSkillListeners::removeGoal', 0, 'removed goal from online', goal.toJSON());
+        } else {
+          Log.log('Profile:addSkillListeners::removeGoal', 1, 'failed to remove goal from online', goal.toJSON());
         }
       })
     });

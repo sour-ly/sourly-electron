@@ -41,10 +41,15 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
     });
   }
 
-  protected emit<K extends keyof T>(event: K, args: T[K]) {
+  protected emit<K extends keyof T>(event: K, args: T[K], callback?: () => void) {
     if (!this.listeners.has(event)) {
       return;
     }
+
     this.listeners.get(event)!.forEach(listener => listener(args));
+    if (callback) {
+      //this is a hack to ensure that the callback is called after all listeners have been called
+      callback();
+    }
   }
 }

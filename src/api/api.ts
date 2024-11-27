@@ -10,11 +10,12 @@ import { Stateful } from "../renderer/util/state";
 import { Authentication, LoginState } from "./auth";
 
 
-namespace APITypes {
+export namespace APITypes {
 
   export type APIError = {
     error: string;
     message: string;
+    code: number;
   }
 
   export type LoginResponse = {
@@ -82,7 +83,14 @@ export namespace API {
       method: "GET",
       headers: { ...headers, ...header },
       credentials: 'include',
-    }).then((res) => res.json()).catch(_ => ({ error: 'fetch-failed', message: 'Fetch Failed' })) as Promise<T | APITypes.APIError>;
+    }).then((res) => {
+      const r = res.json()
+      if ("error" in r) {
+        return { ...r, code: res.status };
+      } else {
+        return r;
+      }
+    }).catch(_ => ({ error: 'fetch-failed', message: 'Fetch Failed', code: 501 })) as Promise<T | APITypes.APIError>;
   }
 
   export async function post<T>(url: string, body: any, header: HeadersInit = {}): Promise<T | APITypes.APIError> {
@@ -94,7 +102,14 @@ export namespace API {
       },
       credentials: 'include',
       body: JSON.stringify(body),
-    }).then((res) => res.json()).catch((_: Error) => { return { error: 'fetch-failed', message: 'Fetch Failed' } }) as Promise<T | APITypes.APIError>;
+    }).then((res) => {
+      const r = res.json()
+      if ("error" in r) {
+        return { ...r, code: res.status };
+      } else {
+        return r;
+      }
+    }).catch(_ => ({ error: 'fetch-failed', message: 'Fetch Failed', code: 501 })) as Promise<T | APITypes.APIError>;
   }
 
   export async function login(username: string, password: string): Promise<LoginState | APITypes.APIError> {
@@ -114,7 +129,7 @@ export namespace API {
       return { accessToken: r.accessToken, refreshToken: r.refreshToken };
     }
     catch (e) {
-      return { error: 'fetch-failed', message: 'Fetch Failed' };
+      return { error: 'fetch-failed', message: 'Fetch Failed', code: 500 };
     }
   }
 
@@ -323,8 +338,9 @@ namespace Online {
     return await callback();
   }
 
+  /* SKILL METHODS */
   export async function addSkills(name: string) {
-    return await API.post(`protected/skill/add`, {
+    return await API.post<APITypes.Skill>(`protected/skill/add`, {
       name
     }, header());
   }
@@ -333,12 +349,17 @@ namespace Online {
     return await API.get<APITypes.Skill[]>(`protected/skill/`, header());
   }
 
+  /* GOAL METHODS */
   export async function addGoal(skill_id: number, goalProps: GoalProps) {
     const newSkill = await API.post<APITypes.Skill>(`protected/skill/goal/add`, {
       skill_id,
       ...goalProps
     }, header());
     return newSkill;
+  }
+
+  export async function deleteGoal(goal_id: number) {
+    return await API.get<APITypes.APIError>(`protected/skill/goal/${goal_id}/delete`, header());
   }
 
 }
@@ -374,6 +395,7 @@ export namespace APIMethods {
       await getSkillsOffline({ profileobj, flags });
       return;
     } else {
+      //TODO: please move this to the online namespace
       //get the profile
       //refresh before we do anything
       const resp = await Authentication.refresh(false, 'getSkills');
@@ -381,7 +403,6 @@ export namespace APIMethods {
         //return handle the error
         return;
       }
-      console.log('refresh good');
       const user = await API.queueAndWait(async () => await Online.getProfile(), 'getSkills::350');
       Online.setProfile({ profileobj, flags }, user);
       if (!profileobj.state) {
@@ -426,7 +447,10 @@ export namespace APIMethods {
     } else {
       if (onlineFlags === 'create') {
         //create the skill
-        await Online.addSkills(skills.name);
+        const r = await Online.addSkills(skills.name);
+        if ('error' in r) {
+          return false;
+        }
         return true;
       }
     }
@@ -454,6 +478,14 @@ export namespace APIMethods {
     if (Authentication.getOfflineMode()) {
     } else {
       return Online.addGoal(skill_id, goalProps);
+    }
+  }
+
+  export async function removeGoal(goal_id: number) {
+    if (Authentication.getOfflineMode()) {
+      return true;
+    } else {
+      return !("error" in Online.deleteGoal(goal_id));
     }
   }
 }

@@ -184,8 +184,12 @@ export default class Skill extends Eventful<EventMap> {
 
 }
 
+export type Absorbable = {
+  absorb: () => void;
+}
+
 export type SkillEventMap = {
-  'skillCreated': { newSkill: Skill };
+  'skillCreated': { newSkill: Skill } & Absorbable;
   'skillAdded': { skills: Skill[], newSkill: Skill };
   'skillChanged': Skill;
   'onUpdates': { skills: Skill[] };
@@ -262,11 +266,16 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
 
   public addSkill(skill: Skill, create: boolean = true) {
     //lets abstract this to the API
-    this.skills.push(skill);
+    let absorbed = false;
+    //fn gets called after the event is emitted
+    const fn = () => {
+      if (absorbed) return;
+      this.skills.push(skill);
+    }
     if (create) {
-      this.emit('skillCreated', { newSkill: skill });
+      this.emit('skillCreated', { newSkill: skill, absorb: () => { absorbed = true } }, fn);
     } else {
-      this.emit('skillAdded', { skills: this.skills, newSkill: skill });
+      this.emit('skillAdded', { skills: this.skills, newSkill: skill }, fn);
     }
   }
 
@@ -280,7 +289,9 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
     n_skill.changeId(Number(skill.id ?? -1));
     if (skill.goals) {
       for (const goal of skill.goals) {
-        n_skill.addGoal(new Goal(goal.name, goal.description, goal.progress, goal.reward ?? 0, goal.metric, goal.target, goal.completed));
+        const n_goal = new Goal(goal.name, goal.description, goal.progress, goal.reward ?? 0, goal.metric, goal.target, goal.completed);
+        n_goal.changeId(Number(goal.id ?? -1));
+        n_skill.addGoal(n_goal);
       }
     }
     return n_skill;
