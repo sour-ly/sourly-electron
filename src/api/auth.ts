@@ -168,6 +168,7 @@ export namespace Authentication {
     if (!resp) {
       //if the refresh token is invalid, logout
       logout();
+      callback();
       return;
     }
     bOfflineMode = false;

@@ -7,6 +7,7 @@ type EventMap = {
 
 
 export type GoalProps = {
+  id?: string;
   name?: string;
   description?: string;
   progress?: number;

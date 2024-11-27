@@ -85,6 +85,17 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     skill.on('experienceGained', (arg) => {
       this.addExperience(arg.experience * .6);
     });
+    /* Really limited to online stuff */
+    skill.on('goalAdded', (goal) => {
+      APIMethods.addGoal(skill.Id, goal.toJSON()).then((r) => {
+        if (r) {
+          Log.log('Profile:addSkillListeners::addGoal', 0, 'added goal to online', goal.toJSON());
+        } else {
+          Log.log('Profile:addSkillListeners::addGoal', 1, 'failed to add goal to online', goal.toJSON());
+        }
+      })
+    });
+
   }
 
   override emitUpdates() {

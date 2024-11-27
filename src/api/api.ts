@@ -1,5 +1,6 @@
 import { Log } from "../log/log";
 import { endpoint } from "../main/version";
+import { GoalProps } from "../model/Goal";
 import { Profile } from "../model/Profile";
 import Skill, { SkillManager, SkillProps } from "../model/Skill";
 import { SourlyFlags } from "../renderer";
@@ -52,7 +53,20 @@ namespace APITypes {
     level: number;
     currentExp: number;
     created_at: string;
-    goals: any[];
+    goals: Goal[];
+  }
+
+  export type Goal = {
+    id: number;
+    skill_id: number;
+    name: string;
+    description: string;
+    progress: number;
+    metric: string;
+    target: number;
+    reward: number;
+    created_at: string;
+    completed: boolean;
   }
 }
 
@@ -319,6 +333,14 @@ namespace Online {
     return await API.get<APITypes.Skill[]>(`protected/skill/`, header());
   }
 
+  export async function addGoal(skill_id: number, goalProps: GoalProps) {
+    const newSkill = await API.post<APITypes.Skill>(`protected/skill/goal/add`, {
+      skill_id,
+      ...goalProps
+    }, header());
+    return newSkill;
+  }
+
 }
 
 
@@ -375,10 +397,20 @@ export namespace APIMethods {
           name: skill.name,
           level: skill.level,
           currentExperience: skill.currentExp,
-          goals: []
+          goals: skill.goals.map((goal: APITypes.Goal) => (
+            {
+              id: `${goal.id}`,
+              name: goal.name,
+              description: goal.description,
+              progress: goal.progress,
+              metric: goal.metric,
+              target: goal.target,
+              reward: goal.reward,
+              completed: goal.completed
+            }
+          )) as GoalProps[]
         }
       })
-      console.log(profileobj);
       //changed method to set entire array rather than adding.
       const skillObject = skillProps.map(s => Profile.castSkillFromJSON(s));
       if (profileobj.state) {
@@ -416,6 +448,13 @@ export namespace APIMethods {
       return;
     }
     return Online.refreshToken();
+  }
+
+  export async function addGoal(skill_id: number, goalProps: GoalProps) {
+    if (Authentication.getOfflineMode()) {
+    } else {
+      return Online.addGoal(skill_id, goalProps);
+    }
   }
 }
 

@@ -277,6 +277,7 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
 
   public static castSkillFromJSON(skill: SkillProps) {
     const n_skill = (new Skill(skill.name, skill.level, skill.currentExperience));
+    n_skill.changeId(Number(skill.id ?? -1));
     if (skill.goals) {
       for (const goal of skill.goals) {
         n_skill.addGoal(new Goal(goal.name, goal.description, goal.progress, goal.reward ?? 0, goal.metric, goal.target, goal.completed));
