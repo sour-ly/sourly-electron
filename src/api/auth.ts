@@ -24,9 +24,16 @@ export namespace Authentication {
   let bLoggedIn = false;
   let bOfflineMode = false;
 
+
+  export type StateChangeProps = {
+    loginState: LoginState,
+  }
+
+  type StateChangeCallback = (state: StateChangeProps) => void;
+
   type EventMap = {
     'logout': undefined;
-    'loginStateChange': LoginState;
+    'loginStateChange': { state: LoginState, callback: StateChangeCallback };
   }
 
   class AuthEventHooks extends Eventful<EventMap> {
@@ -35,16 +42,22 @@ export namespace Authentication {
 
     public constructor() {
       super();
-      this.on('loginStateChange', (state) => {
+      this.on('loginStateChange', (gstate) => {
+        const { state, callback } = gstate;
         Log.log('auth:loginStateChange', 0, 'login state changed to ', state);
         //check if its null; if so ignore it
         if (state.null) {
+          callback({ loginState: state });
           return;
         } else if (state.offline) {
-          offlineMode(() => { }, false);
+          offlineMode(() => {
+            callback({ loginState: state });
+          }, false);
         } else if (state.accessToken) {
           bLoggedIn = true;
-          onlineMode(() => { }, false);
+          onlineMode(() => {
+            callback({ loginState: state });
+          }, false);
         }
         IPC.sendMessage('storage-save', { key: 'login', value: state });
       })
@@ -60,7 +73,12 @@ export namespace Authentication {
 
     public set LoginState(state: LoginState) {
       this.loginState = state;
-      super.emit('loginStateChange', state);
+      super.emit('loginStateChange', { state, callback: () => { } });
+    }
+
+    public LoginStateCallback(state: LoginState, callback: StateChangeCallback) {
+      this.loginState = state;
+      super.emit('loginStateChange', { state, callback });
     }
 
     public set LoginStateEventless(state: LoginState) {
@@ -80,13 +98,23 @@ export namespace Authentication {
   //expose the on and off functions for event listening
   export const on = authEvents.on.bind(authEvents);
   export const off = authEvents.off.bind(authEvents);
-  export const loginState: ReactlessState<LoginState> = {
+  export const loginState: ReactlessState<LoginState, { state: LoginState, callback: StateChangeCallback } | LoginState> = {
     state: () => authEvents.LoginState,
-    setState: (state) => {
-      if (typeof state === 'function') {
-        authEvents.LoginState = state(authEvents.LoginState);
+    setState: async (state) => {
+
+      if ('callback' in state) {
+        authEvents.LoginStateCallback(state.state, state.callback);
       } else {
-        authEvents.LoginState = state;
+        if (typeof state === 'function') {
+          const r = state(authEvents.LoginState);
+          if ("callback" in r) {
+            authEvents.LoginStateCallback(r.state, r.callback);
+          } else {
+            authEvents.LoginState = r;
+          }
+        } else {
+          authEvents.LoginState = state;
+        }
       }
     }
   }
@@ -138,6 +166,7 @@ export namespace Authentication {
   export async function onlineMode(callback: () => void, eventful: boolean = true) {
     const resp = await refresh(false, 'onlineMode::125');
     if (!resp) {
+      //if the refresh token is invalid, logout
       logout();
       return;
     }

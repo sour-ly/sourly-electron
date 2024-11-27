@@ -5,9 +5,9 @@ export type Stateful<T> = {
   setState: React.Dispatch<React.SetStateAction<T>>;
 };
 
-export type ReactlessState<T> = {
+export type ReactlessState<T, U = T> = {
   state: () => T;
-  setState: React.Dispatch<React.SetStateAction<T>>;
+  setState: React.Dispatch<React.SetStateAction<U>>;
 }
 
 type ExpectedInput<T> = React.Dispatch<React.SetStateAction<T>>;

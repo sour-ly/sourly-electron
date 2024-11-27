@@ -92,9 +92,16 @@ export default function App({ flags }: { flags: number }) {
       if (login.null) {
         //Authentication.logout();
       } else {
-        Authentication.loginState.setState(login);
+        Authentication.loginState.setState({
+          state: login,
+          callback: (state) => {
+            if (state.loginState.null) {
+              Authentication.logout();
+            }
+            setLoading(false);
+          }
+        });
       }
-      setLoading(false);
     });
 
     /* simply call the adjustTheme function */
