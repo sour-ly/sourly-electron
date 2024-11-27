@@ -342,7 +342,10 @@ export namespace APIMethods {
     } else {
       //get the profile
       //refresh before we do anything
-      await Authentication.refresh(false);
+      const resp = await Authentication.refresh(false);
+      if (!resp) {
+        throw new Error('failed to refresh token');
+      }
       const user = await API.queueAndWait(async () => await Online.getProfile());
       Online.setProfile({ profileobj, flags }, user);
       if (!profileobj.state) {

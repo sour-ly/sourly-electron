@@ -178,9 +178,12 @@ export namespace Authentication {
     if (bOfflineMode) {
       return true;
     }
+    if (loginState.state().accessToken === undefined || loginState.state().refreshToken === undefined) {
+      return false;
+    }
     const tokens = await API.queueAndWait(async () => await APIMethods.refresh());
     if (!tokens) return false;
-    if (tokens?.accessToken === "" || tokens?.accessToken === "no-user-id") {
+    if (tokens?.accessToken === "" || tokens?.accessToken === "no-user-id" || tokens?.accessToken === "invalid-refresh-token") {
       return false;
     }
     if (eventful)
