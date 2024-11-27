@@ -4,17 +4,35 @@ import { Log } from '../log/log';
 import IPC from '../renderer/ReactIPC';
 import Goal, { GoalProps } from './Goal';
 
-
-export type Metric = 'units' | 'times' | '%' | 'pages' | 'chapters' | 'books' | 'articles' | 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years' | 'lbs' | 'kg' | 'miles' | 'meters' | 'other' | string;
+export type Metric =
+  | 'units'
+  | 'times'
+  | '%'
+  | 'pages'
+  | 'chapters'
+  | 'books'
+  | 'articles'
+  | 'minutes'
+  | 'hours'
+  | 'days'
+  | 'weeks'
+  | 'months'
+  | 'years'
+  | 'lbs'
+  | 'kg'
+  | 'miles'
+  | 'meters'
+  | 'other'
+  | string;
 
 type EventMap = {
-  'levelUp': { skill: Skill, level: number };
-  'experienceGained': { skill: Skill, experience: number };
-  'skillChanged': Skill;
-  'goalAdded': Goal;
-  'goalUpdated': Goal;
-  'goalRemoved': Goal;
-}
+  levelUp: { skill: Skill; level: number };
+  experienceGained: { skill: Skill; experience: number };
+  skillChanged: Skill;
+  goalAdded: Goal;
+  goalUpdated: Goal;
+  goalRemoved: Goal;
+};
 
 export type SkillProps = {
   id?: string;
@@ -22,18 +40,23 @@ export type SkillProps = {
   level?: number;
   currentExperience?: number;
   goals?: GoalProps[];
-}
+};
 
 export default class Skill extends Eventful<EventMap> {
-
   private experienceRequired: number;
+
   private goals: Goal[] = [];
 
-  constructor(private name: string = "Untitled", private level: number = 1, private currentExperience: number = 0, goals: Goal[] = []) {
+  constructor(
+    private name: string = 'Untitled',
+    private level: number = 1,
+    private currentExperience: number = 0,
+    goals: Goal[] = [],
+  ) {
     super();
     this.experienceRequired = this.calculateExperienceRequired(level);
-    goals.forEach(goal => {
-      //why? because event listeners jackass
+    goals.forEach((goal) => {
+      // why? because event listeners jackass
       this.addGoal(goal);
     });
     if (isNaN(this.currentExperience)) {
@@ -42,8 +65,8 @@ export default class Skill extends Eventful<EventMap> {
   }
 
   private calculateExperienceRequired(level: number) {
-    //f = 50x^2 - 150x + 200 --> 50/3x^3 - 150/2z^2 + 200x
-    return Math.floor(50 * Math.pow(level, 2) - 150 * level + 200);
+    // f = 50x^2 - 150x + 200 --> 50/3x^3 - 150/2z^2 + 200x
+    return Math.floor(50 * level ** 2 - 150 * level + 200);
   }
 
   private listenToGoal(goal: Goal) {
@@ -53,15 +76,11 @@ export default class Skill extends Eventful<EventMap> {
     goal.on('goalProgressChanged', (args) => {
       const { amount, goal, revertCompletion } = args;
       if (goal.Completed && !revertCompletion) {
-        return;
-      }
-      else if (revertCompletion) {
+      } else if (revertCompletion) {
         this.addExperience(-goal.Reward);
-      } else
-        this.addExperience(amount * (goal.Reward * .05));
+      } else this.addExperience(amount * (goal.Reward * 0.05));
     });
   }
-
 
   private levelUp() {
     this.level++;
@@ -70,13 +89,13 @@ export default class Skill extends Eventful<EventMap> {
   }
 
   private levelDown() {
-    //go down a level
+    // go down a level
     if (this.level <= 1) {
       return;
     }
-    //go down a alevel
+    // go down a alevel
     this.level--;
-    //reset the max experience
+    // reset the max experience
     this.experienceRequired = this.calculateExperienceRequired(this.level);
   }
 
@@ -88,28 +107,28 @@ export default class Skill extends Eventful<EventMap> {
     this.currentExperience += experience;
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     if (this.currentExperience >= this.experienceRequired) {
-      //check if we need to level up still
+      // check if we need to level up still
       while (this.currentExperience >= this.experienceRequired) {
         this.currentExperience -= this.experienceRequired;
         this.levelUp();
       }
     } else if (this.currentExperience < 0) {
-      //should give us the experience we need to get to the previous level
+      // should give us the experience we need to get to the previous level
       this.levelDown();
       this.currentExperience = this.experienceRequired + this.currentExperience;
-      //check if we need to go down another level
+      // check if we need to go down another level
       while (this.currentExperience < 0) {
         if (this.level <= 1) {
           this.currentExperience = 0;
           break;
         }
         this.levelDown();
-        this.currentExperience = this.experienceRequired + this.currentExperience;
+        this.currentExperience =
+          this.experienceRequired + this.currentExperience;
       }
     }
-    this.emit('experienceGained', { skill: this, experience: experience });
+    this.emit('experienceGained', { skill: this, experience });
   }
-
 
   public get Name() {
     return this.name;
@@ -157,7 +176,7 @@ export default class Skill extends Eventful<EventMap> {
   }
 
   public updateGoal(goal_id: number, goal: Goal) {
-    const index = this.goals.findIndex(goal => goal.Id === goal_id);
+    const index = this.goals.findIndex((goal) => goal.Id === goal_id);
     if (index !== -1) {
       this.goals[index] = goal;
       this.emit('goalUpdated', goal);
@@ -167,9 +186,13 @@ export default class Skill extends Eventful<EventMap> {
 
   /* get total xp */
   public getTotalExperience() {
-    //take the integral of the formula for max experience
-    //f = 50x^2 - 150x + 200 --> 50/3x^3 - 150/2z^2 + 200x
-    return Math.floor((50 / 3) * Math.pow(this.level, 3) - (150 / 2) * Math.pow(this.level, 2) + 200 * this.level);
+    // take the integral of the formula for max experience
+    // f = 50x^2 - 150x + 200 --> 50/3x^3 - 150/2z^2 + 200x
+    return Math.floor(
+      (50 / 3) * this.level ** 3 -
+        (150 / 2) * this.level ** 2 +
+        200 * this.level,
+    );
   }
 
   /* Searialize */
@@ -178,31 +201,32 @@ export default class Skill extends Eventful<EventMap> {
       name: this.name,
       level: this.level,
       currentExperience: this.currentExperience,
-      goals: this.goals.map(goal => goal.toJSON())
-    }
+      goals: this.goals.map((goal) => goal.toJSON()),
+    };
   }
-
 }
 
 export type Absorbable = {
   absorb: () => void;
-}
+};
 
 export type SkillEventMap = {
-  'skillCreated': { newSkill: Skill } & Absorbable;
-  'skillAdded': { skills: Skill[], newSkill: Skill };
-  'skillChanged': Skill;
-  'onUpdates': { skills: Skill[] };
-  'skillRemoved': Skill;
-}
+  skillCreated: { newSkill: Skill } & Absorbable;
+  skillAdded: { skills: Skill[]; newSkill: Skill };
+  skillChanged: Skill;
+  onUpdates: { skills: Skill[] };
+  skillRemoved: Skill;
+};
 
-export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> extends Eventful<T> {
+export abstract class SkillContainer<
+  T extends SkillEventMap = SkillEventMap,
+> extends Eventful<T> {
   protected skills: Skill[] = [];
 
   protected constructor() {
     super();
     if (this.skills.length > 0) {
-      this.skills.forEach(skill => {
+      this.skills.forEach((skill) => {
         this.addSkillListeners(skill);
       });
     }
@@ -221,11 +245,11 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
       this.emitUpdates();
     });
     this.on('onUpdates', ({ skills }) => {
-      //IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
+      // IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
     });
   }
 
-  //this should be overriden
+  // this should be overriden
   protected emitUpdates() {
     this.emit('onUpdates', { skills: this.skills });
   }
@@ -235,7 +259,7 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
       goal.on('goalProgressChanged', () => {
         this.emitUpdates();
       });
-    }
+    };
     skill.on('goalAdded', (goal) => {
       listenToGoals(goal);
       this.emitUpdates();
@@ -265,9 +289,9 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
 
   public async addSkill(skill: Skill, create: boolean = true) {
     const p = new Promise((resolve) => {
-      //lets abstract this to the API
+      // lets abstract this to the API
       let absorbed = false;
-      //fn gets called after the event is emitted
+      // fn gets called after the event is emitted
       const fn = () => {
         if (absorbed) {
           resolve(false);
@@ -276,9 +300,18 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
           this.emitUpdates();
           resolve(true);
         }
-      }
+      };
       if (create) {
-        this.emit('skillCreated', { newSkill: skill, absorb: () => { absorbed = true; } }, fn);
+        this.emit(
+          'skillCreated',
+          {
+            newSkill: skill,
+            absorb: () => {
+              absorbed = true;
+            },
+          },
+          fn,
+        );
       } else {
         this.emit('skillAdded', { skills: this.skills, newSkill: skill }, fn);
       }
@@ -292,11 +325,19 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
   }
 
   public static castSkillFromJSON(skill: SkillProps) {
-    const n_skill = (new Skill(skill.name, skill.level, skill.currentExperience));
+    const n_skill = new Skill(skill.name, skill.level, skill.currentExperience);
     n_skill.changeId(Number(skill.id ?? -1));
     if (skill.goals) {
       for (const goal of skill.goals) {
-        const n_goal = new Goal(goal.name, goal.description, goal.progress, goal.reward ?? 0, goal.metric, goal.target, goal.completed);
+        const n_goal = new Goal(
+          goal.name,
+          goal.description,
+          goal.progress,
+          goal.reward ?? 0,
+          goal.metric,
+          goal.target,
+          goal.completed,
+        );
         n_goal.changeId(Number(goal.id ?? -1));
         n_skill.addGoal(n_goal);
       }
@@ -305,15 +346,14 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
   }
 
   public updateSkill(skill_id: number, new_skill: SkillProps) {
-    const index = this.skills.findIndex(skill => skill.Id === skill_id);
+    const index = this.skills.findIndex((skill) => skill.Id === skill_id);
     if (index !== -1 && new_skill.name) {
       this.skills[index].Name = new_skill.name;
       this.emit('skillChanged', this.skills[index]);
       return true;
-    } else {
-      Log.log('skillManager:updateSkill', 1, 'skill not found', skill_id);
-      return false;
     }
+    Log.log('skillManager:updateSkill', 1, 'skill not found', skill_id);
+    return false;
   }
 
   public removeSkill(skill: Skill) {
@@ -325,13 +365,12 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
   }
 
   public getSkillById(id: number) {
-    return this.skills.find(skill => skill.Id === id);
+    return this.skills.find((skill) => skill.Id === id);
   }
 
   protected serializeSkills() {
-    return this.skills.map(skill => skill.toJSON());
+    return this.skills.map((skill) => skill.toJSON());
   }
-
 }
 
 export class SkillManager extends SkillContainer {
@@ -339,9 +378,7 @@ export class SkillManager extends SkillContainer {
 
   private constructor() {
     super();
-
   }
-
 
   public static getInstance() {
     if (!this.instance) {
@@ -349,5 +386,4 @@ export class SkillManager extends SkillContainer {
     }
     return this.instance;
   }
-
 }

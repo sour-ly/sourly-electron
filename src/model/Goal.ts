@@ -1,10 +1,13 @@
-import { Eventful } from "../event/events";
+import { Eventful } from '../event/events';
 
 type EventMap = {
-  'goalProgressChanged': { goal: Goal, amount: number, revertCompletion?: boolean };
-  'completed': Goal;
-}
-
+  goalProgressChanged: {
+    goal: Goal;
+    amount: number;
+    revertCompletion?: boolean;
+  };
+  completed: Goal;
+};
 
 export type GoalProps = {
   id?: string;
@@ -15,13 +18,20 @@ export type GoalProps = {
   target?: number;
   reward?: number;
   completed?: boolean;
-}
+};
 
 export default class Goal extends Eventful<EventMap> {
-
   private completed: boolean = false;
 
-  constructor(private name: string = "Untitled", private description: string = "No description", private progress: number = 0, private reward: number = 1, private metric: string = "units", private target: number = 1, completed: boolean = false) {
+  constructor(
+    private name: string = 'Untitled',
+    private description: string = 'No description',
+    private progress: number = 0,
+    private reward: number = 1,
+    private metric: string = 'units',
+    private target: number = 1,
+    completed: boolean = false,
+  ) {
     super();
     this.completed = completed;
   }
@@ -33,7 +43,7 @@ export default class Goal extends Eventful<EventMap> {
       this.completed = true;
       this.emit('completed', this);
     } else {
-      this.emit('goalProgressChanged', { goal: this, amount: amount });
+      this.emit('goalProgressChanged', { goal: this, amount });
     }
   }
 
@@ -41,7 +51,11 @@ export default class Goal extends Eventful<EventMap> {
     if (this.progress <= 0) return;
     if (this.completed) {
       this.completed = false;
-      this.emit('goalProgressChanged', { goal: this, amount: -1, revertCompletion: true });
+      this.emit('goalProgressChanged', {
+        goal: this,
+        amount: -1,
+        revertCompletion: true,
+      });
     } else {
       this.emit('goalProgressChanged', { goal: this, amount: -1 });
     }
@@ -89,10 +103,7 @@ export default class Goal extends Eventful<EventMap> {
       metric: this.metric,
       reward: this.reward,
       target: this.target,
-      completed: this.completed
-    }
+      completed: this.completed,
+    };
   }
-
-
-
 }

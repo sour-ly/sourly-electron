@@ -1,15 +1,14 @@
-import { Eventful } from "../../event/events";
-import { Log } from "../../log/log";
+import { Eventful } from '../../event/events';
+import { Log } from '../../log/log';
 
 type QueueEventMap<T> = {
-  'queue': T;
-  'queueintoempty': T;
-  'pop': T;
-  'update': Queue<any>;
-}
+  queue: T;
+  queueintoempty: T;
+  pop: T;
+  update: Queue<any>;
+};
 
 class Queue<T> extends Eventful<QueueEventMap<T>> {
-
   public data: T[] = [];
 
   constructor() {
@@ -22,19 +21,18 @@ class Queue<T> extends Eventful<QueueEventMap<T>> {
 
   queue(message: T) {
     Log.log('queue', 0, 'queueing message', message);
-    //place the message in the queue
+    // place the message in the queue
     this.data.push(message);
     if (this.data.length === 1) {
       this.emit('queueintoempty', message);
     } else {
       this.emit('queue', message);
     }
-  };
+  }
 
   pop() {
     const data = this.data.shift();
-    if (data)
-      this.emit('pop', data);
+    if (data) this.emit('pop', data);
     return data;
   }
 

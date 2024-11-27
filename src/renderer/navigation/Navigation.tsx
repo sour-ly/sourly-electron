@@ -3,23 +3,17 @@ import './styles/navigation.scss';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { Authentication } from '../../api/auth';
 
-function Link(props: { href: string, children: ReactNode }) {
-
+function Link(props: { href: string; children: ReactNode }) {
   const router = useNavigate();
 
   function navigate(path: string) {
     router(path);
   }
 
-  return (
-    <div onClick={() => navigate(props.href)}>
-      {props.children}
-    </div>
-  );
+  return <div onClick={() => navigate(props.href)}>{props.children}</div>;
 }
 
 function Navigator() {
-
   const location = useLocation();
   const [current, setCurrent] = useState<string>('');
   const ref = React.createRef<HTMLDivElement>();
@@ -28,14 +22,20 @@ function Navigator() {
   function handleHover(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (hover.current) {
       hover.current.style.setProperty('--opacity', '1');
-      hover.current.style.setProperty('--spot', `${parseInt((e.target as HTMLElement).getAttribute('datatype-order') || '0')}`);
+      hover.current.style.setProperty(
+        '--spot',
+        `${parseInt((e.target as HTMLElement).getAttribute('datatype-order') || '0')}`,
+      );
     }
   }
 
   function handleExit(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (hover.current) {
       hover.current.style.setProperty('--opacity', '0');
-      hover.current.style.setProperty('--spot', `${parseInt((e.target as HTMLElement).getAttribute('datatype-order') || '0')}`);
+      hover.current.style.setProperty(
+        '--spot',
+        `${parseInt((e.target as HTMLElement).getAttribute('datatype-order') || '0')}`,
+      );
     }
   }
 
@@ -44,7 +44,7 @@ function Navigator() {
   }, [location.pathname]);
 
   useEffect(() => {
-    //code to update the current spot based on location
+    // code to update the current spot based on location
     if (ref.current) {
       let spot = 0;
       switch (current) {
@@ -69,16 +69,15 @@ function Navigator() {
     }
   }, [current]);
 
-
   if (Authentication.getLoggedIn()) {
-
     return (
       <nav className="navigation">
         <div className="navigation__row">
           <div className="netscape-box effect" ref={ref} />
           <div className="netscape-box effect-2" ref={hover} />
-          <Link href={'/'}>
-            <div className={`netscape-box`}
+          <Link href="/">
+            <div
+              className="netscape-box"
               datatype-order={0}
               onMouseEnter={handleHover}
               onMouseLeave={handleExit}
@@ -92,16 +91,20 @@ function Navigator() {
           <div className="netscape-box disabled" datatype-order={2}>
             <span>N/A</span>
           </div>
-          <Link href={'/profile'}>
-            <div className="netscape-box " datatype-order={3}
+          <Link href="/profile">
+            <div
+              className="netscape-box "
+              datatype-order={3}
               onMouseEnter={handleHover}
               onMouseLeave={handleExit}
             >
               <span>Profile</span>
             </div>
           </Link>
-          <Link href={'/settings'}>
-            <div className="netscape-box " datatype-order={4}
+          <Link href="/settings">
+            <div
+              className="netscape-box "
+              datatype-order={4}
               onMouseEnter={handleHover}
               onMouseLeave={handleExit}
             >
@@ -110,36 +113,36 @@ function Navigator() {
           </Link>
         </div>
       </nav>
-    )
-  } else {
-    return (
-      <nav className="navigation">
-        <div className="navigation__row">
-          <div className="netscape-box effect" ref={ref} />
-          <div className="netscape-box effect-2" ref={hover} />
-          <Link href={'/login'}>
-            <div className={`netscape-box`}
-              datatype-order={0}
-              onMouseEnter={handleHover}
-              onMouseLeave={handleExit}
-            >
-              <span>Login</span>
-            </div>
-          </Link>
-          <Link href={'/signup'}>
-            <div className={`netscape-box`}
-              datatype-order={1}
-              onMouseEnter={handleHover}
-              onMouseLeave={handleExit}
-            >
-              <span>Sign-Up</span>
-            </div>
-          </Link>
-        </div>
-      </nav>
-    )
-
+    );
   }
+  return (
+    <nav className="navigation">
+      <div className="navigation__row">
+        <div className="netscape-box effect" ref={ref} />
+        <div className="netscape-box effect-2" ref={hover} />
+        <Link href="/login">
+          <div
+            className="netscape-box"
+            datatype-order={0}
+            onMouseEnter={handleHover}
+            onMouseLeave={handleExit}
+          >
+            <span>Login</span>
+          </div>
+        </Link>
+        <Link href="/signup">
+          <div
+            className="netscape-box"
+            datatype-order={1}
+            onMouseEnter={handleHover}
+            onMouseLeave={handleExit}
+          >
+            <span>Sign-Up</span>
+          </div>
+        </Link>
+      </div>
+    </nav>
+  );
 }
 
 export default Navigator;

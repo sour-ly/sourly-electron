@@ -1,15 +1,14 @@
-import { APIMethods } from "../api/api";
-import { Authentication } from "../api/auth";
-import { Log } from "../log/log";
-import { SourlyFlags } from "../renderer";
-import IPC from "../renderer/ReactIPC";
-import Skill, { SkillContainer, SkillEventMap } from "./Skill";
+import { APIMethods } from '../api/api';
+import { Authentication } from '../api/auth';
+import { Log } from '../log/log';
+import { SourlyFlags } from '../renderer';
+import IPC from '../renderer/ReactIPC';
+import Skill, { SkillContainer, SkillEventMap } from './Skill';
 
 type SkillEventMapOverride = {
-  'onUpdates': { profile: Profile, skills: Skill[] };
-  'profilelevelUp': { profile: Profile, level: number };
-
-} & Omit<SkillEventMap, 'onUpdates'>
+  onUpdates: { profile: Profile; skills: Skill[] };
+  profilelevelUp: { profile: Profile; level: number };
+} & Omit<SkillEventMap, 'onUpdates'>;
 
 export interface ProfileSkeleton {
   name: string;
@@ -20,11 +19,18 @@ export interface ProfileSkeleton {
 }
 
 export class Profile extends SkillContainer<SkillEventMapOverride> {
-
   private level: number = 1;
+
   private currentExperience: number = 0;
 
-  constructor(private name: string = "User", level?: number, currentExperience?: number, skills?: Skill[], private version: string = "0.0.0", private flags: SourlyFlags = SourlyFlags.NULL) {
+  constructor(
+    private name: string = 'User',
+    level?: number,
+    currentExperience?: number,
+    skills?: Skill[],
+    private version: string = '0.0.0',
+    private flags: SourlyFlags = SourlyFlags.NULL,
+  ) {
     super();
     this.level = level || 1;
     this.currentExperience = currentExperience || 0;
@@ -33,16 +39,31 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     console.log('Profile:constructor', this.serialize());
     this.on('skillCreated', async ({ newSkill, absorb }) => {
       if (!newSkill) return;
-      const r = await APIMethods.saveSkills(newSkill.toJSON(), 'create')
+      const r = await APIMethods.saveSkills(newSkill.toJSON(), 'create');
       if (r) {
         if (Authentication.getOfflineMode()) {
-          Log.log('Profile:onUpdates::saveSkills', 0, 'saved skills to storage', this.serialize());
+          Log.log(
+            'Profile:onUpdates::saveSkills',
+            0,
+            'saved skills to storage',
+            this.serialize(),
+          );
         } else {
-          Log.log('Profile:onUpdates::saveSkills', 0, 'saved skills to online', this.serialize());
+          Log.log(
+            'Profile:onUpdates::saveSkills',
+            0,
+            'saved skills to online',
+            this.serialize(),
+          );
         }
       } else {
-        //need to refresh or retry
-        Log.log('Profile:onUpdates::saveSkills', 1, 'failed to save skills to storage', this.serialize());
+        // need to refresh or retry
+        Log.log(
+          'Profile:onUpdates::saveSkills',
+          1,
+          'failed to save skills to storage',
+          this.serialize(),
+        );
         absorb();
       }
     });
@@ -54,47 +75,70 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
       console.log('Profile:onUpdates', this.serialize());
       APIMethods.saveProfile(this.serialize());
       if (Authentication.getOfflineMode()) {
-        Log.log('Profile:onUpdates', 0, 'saved profile to storage', this.serialize());
+        Log.log(
+          'Profile:onUpdates',
+          0,
+          'saved profile to storage',
+          this.serialize(),
+        );
         APIMethods.saveSkills(this.serializeSkills());
       }
-      //IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
+      // IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
     });
-
   }
 
   override addSkillListeners(skill: Skill) {
     super.addSkillListeners(skill);
     skill.on('levelUp', (arg) => {
-      this.addExperience(arg.level * 1.5)
+      this.addExperience(arg.level * 1.5);
     });
     skill.on('experienceGained', (arg) => {
-      this.addExperience(arg.experience * .6);
+      this.addExperience(arg.experience * 0.6);
     });
     /* Really limited to online stuff */
     skill.on('goalAdded', (goal) => {
       APIMethods.addGoal(skill.Id, goal.toJSON()).then((r) => {
         if (r) {
-          Log.log('Profile:addSkillListeners::addGoal', 0, 'added goal to online', goal.toJSON());
+          Log.log(
+            'Profile:addSkillListeners::addGoal',
+            0,
+            'added goal to online',
+            goal.toJSON(),
+          );
         } else {
-          Log.log('Profile:addSkillListeners::addGoal', 1, 'failed to add goal to online', goal.toJSON());
+          Log.log(
+            'Profile:addSkillListeners::addGoal',
+            1,
+            'failed to add goal to online',
+            goal.toJSON(),
+          );
         }
-      })
+      });
     });
     skill.on('goalRemoved', (goal) => {
       APIMethods.removeGoal(goal.Id).then((r) => {
-        //TODO: remove goal from skill and have a fallback where it will retry or undo the action
+        // TODO: remove goal from skill and have a fallback where it will retry or undo the action
         if (r) {
-          Log.log('Profile:addSkillListeners::removeGoal', 0, 'removed goal from online', goal.toJSON());
+          Log.log(
+            'Profile:addSkillListeners::removeGoal',
+            0,
+            'removed goal from online',
+            goal.toJSON(),
+          );
         } else {
-          Log.log('Profile:addSkillListeners::removeGoal', 1, 'failed to remove goal from online', goal.toJSON());
+          Log.log(
+            'Profile:addSkillListeners::removeGoal',
+            1,
+            'failed to remove goal from online',
+            goal.toJSON(),
+          );
         }
-      })
+      });
     });
-
   }
 
   override emitUpdates() {
-    if ((this.flags & SourlyFlags.IGNORE)) {
+    if (this.flags & SourlyFlags.IGNORE) {
       console.log('Profile:emitUpdates::IGNORED', this.serialize(), this);
     } else {
       this.emit('onUpdates', { profile: this, skills: this.skills });
@@ -102,7 +146,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
   }
 
   public calculateMaxExperience() {
-    return 100 * this.level + (Math.pow(this.level - 1, 2) * 5);
+    return 100 * this.level + (this.level - 1) ** 2 * 5;
   }
 
   private addExperience(experience: number) {
@@ -122,11 +166,10 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
   public adjustProfileToSkills() {
     for (const skill of this.skills) {
-      this.addExperience(skill.getTotalExperience() * .6);
+      this.addExperience(skill.getTotalExperience() * 0.6);
       this.addExperience(skill.Level * 1.5);
     }
   }
-
 
   get Name() {
     return this.name;
@@ -190,7 +233,6 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
       currentExperience: this.currentExperience,
       version: this.version,
       flags: this.flags,
-    }
+    };
   }
-
 }

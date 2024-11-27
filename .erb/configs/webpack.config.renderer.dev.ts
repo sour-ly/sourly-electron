@@ -69,7 +69,6 @@ const configuration: webpack.Configuration = {
           {
             loader: 'css-loader',
             options: {
-
               modules: true,
               sourceMap: true,
               silenceDeprecations: true,
@@ -81,24 +80,27 @@ const configuration: webpack.Configuration = {
 
             options: {
               sassOptions: {
-                quietDeps: true  // suppress warnings from dependencies
+                quietDeps: true, // suppress warnings from dependencies
               },
-            }
+            },
           },
         ],
         include: /\.module\.s?(c|a)ss$/,
       },
       {
         test: /\.s?css$/,
-        use: ['style-loader', 'css-loader',
+        use: [
+          'style-loader',
+          'css-loader',
           {
             loader: 'sass-loader',
             options: {
               sassOptions: {
-                quietDeps: true  // suppress warnings from dependencies
+                quietDeps: true, // suppress warnings from dependencies
               },
-            }
-          }],
+            },
+          },
+        ],
         exclude: /\.module\.s?(c|a)ss$/,
       },
       // Fonts
@@ -136,12 +138,12 @@ const configuration: webpack.Configuration = {
     ...(skipDLLs
       ? []
       : [
-        new webpack.DllReferencePlugin({
-          context: webpackPaths.dllPath,
-          manifest: require(manifest),
-          sourceType: 'var',
-        }),
-      ]),
+          new webpack.DllReferencePlugin({
+            context: webpackPaths.dllPath,
+            manifest: require(manifest),
+            sourceType: 'var',
+          }),
+        ]),
 
     new webpack.NoEmitOnErrorsPlugin(),
 

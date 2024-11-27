@@ -24,7 +24,7 @@ export enum SourlyFlags {
   IGNORE = 0x08,
 }
 
-let flags = 0;
+const flags = 0;
 createWaitFunction(
   new Promise(async (resolve) => {
     /* get environment */
@@ -44,7 +44,11 @@ createWaitFunction(
     });
 
     if (!environment) {
-      Log.log('environment:request', 1, 'failed to get environment... assuming production');
+      Log.log(
+        'environment:request',
+        1,
+        'failed to get environment... assuming production',
+      );
       environment = {
         version: '-0.0.0',
         mode: 'production',
@@ -57,22 +61,38 @@ createWaitFunction(
     /* get settings */
     await new Promise((resolve) => {
       IPC.once('storage-request', (...arg) => {
-        //this will be our settings object
+        // this will be our settings object
         const [data] = arg;
         if (!data || Object.keys(data).length === 0) {
-          Log.log('storage:request [settings]', 1, 'got a bad packet (or no entry exists)', data);
+          Log.log(
+            'storage:request [settings]',
+            1,
+            'got a bad packet (or no entry exists)',
+            data,
+          );
           sourlysettings = new SettingsObject();
         } else {
           try {
             sourlysettings = new SettingsObject(data as unknown as Settings);
-            Log.log('storage:request [settings]', 0, 'loaded settings from storage', data);
+            Log.log(
+              'storage:request [settings]',
+              0,
+              'loaded settings from storage',
+              data,
+            );
           } catch (e) {
-            Log.log('storage:request [settings]', 1, 'failed to load settings from storage with error %s', e, data);
-            sourlysettings = new SettingsObject();;
+            Log.log(
+              'storage:request [settings]',
+              1,
+              'failed to load settings from storage with error %s',
+              e,
+              data,
+            );
+            sourlysettings = new SettingsObject();
           }
         }
         resolve(undefined);
-      })
+      });
       IPC.sendMessage('storage-request', { key: 'settings', value: '' });
     });
     /* end get settings */
@@ -118,12 +138,20 @@ createWaitFunction(
 
     */
 
-    //create a dummy profile just until the user logs in
-    profileobj = new Profile('Guest', 1, 0, [], environment.version, SourlyFlags.IGNORE);
+    // create a dummy profile just until the user logs in
+    profileobj = new Profile(
+      'Guest',
+      1,
+      0,
+      [],
+      environment.version,
+      SourlyFlags.IGNORE,
+    );
     resolve(undefined);
-
-  }), async () => {
+  }),
+  async () => {
     const container = document.getElementById('root') as HTMLElement;
     const root = createRoot(container);
-    root.render(<App flags={flags} />)
-  })
+    root.render(<App flags={flags} />);
+  },
+);

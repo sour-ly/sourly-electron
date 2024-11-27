@@ -5,11 +5,11 @@ const truncateNumber = (num: number, digits: number) => {
     return numStr;
   }
   return numStr.slice(0, dotIndex + digits + 1);
-}
+};
 
 const truncateDecimal = (num: number, decimalPlaces: number) => {
-  return Math.round(num * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
-}
+  return Math.round(num * 10 ** decimalPlaces) / 10 ** decimalPlaces;
+};
 
 export { truncateDecimal };
 export default truncateNumber;

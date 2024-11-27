@@ -46,10 +46,9 @@ const configuration: webpack.Configuration = {
 
     new webpack.DefinePlugin({
       'process.type': '"browser"',
-      //disable sass deprecated warning
+      // disable sass deprecated warning
       'process.noDeprecation': 'true',
       'process.env.SASS_SILENCE_DEPRECATIONS': JSON.stringify('true'),
-
     }),
   ],
 

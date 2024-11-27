@@ -1,55 +1,61 @@
-import { Eventful } from "../event/events";
-import { Log } from "../log/log";
-import { Profile } from "../model/Profile";
-import { profileobj, setProfile } from "../renderer";
-import IPC from "../renderer/ReactIPC";
-import { ReactlessState, Stateful } from "../renderer/util/state";
-import { API, APIMethods } from "./api";
+import { Eventful } from '../event/events';
+import { Log } from '../log/log';
+import { Profile } from '../model/Profile';
+import { profileobj, setProfile } from '../renderer';
+import IPC from '../renderer/ReactIPC';
+import { ReactlessState, Stateful } from '../renderer/util/state';
+import { API, APIMethods } from './api';
 
-
-export type LoginState = { null: boolean, offline: boolean } & OfflineLoginState & OnlineLoginState;
+export type LoginState = {
+  null: boolean;
+  offline: boolean;
+} & OfflineLoginState &
+  OnlineLoginState;
 
 type OfflineLoginState = {
   username: string;
-}
+};
 
 type OnlineLoginState = {
   userid?: number;
   username: string;
   accessToken?: string;
   refreshToken?: string;
-}
+};
 
 export namespace Authentication {
   let bLoggedIn = false;
   let bOfflineMode = false;
 
-
   export type StateChangeProps = {
-    loginState: LoginState,
-  }
+    loginState: LoginState;
+  };
 
   type StateChangeCallback = (state: StateChangeProps) => void;
 
   type EventMap = {
-    'logout': undefined;
-    'loginStateChange': { state: LoginState, callback: StateChangeCallback };
-  }
+    logout: undefined;
+    loginStateChange: { state: LoginState; callback: StateChangeCallback };
+  };
 
   class AuthEventHooks extends Eventful<EventMap> {
-
-    private loginState: LoginState = { null: true, offline: false, username: '' };
+    private loginState: LoginState = {
+      null: true,
+      offline: false,
+      username: '',
+    };
 
     public constructor() {
       super();
       this.on('loginStateChange', (gstate) => {
         const { state, callback } = gstate;
         Log.log('auth:loginStateChange', 0, 'login state changed to ', state);
-        //check if its null; if so ignore it
+        // check if its null; if so ignore it
         if (state.null) {
           callback({ loginState: state });
           return;
-        } else if (state.offline) {
+        }
+        if (state.offline) {
           offlineMode(() => {
             callback({ loginState: state });
           }, false);
@@ -60,23 +66,29 @@ export namespace Authentication {
           }, false);
         }
         IPC.sendMessage('storage-save', { key: 'login', value: state });
-      })
+      });
       this.on('logout', () => {
-        IPC.sendMessage('storage-save', { key: 'login', value: { null: true, offline: false, username: '' } });
+        IPC.sendMessage('storage-save', {
+          key: 'login',
+          value: { null: true, offline: false, username: '' },
+        });
       });
     }
 
     public emit<K extends keyof EventMap>(event: K, args: EventMap[K]) {
-      //@ts-ignore
+      // @ts-ignore
       super.emit(event, args);
     }
 
     public set LoginState(state: LoginState) {
       this.loginState = state;
-      super.emit('loginStateChange', { state, callback: () => { } });
+      super.emit('loginStateChange', { state, callback: () => {} });
     }
 
-    public LoginStateCallback(state: LoginState, callback: StateChangeCallback) {
+    public LoginStateCallback(
+      state: LoginState,
+      callback: StateChangeCallback,
+    ) {
       this.loginState = state;
       super.emit('loginStateChange', { state, callback });
     }
@@ -91,124 +103,156 @@ export namespace Authentication {
     }
   }
 
-
   const authEvents = new AuthEventHooks();
 
   const emit = authEvents.emit.bind(authEvents);
-  //expose the on and off functions for event listening
+  // expose the on and off functions for event listening
   export const on = authEvents.on.bind(authEvents);
   export const off = authEvents.off.bind(authEvents);
-  export const loginState: ReactlessState<LoginState, { state: LoginState, callback: StateChangeCallback } | LoginState> = {
+  export const loginState: ReactlessState<
+    LoginState,
+    { state: LoginState; callback: StateChangeCallback } | LoginState
+  > = {
     state: () => authEvents.LoginState,
     setState: async (state) => {
-
       if ('callback' in state) {
         authEvents.LoginStateCallback(state.state, state.callback);
-      } else {
-        if (typeof state === 'function') {
-          const r = state(authEvents.LoginState);
-          if ("callback" in r) {
-            authEvents.LoginStateCallback(r.state, r.callback);
-          } else {
-            authEvents.LoginState = r;
-          }
+      } else if (typeof state === 'function') {
+        const r = state(authEvents.LoginState);
+        if ('callback' in r) {
+          authEvents.LoginStateCallback(r.state, r.callback);
         } else {
-          authEvents.LoginState = state;
+          authEvents.LoginState = r;
         }
+      } else {
+        authEvents.LoginState = state;
       }
-    }
-  }
-
+    },
+  };
 
   function setCookie(key: string, value: string, expires: number) {
     const date = new Date();
     date.setTime(date.getTime() + expires);
     document.cookie = `${key}=${value};expires=${date.toUTCString()};path=/`;
-
   }
 
-  //expose the auth cookies
+  // expose the auth cookies
   export const authCookies = () => {
-    console.log(loginState.state())
-    document.cookie = "";
+    console.log(loginState.state());
+    document.cookie = '';
     if (loginState.state().accessToken) {
       setCookie('access_token', loginState.state()?.accessToken ?? '', 3600);
     }
     if (loginState.state().refreshToken) {
-      console.log('setting refresh token:', loginState.state()?.refreshToken ?? '');
+      console.log(
+        'setting refresh token:',
+        loginState.state()?.refreshToken ?? '',
+      );
       setCookie('refresh_token', loginState.state()?.refreshToken ?? '', 3600);
     }
     if (loginState.state().userid) {
       setCookie('user_id', (loginState.state()?.userid ?? -1).toString(), 3600);
     }
 
-    return ''
-  }
+    return '';
+  };
 
-  //expose the login state
+  // expose the login state
 
-  //this is supposed to act as a mock for the actual authentication, this namespace will contain the actual implementation for the authentication but also will handle all
-  export async function login(login: string, password: string): Promise<true | string> {
-    const api_resp = await API.queueAndWait(async () => await API.login(login, password), 'auth::login');
+  // this is supposed to act as a mock for the actual authentication, this namespace will contain the actual implementation for the authentication but also will handle all
+  export async function login(
+    login: string,
+    password: string,
+  ): Promise<true | string> {
+    const api_resp = await API.queueAndWait(
+      async () => await API.login(login, password),
+      'auth::login',
+    );
     if ('error' in api_resp) {
       return api_resp.error;
-    } else if (api_resp.accessToken === "" || api_resp.accessToken === "no-user-id" || api_resp.accessToken === "invalid-refresh-token") {
+    }
+    if (
+      api_resp.accessToken === '' ||
+      api_resp.accessToken === 'no-user-id' ||
+      api_resp.accessToken === 'invalid-refresh-token'
+    ) {
       return '';
     }
-    else {
-      bLoggedIn = true;
-      loginState.setState({ null: false, offline: false, userid: api_resp.userid, username: login, accessToken: api_resp.accessToken, refreshToken: api_resp.refreshToken });
 
-      return true;
-    }
+    bLoggedIn = true;
+    loginState.setState({
+      null: false,
+      offline: false,
+      userid: api_resp.userid,
+      username: login,
+      accessToken: api_resp.accessToken,
+      refreshToken: api_resp.refreshToken,
+    });
+
+    return true;
   }
 
-  export async function onlineMode(callback: () => void, eventful: boolean = true) {
+  export async function onlineMode(
+    callback: () => void,
+    eventful: boolean = true,
+  ) {
     const resp = await refresh(false, 'onlineMode::125');
     if (!resp) {
-      //if the refresh token is invalid, logout
+      // if the refresh token is invalid, logout
       logout();
       callback();
       return;
     }
     bOfflineMode = false;
-    await API.queueAndWait(async () =>
-      await APIMethods.getSkills({
-        profileobj: {
-          state: profileobj,
-          setState: (p) => {
-            if (p instanceof Profile)
-              setProfile(p)
-          }
-        },
-        flags: profileobj.Flags,
-      }).finally(() => {
-        if (profileobj.Name === 'User') return;
-        if (eventful)
-          loginState.setState({ ...loginState.state(), offline: false });
-        else
-          authEvents.LoginStateEventless = ({ ...loginState.state(), offline: false });
-        callback();
-      }), 'getskills::128');
+    await API.queueAndWait(
+      async () =>
+        await APIMethods.getSkills({
+          profileobj: {
+            state: profileobj,
+            setState: (p) => {
+              if (p instanceof Profile) setProfile(p);
+            },
+          },
+          flags: profileobj.Flags,
+        }).finally(() => {
+          if (profileobj.Name === 'User') return;
+          if (eventful)
+            loginState.setState({ ...loginState.state(), offline: false });
+          else
+            authEvents.LoginStateEventless = {
+              ...loginState.state(),
+              offline: false,
+            };
+          callback();
+        }),
+      'getskills::128',
+    );
   }
 
   export function offlineMode(callback: () => void, eventful: boolean = true) {
     bOfflineMode = true;
-    //call this function to simulate offline mode
+    // call this function to simulate offline mode
     APIMethods.getSkillsOffline({
       profileobj: {
         state: profileobj,
         setState: (p) => {
-          if (p instanceof Profile)
-            setProfile(p)
-        }
+          if (p instanceof Profile) setProfile(p);
+        },
       },
       flags: profileobj.Flags,
     }).finally(() => {
       if (eventful)
-        loginState.setState({ null: false, offline: true, username: profileobj.Name });
+        loginState.setState({
+          null: false,
+          offline: true,
+          username: profileobj.Name,
+        });
       else
-        authEvents.LoginStateEventless = ({ null: false, offline: true, username: profileobj.Name });
+        authEvents.LoginStateEventless = {
+          null: false,
+          offline: true,
+          username: profileobj.Name,
+        };
       callback();
     });
   }
@@ -221,22 +265,40 @@ export namespace Authentication {
     emit('logout', undefined);
   }
 
-  export async function refresh(eventful: boolean = true, src?: string): Promise<boolean> {
+  export async function refresh(
+    eventful: boolean = true,
+    src?: string,
+  ): Promise<boolean> {
     if (bOfflineMode) {
       return true;
     }
-    if (loginState.state().accessToken === undefined || loginState.state().refreshToken === undefined || !bLoggedIn) {
+    if (
+      loginState.state().accessToken === undefined ||
+      loginState.state().refreshToken === undefined ||
+      !bLoggedIn
+    ) {
       return false;
     }
-    const tokens = await API.queueAndWait(async () => await APIMethods.refresh(), 'auth::refresh::184');
+    const tokens = await API.queueAndWait(
+      async () => await APIMethods.refresh(),
+      'auth::refresh::184',
+    );
     if (!tokens) return false;
     if ('error' in tokens) {
       return false;
     }
     if (eventful)
-      loginState.setState({ ...loginState.state(), accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
+      loginState.setState({
+        ...loginState.state(),
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      });
     else
-      authEvents.LoginStateEventless = { ...loginState.state(), accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+      authEvents.LoginStateEventless = {
+        ...loginState.state(),
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      };
 
     return bLoggedIn;
   }
@@ -248,5 +310,4 @@ export namespace Authentication {
   export function getOfflineMode() {
     return bOfflineMode;
   }
-
 }

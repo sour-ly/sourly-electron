@@ -1,19 +1,16 @@
-import Identifiable from "../id/id";
-
+import Identifiable from '../id/id';
 
 type EventMap<U> = {
-  'onUpdates': U;
-}
+  onUpdates: U;
+};
 
 export type Event<T extends any, U extends any> = {
   [key in keyof T]: U;
 } & EventMap<U>;
 
-
-type Listener<T> = (args: T) => (Promise<void> | void);
+type Listener<T> = (args: T) => Promise<void> | void;
 
 export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
-
   protected listeners: Map<keyof T, Listener<T[keyof T]>[]> = new Map();
 
   protected constructor() {
@@ -46,7 +43,11 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
     });
   }
 
-  protected async emit<K extends keyof T>(event: K, args: T[K], callback?: () => void) {
+  protected async emit<K extends keyof T>(
+    event: K,
+    args: T[K],
+    callback?: () => void,
+  ) {
     if (!this.listeners.has(event)) {
       return;
     }
@@ -55,7 +56,7 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
       await listener(args);
     }
     if (callback) {
-      //this is a hack to ensure that the callback is called after all listeners have been called
+      // this is a hack to ensure that the callback is called after all listeners have been called
       callback();
     }
   }

@@ -1,10 +1,12 @@
-import { sourlysettings } from "..";
+import { sourlysettings } from '..';
 
 function getWindow() {
   if (typeof window !== 'undefined') {
     return window;
   }
-  throw new Error('Window is not defined, this function should only be called on the client side');
+  throw new Error(
+    'Window is not defined, this function should only be called on the client side',
+  );
 }
 
 function getDarkModeFromSystem() {
@@ -12,7 +14,7 @@ function getDarkModeFromSystem() {
 }
 
 export function isDarkMode() {
-  const settings = sourlysettings
+  const settings = sourlysettings;
   return settings.theme === 'dark' || getDarkModeFromSystem();
 }
 

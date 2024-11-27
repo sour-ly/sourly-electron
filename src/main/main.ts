@@ -21,7 +21,6 @@ import { version } from './version';
 
 class AppUpdater {
   constructor() {
-
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
     autoUpdater.checkForUpdatesAndNotify();
@@ -38,16 +37,15 @@ ipcMain.on('ipc-example', async (event, arg) => {
   event.reply('ipc-example', 'pong');
 });
 
-
 /* STORAGE IPC CALLS */
 ipcMain.on('storage-request', async (event, arg) => {
-  const [data] = arg
+  const [data] = arg;
   Log.log('ipcMain:lambda:request', 0, 'Received storage request', data);
   event.reply('storage-request', storage.getItem(data.key) ?? {});
 });
 
 ipcMain.on('storage-save', async (event, arg) => {
-  const [data] = arg
+  const [data] = arg;
   Log.log('ipcMain:lambda:save', 0, 'Received storage save', data);
   if (data.key === undefined || data.value === undefined) {
     Log.log('ipcMain:lambda:save', 1, 'Invalid storage save request', data);
@@ -62,15 +60,19 @@ ipcMain.on('storage-save', async (event, arg) => {
 /* ENVIRONMENT IPC CALLS */
 
 ipcMain.on('environment-request', async (event, arg) => {
-  Log.log('ipcMain:lambda:environment-request', 0, 'Received environment request', arg);
+  Log.log(
+    'ipcMain:lambda:environment-request',
+    0,
+    'Received environment request',
+    arg,
+  );
   event.reply('environment-response', {
-    version: version,
+    version,
     mode: process.env.NODE_ENV,
     debug: process.env.DEBUG_PROD === 'true',
     platform: process.platform,
   });
 });
-
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -133,7 +135,6 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
-
   });
 
   mainWindow.on('closed', () => {

@@ -1,5 +1,6 @@
 export default abstract class Identifiable {
   private static idCounter: number = 0;
+
   private id: number;
 
   constructor() {

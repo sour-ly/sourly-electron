@@ -3,10 +3,13 @@ type NumericalInputFilterProps = {
   max?: number;
   allowNaN?: boolean;
   defaultValue?: number;
-}
+};
 
-export function NumberInputFilter(e: string, options?: NumericalInputFilterProps) {
-  let value = parseInt(e);
+export function NumberInputFilter(
+  e: string,
+  options?: NumericalInputFilterProps,
+) {
+  const value = parseInt(e);
   if (isNaN(value) && !options?.allowNaN) {
     return options?.defaultValue || 0;
   }
@@ -21,7 +24,7 @@ export function NumberInputFilter(e: string, options?: NumericalInputFilterProps
 
 type DisplayNumberProps = {
   defaultValue?: string;
-}
+};
 
 export function DisplayNumber(value: number, options?: DisplayNumberProps) {
   if (isNaN(value) || value === null) {
@@ -30,11 +33,10 @@ export function DisplayNumber(value: number, options?: DisplayNumberProps) {
   return value;
 }
 
-
-//object should be a object with keys
+// object should be a object with keys
 export function RemoveNANFromObject(obj: any, defaultValue: number = 0) {
   const copy = { ...obj };
-  Object.keys(obj).forEach(key => {
+  Object.keys(obj).forEach((key) => {
     if (typeof copy[key] === 'number' && isNaN(copy[key])) {
       copy[key] = defaultValue;
     } else if (typeof copy[key] === 'object') {
