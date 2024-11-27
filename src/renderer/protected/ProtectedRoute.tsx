@@ -16,13 +16,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   useEffect(() => {
 
     const l = Authentication.on('logout', () => {
-      //navigation('/login');
+      navigation('/login');
     });
 
     const x = async () => {
-      const refreshed = await Authentication.refresh();
+      const refreshed = await Authentication.refresh(false, 'protectedRoute::refresh');
       if (!refreshed) {
-        //navigation('/login');
+        navigation('/login');
+        Authentication.logout();
       }
     }
     x();

@@ -9,6 +9,7 @@ import { WelcomePageSlideOneContext, WelcomePageSlideTwoContext } from '../messa
 import { VersionPageContext } from '../messagescreen/pages/VersionPage';
 import { Button } from '../components/Button';
 import { Authentication } from '../../api/auth';
+import { useNavigate } from 'react-router-dom';
 
 
 type CheckboxProps = {
@@ -51,10 +52,17 @@ function Settings() {
   const settings = sourlysettings;
   const [settings_copy, setSettings] = useState(settings);
   const change = useStateUtil(setSettings);
+  /* navigation */
+  const navigation = useNavigate();
 
   useEffect(() => {
     settings.setAll(settings_copy);
   }, [settings_copy])
+
+  function logout() {
+    Authentication.logout();
+    //navigation('/login');
+  }
 
   return (
     <main className="settings">
@@ -92,7 +100,7 @@ function Settings() {
 
           <Button style={{ marginTop: '1rem' }} type="outline" onClick={() => ctx.msgScreen.open(VersionPageContext)} className="settings__notes">See Version Notes</Button>
           <Button style={{ marginTop: '1rem' }} type="outline" onClick={() => setSettings({ ...settings_copy, ...sDefault })} className="settings__save">Reset Settings</Button>
-          <Button style={{ marginTop: '1rem' }} type="solid" onClick={() => Authentication.logout()} className="settings__save">Logout</Button>
+          <Button style={{ marginTop: '1rem' }} type="solid" onClick={logout} className="settings__save">Logout</Button>
         </div>
       </div>
     </main>

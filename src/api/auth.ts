@@ -65,6 +65,7 @@ export namespace Authentication {
 
     public set LoginStateEventless(state: LoginState) {
       this.loginState = state;
+      console.log(state);
     }
 
     public get LoginState() {
@@ -103,7 +104,7 @@ export namespace Authentication {
 
   //this is supposed to act as a mock for the actual authentication, this namespace will contain the actual implementation for the authentication but also will handle all
   export async function login(login: string, password: string): Promise<true | string> {
-    const api_resp = await API.queueAndWait(async () => await API.login(login, password));
+    const api_resp = await API.queueAndWait(async () => await API.login(login, password), 'auth::login');
     if ('error' in api_resp) {
       return api_resp.error;
     } else if (api_resp.accessToken === "" || api_resp.accessToken === "no-user-id" || api_resp.accessToken === "invalid-refresh-token") {
@@ -112,17 +113,13 @@ export namespace Authentication {
     else {
       bLoggedIn = true;
       loginState.setState({ null: false, offline: false, userid: api_resp.userid, username: login, accessToken: api_resp.accessToken, refreshToken: api_resp.refreshToken });
-      await onlineMode(() => {
-        //do nothing
-      });
+
       return true;
     }
   }
 
   export async function onlineMode(callback: () => void, eventful: boolean = true) {
-    const resp = await API.queueAndWait(async () => {
-      return await refresh(false);
-    })
+    const resp = await refresh(false, 'onlineMode::125');
     if (!resp) {
       logout();
       return;
@@ -145,7 +142,7 @@ export namespace Authentication {
         else
           authEvents.LoginStateEventless = ({ ...loginState.state(), offline: false });
         callback();
-      }));
+      }), 'getskills::128');
   }
 
   export function offlineMode(callback: () => void, eventful: boolean = true) {
@@ -177,16 +174,17 @@ export namespace Authentication {
     emit('logout', undefined);
   }
 
-  export async function refresh(eventful: boolean = true): Promise<boolean> {
+  export async function refresh(eventful: boolean = true, src: string): Promise<boolean> {
+    console.log('refreshing from ', src);
     if (bOfflineMode) {
       return true;
     }
-    if (loginState.state().accessToken === undefined || loginState.state().refreshToken === undefined) {
+    if (loginState.state().accessToken === undefined || loginState.state().refreshToken === undefined || !bLoggedIn) {
       return false;
     }
-    const tokens = await API.queueAndWait(async () => await APIMethods.refresh());
+    const tokens = await API.queueAndWait(async () => await APIMethods.refresh(), 'auth::refresh::184');
     if (!tokens) return false;
-    if (tokens?.accessToken === "" || tokens?.accessToken === "no-user-id" || tokens?.accessToken === "invalid-refresh-token") {
+    if ('error' in tokens) {
       return false;
     }
     if (eventful)

@@ -68,7 +68,7 @@ export namespace API {
       method: "GET",
       headers: { ...headers, ...header },
       credentials: 'include',
-    }).then((res) => res.json()) as Promise<T>;
+    }).then((res) => res.json()).catch(_ => ({ error: 'fetch-failed', message: 'Fetch Failed' })) as Promise<T | APITypes.APIError>;
   }
 
   export async function post<T>(url: string, body: any, header: HeadersInit = {}): Promise<T | APITypes.APIError> {
@@ -80,7 +80,7 @@ export namespace API {
       },
       credentials: 'include',
       body: JSON.stringify(body),
-    }).then((res) => res.json()).catch((e: Error) => { return { error: 'fetch-failed', message: 'Fetch Failed' } }) as Promise<T | APITypes.APIError>;
+    }).then((res) => res.json()).catch((_: Error) => { return { error: 'fetch-failed', message: 'Fetch Failed' } }) as Promise<T | APITypes.APIError>;
   }
 
   export async function login(username: string, password: string): Promise<LoginState | APITypes.APIError> {
@@ -91,16 +91,16 @@ export namespace API {
     return { null: false, userid: r.user_id, offline: false, username, accessToken: r.accessToken, refreshToken: r.refreshToken };
   }
 
-  export async function refresh(headers: HeadersInit): Promise<APITypes.RefreshResponse> {
+  export async function refresh(headers: HeadersInit): Promise<APITypes.RefreshResponse | APITypes.APIError> {
     try {
       const r = await get<APITypes.LoginResponse>('auth/refresh', headers);
       if ('error' in r) {
-        return { accessToken: r.error, refreshToken: '' };
+        return r;
       }
       return { accessToken: r.accessToken, refreshToken: r.refreshToken };
     }
     catch (e) {
-      return { accessToken: '', refreshToken: '' };
+      return { error: 'fetch-failed', message: 'Fetch Failed' };
     }
   }
 
@@ -116,13 +116,14 @@ export namespace API {
       });
     }
 
-    public async queueAndWait(fn: AsyncFunction): ReturnType<AsyncFunction> {
+    public async queueAndWait(fn: AsyncFunction, src: string): ReturnType<AsyncFunction> {
       const promise = new Promise((resolve) => {
         this.once('pop', async (data) => {
           resolve(await data());
         });
       })
       this.queue(fn);
+      console.log("[queueAndWait] Queued %s from %s", fn, src);
       return await promise;
     }
 
@@ -288,9 +289,8 @@ namespace Online {
   }
 
   export async function refreshFirst<T>(callback: () => T): Promise<T | undefined> {
-    const r = await Authentication.refresh();
+    const r = await Authentication.refresh(false, 'refreshFirst');
     if (!r) {
-
       return undefined;
     }
     //handle the refresh token
@@ -342,16 +342,16 @@ export namespace APIMethods {
     } else {
       //get the profile
       //refresh before we do anything
-      const resp = await Authentication.refresh(false);
+      const resp = await Authentication.refresh(false, 'getSkills');
       if (!resp) {
-        throw new Error('failed to refresh token');
+        return;
       }
-      const user = await API.queueAndWait(async () => await Online.getProfile());
+      const user = await API.queueAndWait(async () => await Online.getProfile(), 'getSkills::350');
       Online.setProfile({ profileobj, flags }, user);
       if (!profileobj.state) {
         throw new Error('profile object is still undefined');
       }
-      const skills = await API.queueAndWait(async () => await Online.getSkills());
+      const skills = await API.queueAndWait(async () => await Online.getSkills(), 'getSkills::355');
       if ('error' in skills) {
         return;
       }
