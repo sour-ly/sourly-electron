@@ -16,14 +16,17 @@ export function SkillPopupWrapper({ tskill, edit, ...props }: { tskill: SkillPro
   const ctx = useWindow();
 
   function saveSkill() {
-    setSkill(o => {
+    setSkill((o) => {
       console.log('saveSkill', o);
       if (edit) {
         if (profileobj.updateSkill(Number(tskill.id ?? -1), { ...o }))
           ctx.notification.notify(`Skill "${tskill.name}" is now "${o.name}" !`);
       } else {
-        profileobj.addSkill(new Skill(o.name));
-        ctx.notification.notify(`Skill ${o.name} created!`);
+        (async () => {
+          const r = await profileobj.addSkill(new Skill(o.name));
+          if (r)
+            ctx.notification.notify(`Skill ${o.name} created!`);
+        })();
       }
       return {};
     });

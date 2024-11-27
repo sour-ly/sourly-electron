@@ -37,7 +37,7 @@ export function SkillView({ skill, skills }: { skill: Skill, skills: Skill[] }) 
     ]);
 
   useEffect(() => {
-    const i = skill.on('levelUp', (args) => {
+    const i = skill.on('levelUp', async (args) => {
       ctx.notification.notify({ message: `You have leveled up ${skill.Name} to level ${args.level}`, event: 'confetti' });
     });
 

@@ -31,21 +31,20 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     this.skills = skills || [];
     console.log('Profile:constructor', this.serialize());
-    this.on('skillCreated', ({ newSkill, absorb }) => {
+    this.on('skillCreated', async ({ newSkill, absorb }) => {
       if (!newSkill) return;
-      APIMethods.saveSkills(newSkill.toJSON(), 'create').then((r) => {
-        if (r) {
-          if (Authentication.getOfflineMode()) {
-            Log.log('Profile:onUpdates::saveSkills', 0, 'saved skills to storage', this.serialize());
-          } else {
-            Log.log('Profile:onUpdates::saveSkills', 0, 'saved skills to online', this.serialize());
-          }
+      const r = await APIMethods.saveSkills(newSkill.toJSON(), 'create')
+      if (r) {
+        if (Authentication.getOfflineMode()) {
+          Log.log('Profile:onUpdates::saveSkills', 0, 'saved skills to storage', this.serialize());
         } else {
-          //need to refresh or retry
-          Log.log('Profile:onUpdates::saveSkills', 1, 'failed to save skills to storage', this.serialize());
-          absorb();
+          Log.log('Profile:onUpdates::saveSkills', 0, 'saved skills to online', this.serialize());
         }
-      });
+      } else {
+        //need to refresh or retry
+        Log.log('Profile:onUpdates::saveSkills', 1, 'failed to save skills to storage', this.serialize());
+        absorb();
+      }
     });
     this.on('skillAdded', ({ newSkill }) => {
       if (!newSkill) return;

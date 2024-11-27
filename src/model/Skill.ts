@@ -207,7 +207,6 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
       });
     }
     this.on('skillCreated', ({ newSkill }) => {
-      this.emitUpdates();
       this.addSkillListeners(newSkill);
     });
     this.on('skillAdded', ({ newSkill }) => {
@@ -264,19 +263,27 @@ export abstract class SkillContainer<T extends SkillEventMap = SkillEventMap> ex
 
   /* skill methods */
 
-  public addSkill(skill: Skill, create: boolean = true) {
-    //lets abstract this to the API
-    let absorbed = false;
-    //fn gets called after the event is emitted
-    const fn = () => {
-      if (absorbed) return;
-      this.skills.push(skill);
-    }
-    if (create) {
-      this.emit('skillCreated', { newSkill: skill, absorb: () => { absorbed = true } }, fn);
-    } else {
-      this.emit('skillAdded', { skills: this.skills, newSkill: skill }, fn);
-    }
+  public async addSkill(skill: Skill, create: boolean = true) {
+    const p = new Promise((resolve) => {
+      //lets abstract this to the API
+      let absorbed = false;
+      //fn gets called after the event is emitted
+      const fn = () => {
+        if (absorbed) {
+          resolve(false);
+        } else {
+          this.skills.push(skill);
+          this.emitUpdates();
+          resolve(true);
+        }
+      }
+      if (create) {
+        this.emit('skillCreated', { newSkill: skill, absorb: () => { absorbed = true; } }, fn);
+      } else {
+        this.emit('skillAdded', { skills: this.skills, newSkill: skill }, fn);
+      }
+    });
+    return p;
   }
 
   public addSkillFromJSON(skill: SkillProps) {

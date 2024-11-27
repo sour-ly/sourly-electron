@@ -1,11 +1,16 @@
 import Identifiable from "../id/id";
 
-export type Event<T extends any, U extends any> = {
-  [key in keyof T]: U;
+
+type EventMap<U> = {
+  'onUpdates': U;
 }
 
+export type Event<T extends any, U extends any> = {
+  [key in keyof T]: U;
+} & EventMap<U>;
 
-type Listener<T> = (args: T) => void;
+
+type Listener<T> = (args: T) => (Promise<void> | void);
 
 export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
 
@@ -35,18 +40,20 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
   }
 
   once<K extends keyof T>(event: K, listener: Listener<T[K]>) {
-    const idx = this.on(event, (args) => {
-      listener(args);
+    const idx = this.on(event, async (args) => {
+      await listener(args);
       this.off(event, idx);
     });
   }
 
-  protected emit<K extends keyof T>(event: K, args: T[K], callback?: () => void) {
+  protected async emit<K extends keyof T>(event: K, args: T[K], callback?: () => void) {
     if (!this.listeners.has(event)) {
       return;
     }
 
-    this.listeners.get(event)!.forEach(listener => listener(args));
+    for (const listener of this.listeners.get(event)!) {
+      await listener(args);
+    }
     if (callback) {
       //this is a hack to ensure that the callback is called after all listeners have been called
       callback();
