@@ -92,11 +92,28 @@ export namespace Authentication {
   }
 
 
+  function setCookie(key: string, value: string, expires: number) {
+    const date = new Date();
+    date.setTime(date.getTime() + expires);
+    document.cookie = `${key}=${value};expires=${date.toUTCString()};path=/`;
+
+  }
+
   //expose the auth cookies
   export const authCookies = () => {
-    document.cookie = `access_token=${loginState.state().accessToken}`;
-    document.cookie = `refresh_token=${loginState.state().refreshToken}`;
-    document.cookie = `user_id=${loginState.state().userid}`;
+    console.log(loginState.state())
+    document.cookie = "";
+    if (loginState.state().accessToken) {
+      setCookie('access_token', loginState.state()?.accessToken ?? '', 3600);
+    }
+    if (loginState.state().refreshToken) {
+      console.log('setting refresh token:', loginState.state()?.refreshToken ?? '');
+      setCookie('refresh_token', loginState.state()?.refreshToken ?? '', 3600);
+    }
+    if (loginState.state().userid) {
+      setCookie('user_id', (loginState.state()?.userid ?? -1).toString(), 3600);
+    }
+
     return ''
   }
 
@@ -174,8 +191,7 @@ export namespace Authentication {
     emit('logout', undefined);
   }
 
-  export async function refresh(eventful: boolean = true, src: string): Promise<boolean> {
-    console.log('refreshing from ', src);
+  export async function refresh(eventful: boolean = true, src?: string): Promise<boolean> {
     if (bOfflineMode) {
       return true;
     }

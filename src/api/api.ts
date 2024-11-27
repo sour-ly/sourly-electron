@@ -105,8 +105,9 @@ export namespace API {
   }
 
   type AsyncFunction = () => Promise<any | APITypes.APIError>;
+  type AsyncFunctionIdentifiable = { fn: AsyncFunction, id: string };
 
-  class APIQueue extends Queue<AsyncFunction> {
+  class APIQueue extends Queue<AsyncFunctionIdentifiable> {
 
     constructor() {
       super();
@@ -116,13 +117,24 @@ export namespace API {
       });
     }
 
-    public async queueAndWait(fn: AsyncFunction, src: string): ReturnType<AsyncFunction> {
+    static genID(): string {
+      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
+
+    //@TODO Remove src from the function signature
+    public async queueAndWait(fn: AsyncFunction, src: string = ""): ReturnType<AsyncFunction> {
+
+      const fnc = { fn, id: APIQueue.genID() };
+
       const promise = new Promise((resolve) => {
         this.once('pop', async (data) => {
-          resolve(await data());
+          if (fnc.id === data.id) {
+            const r = await data.fn()
+            resolve(r);
+          }
         });
       })
-      this.queue(fn);
+      this.queue(fnc);
       console.log("[queueAndWait] Queued %s from %s", fn, src);
       return await promise;
     }
@@ -281,7 +293,7 @@ namespace Online {
     profileobj.state.Name = user_obj.name;
     profileobj.state.Level = user_obj.level;
     profileobj.state.CurrentExperience = user_obj.current_exp;
-    profileobj.state.Flags = flags ^ SourlyFlags.IGNORE;
+    profileobj.state.Flags = flags & ~SourlyFlags.IGNORE;
   }
 
   export function refreshToken() {
@@ -344,8 +356,10 @@ export namespace APIMethods {
       //refresh before we do anything
       const resp = await Authentication.refresh(false, 'getSkills');
       if (!resp) {
+        //return handle the error
         return;
       }
+      console.log('refresh good');
       const user = await API.queueAndWait(async () => await Online.getProfile(), 'getSkills::350');
       Online.setProfile({ profileobj, flags }, user);
       if (!profileobj.state) {
@@ -364,6 +378,7 @@ export namespace APIMethods {
           goals: []
         }
       })
+      console.log(profileobj);
       //changed method to set entire array rather than adding.
       const skillObject = skillProps.map(s => Profile.castSkillFromJSON(s));
       if (profileobj.state) {
