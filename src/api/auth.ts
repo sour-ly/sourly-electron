@@ -104,9 +104,12 @@ export namespace Authentication {
   //this is supposed to act as a mock for the actual authentication, this namespace will contain the actual implementation for the authentication but also will handle all
   export async function login(login: string, password: string): Promise<true | string> {
     const api_resp = await API.queueAndWait(async () => await API.login(login, password));
-    if (api_resp.null) {
-      return api_resp.accessToken ?? '';
-    } else {
+    if ('error' in api_resp) {
+      return api_resp.error;
+    } else if (api_resp.accessToken === "" || api_resp.accessToken === "no-user-id" || api_resp.accessToken === "invalid-refresh-token") {
+      return '';
+    }
+    else {
       bLoggedIn = true;
       loginState.setState({ null: false, offline: false, userid: api_resp.userid, username: login, accessToken: api_resp.accessToken, refreshToken: api_resp.refreshToken });
       await onlineMode(() => {

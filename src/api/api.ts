@@ -80,13 +80,13 @@ export namespace API {
       },
       credentials: 'include',
       body: JSON.stringify(body),
-    }).then((res) => res.json()) as Promise<T | APITypes.APIError>;
+    }).then((res) => res.json()).catch((e: Error) => { return { error: 'fetch-failed', message: 'Fetch Failed' } }) as Promise<T | APITypes.APIError>;
   }
 
-  export async function login(username: string, password: string): Promise<LoginState> {
+  export async function login(username: string, password: string): Promise<LoginState | APITypes.APIError> {
     const r = await post<APITypes.LoginResponse>('auth/login', { username, password });
     if ('error' in r) {
-      return { null: true, userid: -1, offline: false, username: r.error, accessToken: r.message, refreshToken: '' };
+      return r;
     }
     return { null: false, userid: r.user_id, offline: false, username, accessToken: r.accessToken, refreshToken: r.refreshToken };
   }
