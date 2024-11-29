@@ -247,7 +247,7 @@ namespace Offline {
 
   export async function getProfile(
     { profileobj, flags }: GetSkillProps,
-    callback: () => void = () => {},
+    callback: () => void = () => { },
   ): Promise<Profile> {
     return new Promise((resolve) => {
       IPC.once('storage-request', (...arg) => {
@@ -550,6 +550,15 @@ export namespace APIMethods {
     return false;
   }
 
+  export async function removeSkill(skill_id: number) {
+    if (Authentication.getOfflineMode()) {
+      return true;
+    } else {
+
+    }
+    return false;
+  }
+
   export async function saveProfile(profile: object): Promise<void> {
     if (Authentication.getOfflineMode()) {
       await saveProfileOffline(profile);
@@ -566,6 +575,7 @@ export namespace APIMethods {
 
   export async function addGoal(skill_id: number, goalProps: GoalProps) {
     if (Authentication.getOfflineMode()) {
+      return true;
     } else {
       return Online.addGoal(skill_id, goalProps);
     }
