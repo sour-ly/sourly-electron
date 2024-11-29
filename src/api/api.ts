@@ -437,12 +437,23 @@ namespace Online {
     return newSkill;
   }
 
+
+  //increment goal progress
+  export async function incrementGoal(goal_id: number) {
+    return await API.get<APITypes.Skill>(
+      `protected/skill/goal/${goal_id}/increment`,
+      header(),
+    );
+  }
+
   export async function deleteGoal(goal_id: number) {
     return await API.get<APITypes.APIError>(
       `protected/skill/goal/${goal_id}/delete`,
       header(),
     );
   }
+
+
 }
 
 export namespace APIMethods {
@@ -564,6 +575,13 @@ export namespace APIMethods {
       await saveProfileOffline(profile);
     } else {
     }
+  }
+
+  export async function incrementGoal(goal_id: number) {
+    if (Authentication.getOfflineMode()) {
+      return true;
+    }
+    return Online.incrementGoal(goal_id);
   }
 
   export async function refresh() {

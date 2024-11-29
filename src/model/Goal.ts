@@ -1,11 +1,12 @@
 import { Eventful } from '../event/events';
+import { Absorbable } from './Skill';
 
 type EventMap = {
   goalProgressChanged: {
     goal: Goal;
     amount: number;
     revertCompletion?: boolean;
-  };
+  } & Absorbable;
   completed: Goal;
 };
 
@@ -36,15 +37,28 @@ export default class Goal extends Eventful<EventMap> {
     this.completed = completed;
   }
 
-  public incrementProgress(amount: number = 1) {
-    if (this.completed) return;
-    this.progress += amount;
-    if (this.progress >= this.target) {
-      this.completed = true;
-      this.emit('completed', this);
-    } else {
-      this.emit('goalProgressChanged', { goal: this, amount });
-    }
+  public async incrementProgress(amount: number = 1) {
+
+    let absorbed = false
+
+    const p = new Promise((resolve) => {
+      const fn = () => {
+        if (absorbed) {
+          resolve(false);
+          return;
+        };
+        if (this.completed) return;
+        this.progress += amount;
+        if (this.progress >= this.target) {
+          this.completed = true;
+          this.emit('completed', this);
+        } else {
+        }
+        resolve(true);
+      }
+      this.emit('goalProgressChanged', { goal: this, amount, absorb: () => absorbed = true }, fn);
+    });
+    return await p;
   }
 
   public undo() {
@@ -55,9 +69,10 @@ export default class Goal extends Eventful<EventMap> {
         goal: this,
         amount: -1,
         revertCompletion: true,
+        absorb: () => { }
       });
     } else {
-      this.emit('goalProgressChanged', { goal: this, amount: -1 });
+      this.emit('goalProgressChanged', { goal: this, amount: -1, absorb: () => { } });
     }
     this.progress--;
   }

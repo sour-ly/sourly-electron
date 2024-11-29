@@ -37,18 +37,24 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
     this.skills = skills || [];
     console.log('Profile:constructor', this.serialize());
+
+    //@TODO Move this some where else other than the constructor...
+
+    //this block of code acts an example so please follow along for the absorb functionality.
     this.on('skillCreated', async ({ newSkill, absorb }) => {
+      //if newSkill is null return
       if (!newSkill) return;
+      //try to save the skills through the API abstraction layer (offline or online)
       const r = await APIMethods.saveSkills(newSkill.toJSON(), 'create');
-      if (r) {
-        if (Authentication.getOfflineMode()) {
+      if (r) { // if the save was successful
+        if (Authentication.getOfflineMode()) { // -- if offline mode is enabled - this is literally only for logs
           Log.log(
             'Profile:onUpdates::saveSkills',
             0,
             'saved skills to storage',
             this.serialize(),
           );
-        } else {
+        } else { // -- this is for online mode
           Log.log(
             'Profile:onUpdates::saveSkills',
             0,
@@ -56,7 +62,8 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
             this.serialize(),
           );
         }
-      } else {
+
+      } else { // if the save was unsuccessful
         // need to refresh or retry
         Log.log(
           'Profile:onUpdates::saveSkills',
@@ -64,7 +71,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
           'failed to save skills to storage',
           this.serialize(),
         );
-        absorb();
+        absorb(); // absorb the action so it doesn't actually get pushed to the frontend. Please see the Skill.ts file for the absorb function.
       }
     });
     this.on('skillAdded', ({ newSkill }) => {
@@ -95,23 +102,30 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     skill.on('experienceGained', (arg) => {
       this.addExperience(arg.experience * 0.6);
     });
+    skill.on('goalAdded', goal => {
+      //just handle the goalAdded event
+      console.log('Profile:addSkillListeners::goalAdded', goal);
+      this.emitUpdates();
+    });
     /* Really limited to online stuff */
-    skill.on('goalAdded', (goal) => {
-      APIMethods.addGoal(skill.Id, goal.toJSON()).then((r) => {
+    skill.on('goalCreated', ({ newGoal, absorb }) => {
+      APIMethods.addGoal(skill.Id, newGoal.toJSON()).then((r) => {
         if (r) {
           Log.log(
             'Profile:addSkillListeners::addGoal',
             0,
             'added goal to online',
-            goal.toJSON(),
+            newGoal.toJSON(),
           );
         } else {
           Log.log(
             'Profile:addSkillListeners::addGoal',
             1,
             'failed to add goal to online',
-            goal.toJSON(),
+            newGoal.toJSON(),
           );
+          // absorb the action so it doesn't actually get pushed to the frontend
+          absorb();
         }
       });
     });
@@ -134,6 +148,34 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
           );
         }
       });
+    });
+    skill.on('goalProgressChanged', async ({ goal, amount, absorb }) => {
+      if (Authentication.getOfflineMode()) {
+        return;
+      }
+      if (amount < 0) {
+        absorb();
+      }
+      const r = await APIMethods.incrementGoal(goal.Id);
+      if (r === true) return;
+      if (!("error" in r)) {
+        Log.log(
+          'Profile:addSkillListeners::incrementGoal',
+          0,
+          'incremented goal online',
+          goal.toJSON(),
+        );
+      } else {
+        Log.log(
+          'Profile:addSkillListeners::incrementGoal',
+          1,
+          'failed to increment goal online - %s',
+          r.error,
+          goal.toJSON(),
+        );
+        absorb();
+      }
+
     });
   }
 

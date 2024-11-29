@@ -1,7 +1,6 @@
 import Identifiable from '../id/id';
 
 type EventMap<U> = {
-  onUpdates: U;
 };
 
 export type Event<T extends any, U extends any> = {
@@ -49,6 +48,7 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
     callback?: () => void,
   ) {
     if (!this.listeners.has(event)) {
+      callback?.();
       return;
     }
 

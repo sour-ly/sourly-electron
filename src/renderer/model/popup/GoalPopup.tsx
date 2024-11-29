@@ -156,7 +156,7 @@ export function GoalPopUpWrapper({
       } else {
         skill!.addGoal(
           new Goal(o.name, o.description, 0, o.reward, o.metric, o.target),
-        );
+          true);
         ctx.notification.notify(`Goal ${o.name} created!`);
       }
       return {};

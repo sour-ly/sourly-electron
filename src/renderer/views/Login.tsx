@@ -69,7 +69,7 @@ export function Login() {
           ctx.popUp.open({
             type: 'dialog',
             title: 'Login Error',
-            content: () => <p>{z}</p>,
+            content: () => <p>{z === 'fetch-failed' ? "It seems that the backend server is down. We apologize for this inconvience." : z}</p>,
             options: {
               onOkay: () => {
                 ctx.popUp.close();
@@ -81,7 +81,7 @@ export function Login() {
           });
         }
       })
-      .catch((e) => {});
+      .catch((e) => { });
   }
 
   return (
