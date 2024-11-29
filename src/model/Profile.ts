@@ -130,7 +130,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
       });
     });
     skill.on('goalRemoved', (goal) => {
-      APIMethods.removeGoal(goal.Id).then((r) => {
+      APIMethods.removeGoal(goal.Id, skill.Id).then((r) => {
         // TODO: remove goal from skill and have a fallback where it will retry or undo the action
         if (r) {
           Log.log(
@@ -155,8 +155,9 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
       }
       if (amount < 0) {
         absorb();
+        return;
       }
-      const r = await APIMethods.incrementGoal(goal.Id);
+      const r = await APIMethods.incrementGoal(goal.Id, skill.Id);
       if (r === true) return;
       if (!("error" in r)) {
         Log.log(
@@ -170,8 +171,8 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
           'Profile:addSkillListeners::incrementGoal',
           1,
           'failed to increment goal online - %s',
-          r.error,
-          goal.toJSON(),
+          r.error
+
         );
         absorb();
       }

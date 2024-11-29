@@ -439,16 +439,16 @@ namespace Online {
 
 
   //increment goal progress
-  export async function incrementGoal(goal_id: number) {
+  export async function incrementGoal(goal_id: number, skill_id: number) {
     return await API.get<APITypes.Skill>(
-      `protected/skill/goal/${goal_id}/inc`,
+      `protected/skill/${skill_id}/goal/${goal_id}/inc`,
       header(),
     );
   }
 
-  export async function deleteGoal(goal_id: number) {
+  export async function deleteGoal(goal_id: number, skill_id: number) {
     return await API.get<APITypes.APIError>(
-      `protected/skill/goal/${goal_id}/delete`,
+      `protected/skill/${skill_id}/goal/${goal_id}/delete`,
       header(),
     );
   }
@@ -577,11 +577,11 @@ export namespace APIMethods {
     }
   }
 
-  export async function incrementGoal(goal_id: number) {
+  export async function incrementGoal(goal_id: number, skill_id: number = 0) {
     if (Authentication.getOfflineMode()) {
       return true;
     }
-    return Online.incrementGoal(goal_id);
+    return Online.incrementGoal(goal_id, skill_id);
   }
 
   export async function refresh() {
@@ -599,10 +599,10 @@ export namespace APIMethods {
     }
   }
 
-  export async function removeGoal(goal_id: number) {
+  export async function removeGoal(goal_id: number, skill_id: number = 0) {
     if (Authentication.getOfflineMode()) {
       return true;
     }
-    return !('error' in Online.deleteGoal(goal_id));
+    return !('error' in Online.deleteGoal(goal_id, skill_id));
   }
 }
