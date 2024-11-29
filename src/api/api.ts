@@ -441,7 +441,7 @@ namespace Online {
   //increment goal progress
   export async function incrementGoal(goal_id: number) {
     return await API.get<APITypes.Skill>(
-      `protected/skill/goal/${goal_id}/increment`,
+      `protected/skill/goal/${goal_id}/inc`,
       header(),
     );
   }
