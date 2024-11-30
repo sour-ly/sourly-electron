@@ -411,7 +411,7 @@ namespace Online {
 
   /* SKILL METHODS */
   export async function addSkills(name: string) {
-    return await API.post<APITypes.Skill>(
+    return await API.post<{ skill: APITypes.Skill }>(
       `protected/skill/add`,
       {
         name,
@@ -427,7 +427,7 @@ namespace Online {
   /* GOAL METHODS */
   export async function addGoal(skill_id: number, goalProps: GoalProps) {
     const newSkill = await API.post<APITypes.Skill>(
-      `protected/skill/goal/add`,
+      `protected/skill/${skill_id}/goal/add`,
       {
         skill_id,
         ...goalProps,
@@ -544,7 +544,7 @@ export namespace APIMethods {
   export async function saveSkills(
     skills: any,
     onlineFlags: 'create' | 'update' = 'create',
-  ): Promise<boolean> {
+  ) {
     if (Authentication.getOfflineMode()) {
       await saveSkillsOffline(skills);
       return true;
@@ -555,7 +555,7 @@ export namespace APIMethods {
       if ('error' in r) {
         return false;
       }
-      return true;
+      return r.skill;
     }
 
     return false;

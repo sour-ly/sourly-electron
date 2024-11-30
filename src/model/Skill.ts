@@ -1,5 +1,6 @@
 import { APIMethods } from '../api/api';
 import { Eventful } from '../event/events';
+import Identifiable from '../id/id';
 import { Log } from '../log/log';
 import IPC from '../renderer/ReactIPC';
 import Goal, { GoalProps } from './Goal';
@@ -388,7 +389,7 @@ export abstract class SkillContainer<
 
   public static castSkillFromJSON(skill: SkillProps) {
     const n_skill = new Skill(skill.name, skill.level, skill.currentExperience);
-    n_skill.changeId(Number(skill.id ?? -1));
+    n_skill.changeId(Number(skill.id ?? Identifiable.newId()));
     if (skill.goals) {
       for (const goal of skill.goals) {
         const n_goal = new Goal(
@@ -400,7 +401,7 @@ export abstract class SkillContainer<
           goal.target,
           goal.completed,
         );
-        n_goal.changeId(Number(goal.id ?? -1));
+        n_goal.changeId(Number(goal.id ?? Identifiable.newId()));
         n_skill.addGoal(n_goal, false);
       }
       console.log(n_skill);

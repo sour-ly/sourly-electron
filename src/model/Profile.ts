@@ -46,6 +46,8 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
       if (!newSkill) return;
       //try to save the skills through the API abstraction layer (offline or online)
       const r = await APIMethods.saveSkills(newSkill.toJSON(), 'create');
+      if (r == true) //if the save was successful (offline)
+        return
       if (r) { // if the save was successful
         if (Authentication.getOfflineMode()) { // -- if offline mode is enabled - this is literally only for logs
           Log.log(
@@ -61,6 +63,8 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
             'saved skills to online',
             this.serialize(),
           );
+          //we need to find a way to update the skill id, oh wait we can just update the skill id literally
+          newSkill.changeId(r.id);
         }
 
       } else { // if the save was unsuccessful

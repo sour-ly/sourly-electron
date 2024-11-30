@@ -15,4 +15,8 @@ export default abstract class Identifiable {
     this.id = newId;
     Identifiable.idCounter = Math.max(Identifiable.idCounter--, newId + 1);
   }
+
+  public static newId() {
+    return Identifiable.idCounter++;
+  }
 }
