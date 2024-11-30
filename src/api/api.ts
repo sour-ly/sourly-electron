@@ -467,6 +467,11 @@ export namespace APIMethods {
     return await Offline.getLoginState();
   }
 
+  export function isOffline(): boolean {
+    const loginState = Authentication.loginState.state();
+    return loginState.offline;
+  }
+
   export async function getSkillsOffline({
     profileobj,
     flags,

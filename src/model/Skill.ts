@@ -1,4 +1,5 @@
 import { APIMethods } from '../api/api';
+import { Authentication } from '../api/auth';
 import { Eventful } from '../event/events';
 import Identifiable from '../id/id';
 import { Log } from '../log/log';
@@ -29,11 +30,12 @@ export type Metric =
 type EventMap = {
   levelUp: { skill: Skill; level: number };
   experienceGained: { skill: Skill; experience: number } & Absorbable;
+  experienceGainedFinal: { skill: Skill; experience: number };
   skillChanged: Skill;
   goalAdded: Goal;
   goalCreated: { newGoal: Goal } & Absorbable;
   goalUpdated: Goal;
-  goalProgressChanged: { amount: number; goal: Goal; } & Absorbable;
+  goalProgressChanged: { amount: number; goal: Goal; } & Absorbable<{ progress: number, completed: boolean, target: number }>;
   goalRemoved: Goal;
 };
 
@@ -76,7 +78,7 @@ export default class Skill extends Eventful<EventMap> {
     goal.on('completed', (goal) => {
       this.addExperience(goal.Reward);
     });
-    goal.on('goalProgressChanged', (args) => {
+    goal.on('goalProgressChanged', async (args) => {
       let absorbed = false;
       const p = new Promise((resolve) => {
         const fn = () => {
@@ -92,12 +94,15 @@ export default class Skill extends Eventful<EventMap> {
           resolve(true);
         };
         this.emit('goalProgressChanged', {
-          goal: args.goal, amount: args.amount, absorb: () => {
+          goal: args.goal, optimisticValue: args.optimisticValue, amount: args.amount, absorb: () => {
             absorbed = true;
             args.absorb();
           }
         }, fn);
       });
+      await p;
+      if (!absorbed)
+        this.emit('experienceGainedFinal', { skill: this, experience: args.amount * (args.goal.Reward * 0.05) });
     });
   }
 
@@ -155,9 +160,9 @@ export default class Skill extends Eventful<EventMap> {
               this.experienceRequired + this.currentExperience;
           }
         }
+        resolve(true);
       }
       this.emit('experienceGained', { skill: this, experience, absorb: () => { absorbed = true } }, fn);
-      resolve(true);
     });
 
     return await p;
@@ -268,16 +273,17 @@ export default class Skill extends Eventful<EventMap> {
   }
 }
 
-export type Absorbable = {
+export type Absorbable<T = any> = {
   absorb: () => void;
+  optimisticValue?: T;
 };
 
 export type SkillEventMap = {
-  skillCreated: { newSkill: Skill } & Absorbable;
+  skillCreated: { newSkill: Skill } & Absorbable<SkillProps>;
   skillAdded: { skills: Skill[]; newSkill: Skill };
   skillChanged: Skill;
   onUpdates: { skills: Skill[] };
-  skillRemoved: { newSkill: Skill } & Absorbable;
+  skillRemoved: { newSkill: Skill } & Absorbable<SkillProps>;
 };
 
 export abstract class SkillContainer<

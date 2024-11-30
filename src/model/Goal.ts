@@ -6,7 +6,7 @@ type EventMap = {
     goal: Goal;
     amount: number;
     revertCompletion?: boolean;
-  } & Absorbable;
+  } & Absorbable<{ progress: number, completed: boolean, target: number }>;
   completed: Goal;
 };
 
@@ -42,6 +42,7 @@ export default class Goal extends Eventful<EventMap> {
     let absorbed = false
 
     const p = new Promise((resolve) => {
+
       const fn = () => {
         if (absorbed) {
           resolve(false);
@@ -52,10 +53,10 @@ export default class Goal extends Eventful<EventMap> {
         if (this.progress >= this.target) {
           this.completed = true;
           this.emit('completed', this);
-        } else {
         }
         resolve(true);
       }
+
       this.emit('goalProgressChanged', { goal: this, amount, absorb: () => absorbed = true }, fn);
     });
     return await p;
@@ -89,12 +90,20 @@ export default class Goal extends Eventful<EventMap> {
     return this.progress;
   }
 
+  public set Progress(value: number) {
+    this.progress = value;
+  }
+
   public get Current() {
     return this.progress;
   }
 
   public get Completed() {
     return this.completed;
+  }
+
+  public set Completed(value: boolean) {
+    this.completed = value;
   }
 
   public get Metric() {
@@ -112,6 +121,7 @@ export default class Goal extends Eventful<EventMap> {
   /* Searialization */
   public toJSON() {
     return {
+      id: `${this.Id}`,
       name: this.name,
       description: this.description,
       progress: this.progress,

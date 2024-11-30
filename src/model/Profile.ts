@@ -198,8 +198,9 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
         }
       });
     });
-    skill.on('goalProgressChanged', async ({ goal, amount, absorb }) => {
+    skill.on('goalProgressChanged', async ({ goal, optimisticValue, amount, absorb }) => {
       if (Authentication.getOfflineMode()) {
+        await APIMethods.saveSkills(this.serializeSkills(), "update");
         return;
       }
       if (amount < 0) {
@@ -225,7 +226,12 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
         );
         absorb();
       }
-
+    });
+    skill.on('experienceGainedFinal', async ({ skill, experience }) => {
+      if (Authentication.getOfflineMode()) {
+        await APIMethods.saveSkills(this.serializeSkills(), "update");
+      }
+      return;
     });
   }
 
