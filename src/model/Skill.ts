@@ -259,6 +259,7 @@ export default class Skill extends Eventful<EventMap> {
   /* Searialize */
   public toJSON() {
     return {
+      id: this.Id,
       name: this.name,
       level: this.level,
       currentExperience: this.currentExperience,
@@ -276,7 +277,7 @@ export type SkillEventMap = {
   skillAdded: { skills: Skill[]; newSkill: Skill };
   skillChanged: Skill;
   onUpdates: { skills: Skill[] };
-  skillRemoved: Skill;
+  skillRemoved: { newSkill: Skill } & Absorbable;
 };
 
 export abstract class SkillContainer<
@@ -302,10 +303,8 @@ export abstract class SkillContainer<
       this.emitUpdates();
       this.addSkillListeners(skill);
     });
-    this.on('skillRemoved', (skill) => {
-      this.emitUpdates();
-    });
     this.on('onUpdates', ({ skills }) => {
+      console.log('onUpdates', skills);
       // IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
     });
   }
@@ -404,7 +403,6 @@ export abstract class SkillContainer<
         n_goal.changeId(Number(goal.id ?? Identifiable.newId()));
         n_skill.addGoal(n_goal, false);
       }
-      console.log(n_skill);
     }
     return n_skill;
   }
@@ -420,12 +418,24 @@ export abstract class SkillContainer<
     return false;
   }
 
-  public removeSkill(skill: Skill) {
-    const index = this.skills.indexOf(skill);
-    if (index !== -1) {
-      this.skills.splice(index, 1);
-      this.emit('skillRemoved', skill);
-    }
+  public async removeSkill(skill: Skill) {
+    const p = new Promise((resolve) => {
+      let absorbed = false;
+      const fn = () => {
+        if (absorbed) {
+          resolve(false);
+          return;
+        }
+        const index = this.skills.indexOf(skill);
+        if (index !== -1) {
+          this.skills.splice(index, 1);
+          this.emitUpdates();
+        }
+        resolve(true);
+      };
+      this.emit('skillRemoved', { newSkill: skill, absorb: () => { absorbed = true } }, fn);
+    });
+    return await p;
   }
 
   public getSkillById(id: number) {

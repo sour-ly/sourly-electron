@@ -78,6 +78,39 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
         absorb(); // absorb the action so it doesn't actually get pushed to the frontend. Please see the Skill.ts file for the absorb function.
       }
     });
+
+    this.on('skillRemoved', async ({ newSkill, absorb }) => {
+      if (!newSkill) return;
+      const r = await APIMethods.saveSkills(newSkill.toJSON(), 'delete');
+      if (r == true) return;
+      if (r) {
+        if (Authentication.getOfflineMode()) {
+          Log.log(
+            'Profile:onUpdates::saveSkills',
+            0,
+            'removed skills from storage',
+            this.serialize(),
+          );
+        } else {
+          Log.log(
+            'Profile:onUpdates::saveSkills',
+            0,
+            'removed skills from online',
+            this.serialize(),
+          );
+        }
+      } else {
+        Log.log(
+          'Profile:onUpdates::saveSkills',
+          1,
+          'failed to remove skills from storage',
+          this.serialize(),
+        );
+        absorb();
+      }
+    });
+
+    //skill added
     this.on('skillAdded', ({ newSkill }) => {
       if (!newSkill) return;
       this.emitUpdates();
@@ -114,6 +147,17 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     /* Really limited to online stuff */
     skill.on('goalCreated', ({ newGoal, absorb }) => {
       APIMethods.addGoal(skill.Id, newGoal.toJSON()).then((r) => {
+        if (r === true) return;
+        if ("error" in r) {
+          Log.log(
+            'Profile:addSkillListeners::addGoal',
+            1,
+            'failed to add goal to online - %s',
+            r.error,
+          );
+          absorb();
+          return;
+        }
         if (r) {
           Log.log(
             'Profile:addSkillListeners::addGoal',
@@ -121,6 +165,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
             'added goal to online',
             newGoal.toJSON(),
           );
+          newGoal.changeId(r.skill.goals.slice(-1)[0].id);
         } else {
           Log.log(
             'Profile:addSkillListeners::addGoal',

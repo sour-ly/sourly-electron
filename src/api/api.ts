@@ -424,9 +424,16 @@ namespace Online {
     return await API.get<APITypes.Skill[]>(`protected/skill/`, header());
   }
 
+  export async function deleteSkill(skill_id: number) {
+    return await API.get<APITypes.APIError>(
+      `protected/skill/${skill_id}/delete`,
+      header(),
+    );
+  }
+
   /* GOAL METHODS */
   export async function addGoal(skill_id: number, goalProps: GoalProps) {
-    const newSkill = await API.post<APITypes.Skill>(
+    const newSkill = await API.post<{ skill: APITypes.Skill }>(
       `protected/skill/${skill_id}/goal/add`,
       {
         skill_id,
@@ -436,7 +443,6 @@ namespace Online {
     );
     return newSkill;
   }
-
 
   //increment goal progress
   export async function incrementGoal(goal_id: number, skill_id: number) {
@@ -466,7 +472,6 @@ export namespace APIMethods {
     flags,
   }: GetSkillProps): Promise<void> {
     const profile = await Offline.getProfile({ profileobj, flags });
-    console.log('getSkillsOffline', profile);
     await Offline.getSkills({
       profileobj: { state: profile, setState: profileobj.setState },
       flags,
@@ -543,7 +548,7 @@ export namespace APIMethods {
 
   export async function saveSkills(
     skills: any,
-    onlineFlags: 'create' | 'update' = 'create',
+    onlineFlags: 'create' | 'update' | 'delete' = 'create',
   ) {
     if (Authentication.getOfflineMode()) {
       await saveSkillsOffline(skills);
@@ -556,6 +561,9 @@ export namespace APIMethods {
         return false;
       }
       return r.skill;
+    } else if (onlineFlags === 'delete') {
+      const r = await Online.deleteSkill(skills.id);
+      return r;
     }
 
     return false;
@@ -565,9 +573,12 @@ export namespace APIMethods {
     if (Authentication.getOfflineMode()) {
       return true;
     } else {
-
+      const r = await Online.deleteSkill(skill_id);
+      if ('error' in r) {
+        return false;
+      }
+      return true;
     }
-    return false;
   }
 
   export async function saveProfile(profile: object): Promise<void> {
@@ -595,7 +606,7 @@ export namespace APIMethods {
     if (Authentication.getOfflineMode()) {
       return true;
     } else {
-      return Online.addGoal(skill_id, goalProps);
+      return (await Online.addGoal(skill_id, goalProps));
     }
   }
 
