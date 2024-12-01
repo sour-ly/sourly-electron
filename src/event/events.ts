@@ -13,7 +13,7 @@ export type Event<T extends any, U extends any> = {
 };
 
 // z acts as a return type
-type Listener<T, Z = void> = (args: T) => Promise<Z> | Z;
+export type Listener<T, Z = void> = (args: T) => Promise<Z> | Z;
 
 
 /* PROBLEM: How do we implement the event system in a way that handles absorbing events and making sure things aren't passed before they're absorbed?

@@ -1,6 +1,6 @@
 import { APIMethods } from '../api/api';
 import { Authentication } from '../api/auth';
-import { Absorbable, Eventful } from '../event/events';
+import { Absorbable, Eventful, Listener } from '../event/events';
 import Identifiable from '../id/id';
 import { Log } from '../log/log';
 import IPC from '../renderer/ReactIPC';
@@ -31,7 +31,7 @@ type EventMap = {
   levelUp: { skill: Skill; level: number };
   experienceGained: { skill: Skill; experience: number };
   experienceGainedFinal: { skill: Skill; experience: number };
-  skillChanged: Skill;
+  skillChanged: { skill: Skill, newSkill: SkillProps };
   goalAdded: Goal;
   goalCreated: { newGoal: Goal };
   goalUpdated: Goal;
@@ -49,8 +49,10 @@ export type SkillProps = {
 
 export default class Skill extends Eventful<EventMap> {
   private experienceRequired: number;
-
   private goals: Goal[] = [];
+  //we need to store pass-through listeners
+  private passThroughListeners: Map<keyof GoalEventMap, Listener<GoalEventMap[keyof GoalEventMap]>[]> = new Map([]);
+  private passThroughAbsorbListeners: Map<keyof GoalEventMap, Listener<GoalEventMap[keyof GoalEventMap], boolean>[]> = new Map([]);
 
   constructor(
     private name: string = 'Untitled',
@@ -84,6 +86,17 @@ export default class Skill extends Eventful<EventMap> {
       } else if (revertCompletion) {
         this.addExperience(-goal.Reward);
       } else this.addExperience(amount * (goal.Reward * 0.05));
+    });
+    /* pass through listeners */
+    this.passThroughListeners.forEach((listeners, event) => {
+      listeners.forEach((listener) => {
+        goal.on(event, listener);
+      });
+    });
+    this.passThroughAbsorbListeners.forEach((listeners, event) => {
+      listeners.forEach((listener) => {
+        goal.absorbableOn(event, listener);
+      });
     });
   }
 
@@ -139,16 +152,38 @@ export default class Skill extends Eventful<EventMap> {
 
   }
 
-  public listenToGoals<T extends keyof GoalEventMap>(event: T, listener: (t: GoalEventMap[T]) => void) {
+
+  /* Listen to Goals must apply to all goals no matter if they are added later */
+
+  public listenToGoalPass<T extends keyof GoalEventMap>(event: T, listener: (t: GoalEventMap[T]) => void) {
+    // add the listener to the pass through listeners
+    if (!this.passThroughListeners.has(event)) {
+      this.passThroughListeners.set(event, []);
+    }
+    //@ts-ignore
+    this.passThroughListeners.get(event)?.push(listener);
+
+    //then add the listener to all the goals
     this.goals.forEach((goal) => {
       goal.on(event, listener);
     });
+
+    return this.passThroughListeners.get(event)?.length;
   }
 
   public listenToGoalAbsorb<T extends keyof GoalEventMap>(event: T, listener: (t: GoalEventMap[T]) => Promise<boolean> | boolean) {
+    // add the listener to the pass through listeners
+    if (!this.passThroughAbsorbListeners.has(event)) {
+      this.passThroughAbsorbListeners.set(event, []);
+    }
+    //@ts-ignore
+    this.passThroughAbsorbListeners.get(event)?.push(listener);
+
     this.goals.forEach((goal) => {
       goal.absorbableOn(event, listener);
     });
+
+    return this.passThroughAbsorbListeners.get(event)?.length;
   }
 
   public get Name() {
@@ -250,7 +285,7 @@ export type SkillEventMap = {
   skillCreated: { newSkill: Skill };
   skillCreatedFinal: { skills: Skill[]; newSkill: Skill };
   skillAdded: { skills: Skill[]; newSkill: Skill };
-  skillChanged: Skill;
+  skillChanged: { skill: Skill, newSkill: SkillProps };
   onUpdates: { skills: Skill[] };
   skillRemoved: { newSkill: Skill };
 };
@@ -276,7 +311,7 @@ export abstract class SkillContainer<
     });
     this.on('skillChanged', (skill) => {
       this.emitUpdates();
-      this.addSkillListeners(skill);
+      this.addSkillListeners(skill.skill);
     });
     this.on('onUpdates', ({ skills }) => {
       // IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
@@ -375,14 +410,23 @@ export abstract class SkillContainer<
   }
 
   public updateSkill(skill_id: number, new_skill: SkillProps) {
+
     const index = this.skills.findIndex((skill) => skill.Id === skill_id);
-    if (index !== -1 && new_skill.name) {
-      this.skills[index].Name = new_skill.name;
-      this.emit('skillChanged', this.skills[index]);
-      return true;
+    if (index === -1 && !(new_skill.name)) {
+      Log.log('skillManager:updateSkill', 1, 'skill not found', skill_id);
+      return false;
     }
-    Log.log('skillManager:updateSkill', 1, 'skill not found', skill_id);
-    return false;
+
+    const fn = () => {
+      if (index !== -1 && new_skill.name) {
+        this.skills[index].Name = new_skill.name;
+        return true;
+      }
+    }
+
+    this.emit('skillChanged', { skill: this.skills[index], newSkill: new_skill }, fn);
+
+    return true;
   }
 
   public async removeSkill(skill: Skill) {

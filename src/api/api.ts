@@ -67,6 +67,12 @@ export namespace APITypes {
     created_at: string;
     completed: boolean;
   };
+
+  /* UPDATE/REQUESTS */
+  export type SkillUpdate = {
+    id: string;
+    name: string;
+  }
 }
 
 export namespace API {
@@ -435,6 +441,14 @@ namespace Online {
     return await API.get<APITypes.Skill[]>(`protected/skill/`, header());
   }
 
+  export async function editSkill(srq: APITypes.SkillUpdate) {
+    return await API.post<APITypes.Skill>(
+      `protected/skill/${srq.id}/edit`,
+      srq,
+      header(),
+    );
+  }
+
   export async function deleteSkill(skill_id: number) {
     return await API.get<APITypes.APIError>(
       `protected/skill/${skill_id}/delete`,
@@ -572,13 +586,16 @@ export namespace APIMethods {
     }
     if (onlineFlags === 'create') {
       // create the skill
-      const r = await Online.addSkills(skills.name);
+      const r = await API.queueAndWait(() => Online.addSkills(skills.name), "saveSkills");
       if ('error' in r) {
         return r;
       }
       return r.skill;
     } else if (onlineFlags === 'delete') {
-      const r = await Online.deleteSkill(skills.id);
+      const r = await API.queueAndWait(() => Online.deleteSkill(skills.id), "saveSkills");
+      return r;
+    } else if (onlineFlags === 'update') {
+      const r = await API.queueAndWait(() => Online.editSkill(skills), "saveSkills");
       return r;
     }
 
@@ -589,7 +606,7 @@ export namespace APIMethods {
     if (Authentication.getOfflineMode()) {
       return true;
     } else {
-      const r = await Online.deleteSkill(skill_id);
+      const r = await API.queueAndWait(() => Online.deleteSkill(skill_id), "removeSkill");
       if ('error' in r) {
         return false;
       }
@@ -608,7 +625,7 @@ export namespace APIMethods {
     if (Authentication.getOfflineMode()) {
       return true;
     }
-    return Online.incrementGoal(goal_id, skill_id);
+    return API.queueAndWait(() => Online.incrementGoal(goal_id, skill_id), "incrementGoal");
   }
 
   export async function refresh() {
@@ -622,7 +639,7 @@ export namespace APIMethods {
     if (Authentication.getOfflineMode()) {
       return true;
     } else {
-      return (await Online.addGoal(skill_id, goalProps));
+      return await API.queueAndWait(() => Online.addGoal(skill_id, goalProps), "addGoal");
     }
   }
 
@@ -630,6 +647,6 @@ export namespace APIMethods {
     if (Authentication.getOfflineMode()) {
       return true;
     }
-    return await Online.deleteGoal(goal_id, skill_id);
+    return await API.queueAndWait(() => Online.deleteGoal(goal_id, skill_id), "removeGoal");
   }
 }

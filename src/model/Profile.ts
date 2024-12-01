@@ -4,7 +4,7 @@ import { Log } from '../log/log';
 import { profileobj, SourlyFlags } from '../renderer';
 import IPC from '../renderer/ReactIPC';
 import Goal from './Goal';
-import Skill, { SkillContainer, SkillEventMap } from './Skill';
+import Skill, { SkillContainer, SkillEventMap, SkillProps } from './Skill';
 
 type SkillEventMapOverride = {
   onUpdates: { profile: Profile; skills: Skill[] };
@@ -50,6 +50,35 @@ namespace ProfileEvents {
           'Profile:onUpdates::saveSkills',
           1,
           'failed to save skills to storage'
+        );
+        return true;
+      }
+    }
+
+    export async function skillChanged({ skill, newSkill }: { skill: Skill, newSkill: SkillProps }) {
+      if (!newSkill) return true;
+      const r = await APIMethods.saveSkills({ id: skill.Id, name: newSkill.name }, 'update');
+      if (r == true) return false;
+      if (!("error" in r)) {
+        if (Authentication.getOfflineMode()) {
+          Log.log(
+            'Profile:onUpdates::saveSkills',
+            0,
+            'updated skills in storage',
+          );
+        } else {
+          Log.log(
+            'Profile:onUpdates::saveSkills',
+            0,
+            'updated skills in online',
+          );
+        }
+        return false;
+      } else {
+        Log.log(
+          'Profile:onUpdates::saveSkills',
+          1,
+          'failed to update skills in storage',
         );
         return true;
       }
@@ -204,6 +233,14 @@ namespace ProfileEvents {
       }
       // IPC.sendMessage('storage-save', { key: 'profile', value: profile.serialize() });
     }
+
+    export async function experienceGained(profile: Profile) {
+      if (Authentication.getOfflineMode()) {
+        await APIMethods.saveSkills(profile.serializeSkills(), "update");
+      }
+      return;
+    }
+
   }
 
 }
@@ -232,6 +269,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
 
     //this block of code acts an example so please follow along for the absorb functionality.
     this.absorbableOn('skillCreated', ProfileEvents.Absorbable.skillCreated);
+    this.absorbableOn('skillChanged', ProfileEvents.Absorbable.skillChanged);
     this.absorbableOn('skillRemoved', ProfileEvents.Absorbable.skillRemoved);
 
     //skill added
@@ -255,18 +293,9 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     /* Really limited to online stuff */
     //goalCreated
     skill.absorbableOn('goalCreated', ProfileEvents.Absorbable.goalCreated.bind(null, skill))
-
-    skill.on('goalProgressChanged', async ({ goal, amount }) => {
-      console.log('Profile:addSkillListeners::goalProgressChangedFinal', goal, amount);
-    });
     skill.absorbableOn('goalRemoved', ProfileEvents.Absorbable.goalRemoved.bind(null, skill));
     skill.listenToGoalAbsorb('goalProgressChanged', ProfileEvents.Absorbable.goalProgressChanged.bind(null, skill));
-    skill.on('experienceGained', async ({ skill, experience }) => {
-      if (Authentication.getOfflineMode()) {
-        await APIMethods.saveSkills(this.serializeSkills(), "update");
-      }
-      return;
-    });
+    skill.on('experienceGained', ProfileEvents.Normal.experienceGained.bind(null, this));
   }
 
   override emitUpdates() {
