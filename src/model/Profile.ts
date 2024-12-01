@@ -1,7 +1,7 @@
 import { APIMethods } from '../api/api';
 import { Authentication } from '../api/auth';
 import { Log } from '../log/log';
-import { SourlyFlags } from '../renderer';
+import { profileobj, SourlyFlags } from '../renderer';
 import IPC from '../renderer/ReactIPC';
 import Skill, { SkillContainer, SkillEventMap } from './Skill';
 
@@ -43,12 +43,12 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     //this block of code acts an example so please follow along for the absorb functionality.
     this.on('skillCreated', async ({ newSkill, absorb }) => {
       //if newSkill is null return
-      if (!newSkill) return;
+      if (!newSkill || Authentication.getOfflineMode()) return;
       //try to save the skills through the API abstraction layer (offline or online)
       const r = await APIMethods.saveSkills(newSkill.toJSON(), 'create');
-      if (r == true) //if the save was successful (offline)
+      if (r == true || !r) //if the save was successful (offline)
         return
-      if (r) { // if the save was successful
+      if (!("error" in r)) { // if the save was successful
         if (Authentication.getOfflineMode()) { // -- if offline mode is enabled - this is literally only for logs
           Log.log(
             'Profile:onUpdates::saveSkills',
@@ -66,7 +66,6 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
           //we need to find a way to update the skill id, oh wait we can just update the skill id literally
           newSkill.changeId(r.id);
         }
-
       } else { // if the save was unsuccessful
         // need to refresh or retry
         Log.log(
@@ -116,16 +115,16 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
       this.emitUpdates();
     });
     this.on('onUpdates', () => {
-      console.log('Profile:onUpdates', this.serialize());
-      APIMethods.saveProfile(this.serialize());
       if (Authentication.getOfflineMode()) {
         Log.log(
           'Profile:onUpdates',
           0,
           'saved profile to storage',
-          this.serialize(),
+          this,
         );
+        APIMethods.saveProfile(this.serialize());
         APIMethods.saveSkills(this.serializeSkills());
+        console.log(profileobj);
       }
       // IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
     });
@@ -141,7 +140,11 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     });
     skill.on('goalAdded', goal => {
       //just handle the goalAdded event
-      console.log('Profile:addSkillListeners::goalAdded', goal);
+      console.log('Profile:addSkillListeners::goalAdded', goal)
+      this.emitUpdates();
+    });
+    skill.on('goalCreatedFinal', ({ newGoal, skills }) => {
+      console.log('Profile:addSkillListeners::goalCreatedFinal', newGoal, skills);
       this.emitUpdates();
     });
     /* Really limited to online stuff */
@@ -178,6 +181,10 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
         }
       });
     });
+    skill.on('goalProgressChangedFinal', async ({ goal, amount }) => {
+      console.log('Profile:addSkillListeners::goalProgressChangedFinal', goal, amount);
+    });
+    /* Really limited to online stuff */
     skill.on('goalRemoved', (goal) => {
       APIMethods.removeGoal(goal.Id, skill.Id).then((r) => {
         // TODO: remove goal from skill and have a fallback where it will retry or undo the action
@@ -200,7 +207,7 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     });
     skill.on('goalProgressChanged', async ({ goal, optimisticValue, amount, absorb }) => {
       if (Authentication.getOfflineMode()) {
-        await APIMethods.saveSkills(this.serializeSkills(), "update");
+        //await APIMethods.saveSkills(this.serializeSkills(), "update");
         return;
       }
       if (amount < 0) {
@@ -222,7 +229,6 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
           1,
           'failed to increment goal online - %s',
           r.error
-
         );
         absorb();
       }
@@ -283,9 +289,17 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.emitUpdates();
   }
 
+  set NameEventless(name: string) {
+    this.name = name;
+  }
+
   set Version(version: string) {
     this.version = version;
     this.emitUpdates();
+  }
+
+  set VersionEventless(version: string) {
+    this.version = version;
   }
 
   set Level(level: number) {
@@ -322,6 +336,10 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
   set Flags(flags: SourlyFlags) {
     this.flags = flags;
     this.emitUpdates();
+  }
+
+  set FlagsEventless(flags: SourlyFlags) {
+    this.flags = flags;
   }
 
   public serialize() {

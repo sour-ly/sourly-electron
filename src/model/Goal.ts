@@ -7,6 +7,7 @@ type EventMap = {
     amount: number;
     revertCompletion?: boolean;
   } & Absorbable<{ progress: number, completed: boolean, target: number }>;
+  goalProgressChangedFinal: { amount: number; goal: Goal };
   completed: Goal;
 };
 

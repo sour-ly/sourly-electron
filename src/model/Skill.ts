@@ -34,8 +34,10 @@ type EventMap = {
   skillChanged: Skill;
   goalAdded: Goal;
   goalCreated: { newGoal: Goal } & Absorbable;
+  goalCreatedFinal: { skills: Skill; newGoal: Goal };
   goalUpdated: Goal;
   goalProgressChanged: { amount: number; goal: Goal; } & Absorbable<{ progress: number, completed: boolean, target: number }>;
+  goalProgressChangedFinal: { amount: number; goal: Goal };
   goalRemoved: Goal;
 };
 
@@ -78,6 +80,9 @@ export default class Skill extends Eventful<EventMap> {
     goal.on('completed', (goal) => {
       this.addExperience(goal.Reward);
     });
+    goal.on('goalProgressChangedFinal', async (args) => {
+      this.emit('goalProgressChangedFinal', args);
+    });
     goal.on('goalProgressChanged', async (args) => {
       let absorbed = false;
       const p = new Promise((resolve) => {
@@ -100,9 +105,6 @@ export default class Skill extends Eventful<EventMap> {
           }
         }, fn);
       });
-      await p;
-      if (!absorbed)
-        this.emit('experienceGainedFinal', { skill: this, experience: args.amount * (args.goal.Reward * 0.05) });
     });
   }
 
@@ -161,6 +163,7 @@ export default class Skill extends Eventful<EventMap> {
           }
         }
         resolve(true);
+        this.emit('experienceGainedFinal', { skill: this, experience });
       }
       this.emit('experienceGained', { skill: this, experience, absorb: () => { absorbed = true } }, fn);
     });
@@ -215,6 +218,9 @@ export default class Skill extends Eventful<EventMap> {
         this.goals.push(goal);
         this.listenToGoal(goal);
         this.emit('goalAdded', goal);
+        if (create) {
+          this.emit('goalCreatedFinal', { skills: this, newGoal: goal });
+        }
         resolve(true);
       }
       if (create) {
@@ -226,7 +232,8 @@ export default class Skill extends Eventful<EventMap> {
           }
         }, fn);
       } else {
-        this.emit('goalAdded', goal, fn);
+        fn();
+        this.emit('goalAdded', goal);
       }
     });
     //allow this function to be awaited
@@ -280,6 +287,7 @@ export type Absorbable<T = any> = {
 
 export type SkillEventMap = {
   skillCreated: { newSkill: Skill } & Absorbable<SkillProps>;
+  skillCreatedFinal: { skills: Skill[]; newSkill: Skill };
   skillAdded: { skills: Skill[]; newSkill: Skill };
   skillChanged: Skill;
   onUpdates: { skills: Skill[] };
@@ -310,7 +318,6 @@ export abstract class SkillContainer<
       this.addSkillListeners(skill);
     });
     this.on('onUpdates', ({ skills }) => {
-      console.log('onUpdates', skills);
       // IPC.sendMessage('storage-save', { key: 'skill', value: this.serializeSkills() });
     });
   }
@@ -364,8 +371,8 @@ export abstract class SkillContainer<
           resolve(false);
         } else {
           this.skills.push(skill);
-          this.emitUpdates();
           resolve(true);
+          this.emitUpdates();
         }
       };
       if (create) {
@@ -381,7 +388,8 @@ export abstract class SkillContainer<
           fn,
         );
       } else {
-        this.emit('skillAdded', { skills: this.skills, newSkill: skill }, fn);
+        fn();
+        this.emit('skillAdded', { skills: this.skills, newSkill: skill });
       }
     });
     return p;

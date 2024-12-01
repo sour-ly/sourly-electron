@@ -266,9 +266,20 @@ namespace Offline {
               json.version ?? '0.0.0',
               json.flags ?? SourlyFlags.NULL,
             );
-            profileobj.setState(npfp);
+            if (!profileobj.state) {
+              profileobj.setState(npfp);
+            } else {
+              profileobj.state.NameEventless = npfp.Name;
+              profileobj.state.Level = npfp.Level;
+              profileobj.state.CurrentExperience = npfp.CurrentExperience;
+              profileobj.state.VersionEventless = npfp.Version;
+              profileobj.state.FlagsEventless = npfp.Flags;
+              profileobj.state.Skills = npfp.Skills;
+
+            }
             Log.log('storage:request', 0, 'loaded profile from storage', data);
-            resolve(npfp as Profile);
+            resolve(profileobj.state as Profile);
+            return;
           } catch (e) {
             Log.log(
               'storage:request',

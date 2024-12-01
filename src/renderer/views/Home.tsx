@@ -9,6 +9,7 @@ function Home() {
 
   useEffect(() => {
     const i = profileobj.on('onUpdates', (skill) => {
+      console.log('updating skills', skill);
       setSkills((_) => {
         return [...skill.skills];
       });
@@ -22,7 +23,7 @@ function Home() {
     <main className="home">
       {skills.length === 0 && <h1>No Skills Yet!</h1>}
       {skills.map((skill) => {
-        return <SkillView key={skill.Id} skill={skill} skills={skills} />;
+        return <SkillView key={skill.uid} skill={skill} skills={skills} />;
       })}
       <SkillPopupWrapper tskill={{}} edit={false} />
     </main>

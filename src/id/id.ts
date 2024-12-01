@@ -2,9 +2,11 @@ export default abstract class Identifiable {
   private static idCounter: number = 0;
 
   private id: number;
+  readonly uid: string;
 
   constructor() {
     this.id = Identifiable.idCounter++;
+    this.uid = Identifiable.newId().toString();
   }
 
   public get Id() {
