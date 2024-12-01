@@ -45,6 +45,7 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
     return i - 1;
   }
 
+  //delete absorbable event listener
   absorbOff<K extends keyof T>(event: K, idx: number) {
     if (!this.absorbListeners.has(event)) {
       return;
@@ -66,6 +67,7 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
     return i - 1;
   }
 
+  //delete normal event listener
   off<K extends keyof T>(event: K, idx: number) {
     if (!this.listeners.has(event)) {
       return;
@@ -76,6 +78,7 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
     this.listeners.set(event, new_arr);
   }
 
+  //this is a one time event listener, it will only be called once and then removed
   once<K extends keyof T>(event: K, listener: Listener<T[K]>) {
     const idx = this.on(event, async (args) => {
       await listener(args);
@@ -129,6 +132,7 @@ export abstract class Eventful<T extends Event<any, any>> extends Identifiable {
 
   }
 
+  // just a wrapper function to get the event
   protected getAbsorbableEvent<K extends keyof T>(event: K): T[K] {
     if (this.absorbableHasEvent(event)) {
       this.absorbListeners.set(event, []);

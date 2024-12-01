@@ -3,6 +3,7 @@ import { Authentication } from '../api/auth';
 import { Log } from '../log/log';
 import { profileobj, SourlyFlags } from '../renderer';
 import IPC from '../renderer/ReactIPC';
+import Goal from './Goal';
 import Skill, { SkillContainer, SkillEventMap } from './Skill';
 
 type SkillEventMapOverride = {
@@ -16,6 +17,177 @@ export interface ProfileSkeleton {
   currentExperience: number;
   version: string;
   flags: SourlyFlags;
+}
+
+
+namespace ProfileEvents {
+  export namespace Absorbable {
+    export async function skillCreated({ newSkill }: { newSkill: Skill }) {
+      if (!newSkill || Authentication.getOfflineMode()) return false;
+      const r = await APIMethods.saveSkills(newSkill.toJSON(), 'create');
+      if (r == true) return false;
+      else if (r === false) {
+        return true;
+      }
+      if (!("error" in r)) {
+        if (Authentication.getOfflineMode()) {
+          Log.log(
+            'Profile:onUpdates::saveSkills',
+            0,
+            'saved skills to storage'
+          );
+        } else {
+          Log.log(
+            'Profile:onUpdates::saveSkills',
+            0,
+            'saved skills to online',
+          );
+          newSkill.changeId(r.id);
+        }
+        return false;
+      } else {
+        Log.log(
+          'Profile:onUpdates::saveSkills',
+          1,
+          'failed to save skills to storage'
+        );
+        return true;
+      }
+    }
+
+    export async function skillRemoved({ newSkill }: { newSkill: Skill }) {
+      if (!newSkill) return true;
+      const r = await APIMethods.saveSkills(newSkill.toJSON(), 'delete');
+      if (r == true) return false;
+      if (r) {
+        if (Authentication.getOfflineMode()) {
+          Log.log(
+            'Profile:onUpdates::saveSkills',
+            0,
+            'removed skills from storage',
+          );
+        } else {
+          Log.log(
+            'Profile:onUpdates::saveSkills',
+            0,
+            'removed skills from online',
+          );
+        }
+        return false;
+      } else {
+        Log.log(
+          'Profile:onUpdates::saveSkills',
+          1,
+          'failed to remove skills from storage',
+        );
+        return true;
+      }
+    }
+
+    export async function goalCreated(skill: Skill, { newGoal }: { newGoal: Goal }) {
+      return await APIMethods.addGoal(skill.Id, newGoal.toJSON()).then((r) => {
+        if (r === true) return false;
+        if ("error" in r) {
+          Log.log(
+            'Profile:addSkillListeners::addGoal',
+            1,
+            'failed to add goal to online - %s',
+            r.error,
+          );
+          return true;
+        }
+        if (r) {
+          Log.log(
+            'Profile:addSkillListeners::addGoal',
+            0,
+            'added goal to online',
+            newGoal.toJSON(),
+          );
+          newGoal.changeId(r.skill.goals.slice(-1)[0].id);
+        } else {
+          Log.log(
+            'Profile:addSkillListeners::addGoal',
+            1,
+            'failed to add goal to online',
+            newGoal.toJSON(),
+          );
+          // absorb the action so it doesn't actually get pushed to the frontend
+          return true;
+        }
+        return false;
+      });
+    }
+
+    export async function goalProgressChanged(skill: Skill, { goal, amount }: { goal: Goal; amount: number }) {
+      return await APIMethods.incrementGoal(goal.Id, skill.Id).then((r) => {
+        if (r === true) return false;
+        if ("error" in r) {
+          Log.log(
+            'Profile:addSkillListeners::incrementGoal',
+            1,
+            'failed to increment goal online - %s',
+            r.error,
+          );
+          return true;
+        }
+        if (r) {
+          Log.log(
+            'Profile:addSkillListeners::incrementGoal',
+            0,
+            'incremented goal online',
+            goal.toJSON(),
+          );
+        } else {
+          Log.log(
+            'Profile:addSkillListeners::incrementGoal',
+            1,
+            'failed to increment goal online',
+            goal.toJSON(),
+          );
+          // absorb the action so it doesn't actually get pushed to the frontend
+          return true;
+        }
+        return false;
+      });
+    }
+
+    export async function goalRemoved(skill: Skill, goal: Goal) {
+      return await APIMethods.removeGoal(goal.Id, skill.Id).then((r) => {
+        if (r === true) return false;
+        if ("error" in r) {
+          Log.log(
+            'Profile:addSkillListeners::removeGoal',
+            1,
+            'failed to remove goal online - %s',
+            r.error,
+          );
+          return true;
+        }
+        if (r) {
+          Log.log(
+            'Profile:addSkillListeners::removeGoal',
+            0,
+            'removed goal online',
+            goal.toJSON(),
+          );
+        } else {
+          Log.log(
+            'Profile:addSkillListeners::removeGoal',
+            1,
+            'failed to remove goal online',
+            goal.toJSON(),
+          );
+          // absorb the action so it doesn't actually get pushed to the frontend
+          return true;
+        }
+        return false;
+      });
+    }
+  }
+
+  export namespace Normal {
+  }
+
 }
 
 export class Profile extends SkillContainer<SkillEventMapOverride> {
@@ -41,78 +213,8 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     //@TODO Move this some where else other than the constructor...
 
     //this block of code acts an example so please follow along for the absorb functionality.
-    this.absorbableOn('skillCreated', async ({ newSkill }) => {
-      //if newSkill is null return
-      if (!newSkill || Authentication.getOfflineMode()) return false;
-      //try to save the skills through the API abstraction layer (offline or online)
-      const r = await APIMethods.saveSkills(newSkill.toJSON(), 'create');
-      if (r == true) //if the save was successful (offline)
-        return false;
-      else if (r === false) {
-        return true;
-      }
-      if (!("error" in r)) { // if the save was successful
-        if (Authentication.getOfflineMode()) { // -- if offline mode is enabled - this is literally only for logs
-          Log.log(
-            'Profile:onUpdates::saveSkills',
-            0,
-            'saved skills to storage',
-            this.serialize(),
-          );
-        } else { // -- this is for online mode
-          Log.log(
-            'Profile:onUpdates::saveSkills',
-            0,
-            'saved skills to online',
-            this.serialize(),
-          );
-          //we need to find a way to update the skill id, oh wait we can just update the skill id literally
-          newSkill.changeId(r.id);
-        }
-        return false;
-      } else { // if the save was unsuccessful
-        // need to refresh or retry
-        Log.log(
-          'Profile:onUpdates::saveSkills',
-          1,
-          'failed to save skills to storage',
-          this.serialize(),
-        );
-        return true;
-      }
-    });
-
-    this.absorbableOn('skillRemoved', async ({ newSkill }) => {
-      if (!newSkill) return true;
-      const r = await APIMethods.saveSkills(newSkill.toJSON(), 'delete');
-      if (r == true) return false;
-      if (r) {
-        if (Authentication.getOfflineMode()) {
-          Log.log(
-            'Profile:onUpdates::saveSkills',
-            0,
-            'removed skills from storage',
-            this.serialize(),
-          );
-        } else {
-          Log.log(
-            'Profile:onUpdates::saveSkills',
-            0,
-            'removed skills from online',
-            this.serialize(),
-          );
-        }
-        return false;
-      } else {
-        Log.log(
-          'Profile:onUpdates::saveSkills',
-          1,
-          'failed to remove skills from storage',
-          this.serialize(),
-        );
-        return true;
-      }
-    });
+    this.absorbableOn('skillCreated', ProfileEvents.Absorbable.skillCreated);
+    this.absorbableOn('skillRemoved', ProfileEvents.Absorbable.skillRemoved);
 
     //skill added
     this.on('skillAdded', ({ newSkill }) => {
@@ -149,90 +251,14 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
       this.emitUpdates();
     });
     /* Really limited to online stuff */
-    skill.absorbableOn('goalCreated', async ({ newGoal }) => {
-      return await APIMethods.addGoal(skill.Id, newGoal.toJSON()).then((r) => {
-        if (r === true) return false;
-        if ("error" in r) {
-          Log.log(
-            'Profile:addSkillListeners::addGoal',
-            1,
-            'failed to add goal to online - %s',
-            r.error,
-          );
-          return true;
-        }
-        if (r) {
-          Log.log(
-            'Profile:addSkillListeners::addGoal',
-            0,
-            'added goal to online',
-            newGoal.toJSON(),
-          );
-          newGoal.changeId(r.skill.goals.slice(-1)[0].id);
-        } else {
-          Log.log(
-            'Profile:addSkillListeners::addGoal',
-            1,
-            'failed to add goal to online',
-            newGoal.toJSON(),
-          );
-          // absorb the action so it doesn't actually get pushed to the frontend
-          return true;
-        }
-        return false;
-      });
-    });
+    //goalCreated
+    skill.absorbableOn('goalCreated', ProfileEvents.Absorbable.goalCreated.bind(null, skill))
+
     skill.on('goalProgressChanged', async ({ goal, amount }) => {
       console.log('Profile:addSkillListeners::goalProgressChangedFinal', goal, amount);
     });
-    /* Really limited to online stuff */
-    skill.on('goalRemoved', (goal) => {
-      APIMethods.removeGoal(goal.Id, skill.Id).then((r) => {
-        // TODO: remove goal from skill and have a fallback where it will retry or undo the action
-        if (r) {
-          Log.log(
-            'Profile:addSkillListeners::removeGoal',
-            0,
-            'removed goal from online',
-            goal.toJSON(),
-          );
-        } else {
-          Log.log(
-            'Profile:addSkillListeners::removeGoal',
-            1,
-            'failed to remove goal from online',
-            goal.toJSON(),
-          );
-        }
-      });
-    });
-    skill.listenToGoalAbsorb('goalProgressChanged', async ({ goal, amount }) => {
-      if (Authentication.getOfflineMode()) {
-        return false;
-      }
-      if (amount < 0) {
-        return true;
-      }
-      const r = await APIMethods.incrementGoal(goal.Id, skill.Id);
-      if (r === true) return false;
-      if (!("error" in r)) {
-        Log.log(
-          'Profile:addSkillListeners::incrementGoal',
-          0,
-          'incremented goal online',
-          goal.toJSON(),
-        );
-        return false;
-      } else {
-        Log.log(
-          'Profile:addSkillListeners::incrementGoal',
-          1,
-          'failed to increment goal online - %s',
-          r.error
-        );
-        return true;
-      }
-    });
+    skill.absorbableOn('goalRemoved', ProfileEvents.Absorbable.goalRemoved.bind(null, skill));
+    skill.listenToGoalAbsorb('goalProgressChanged', ProfileEvents.Absorbable.goalProgressChanged.bind(null, skill));
     skill.on('experienceGained', async ({ skill, experience }) => {
       if (Authentication.getOfflineMode()) {
         await APIMethods.saveSkills(this.serializeSkills(), "update");

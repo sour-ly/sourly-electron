@@ -630,6 +630,6 @@ export namespace APIMethods {
     if (Authentication.getOfflineMode()) {
       return true;
     }
-    return !('error' in Online.deleteGoal(goal_id, skill_id));
+    return await Online.deleteGoal(goal_id, skill_id);
   }
 }
