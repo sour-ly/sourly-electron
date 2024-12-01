@@ -191,9 +191,6 @@ export default class Skill extends Eventful<EventMap> {
         this.goals.push(goal);
         this.listenToGoal(goal);
         this.emit('goalAdded', goal);
-        if (create) {
-          this.emit('goalCreatedFinal', { skills: this, newGoal: goal });
-        }
       }
       if (create) {
         this.emit('goalCreated', {
@@ -407,7 +404,7 @@ export abstract class SkillContainer<
     return this.skills.find((skill) => skill.Id === id);
   }
 
-  protected serializeSkills() {
+  public serializeSkills() {
     return this.skills.map((skill) => skill.toJSON());
   }
 }

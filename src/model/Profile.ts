@@ -186,6 +186,24 @@ namespace ProfileEvents {
   }
 
   export namespace Normal {
+    export async function skillAdded(profile: Profile, { newSkill }: { newSkill: Skill }) {
+      if (!newSkill) return;
+      profile.emitUpdates();
+    }
+
+    export async function onUpdates(profile: Profile) {
+      if (Authentication.getOfflineMode()) {
+        Log.log(
+          'Profile:onUpdates',
+          0,
+          'saved profile to storage',
+          profile,
+        );
+        APIMethods.saveProfile(profile.serialize());
+        APIMethods.saveSkills(profile.serializeSkills());
+      }
+      // IPC.sendMessage('storage-save', { key: 'profile', value: profile.serialize() });
+    }
   }
 
 }
@@ -217,24 +235,8 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.absorbableOn('skillRemoved', ProfileEvents.Absorbable.skillRemoved);
 
     //skill added
-    this.on('skillAdded', ({ newSkill }) => {
-      if (!newSkill) return;
-      this.emitUpdates();
-    });
-    this.on('onUpdates', () => {
-      if (Authentication.getOfflineMode()) {
-        Log.log(
-          'Profile:onUpdates',
-          0,
-          'saved profile to storage',
-          this,
-        );
-        APIMethods.saveProfile(this.serialize());
-        APIMethods.saveSkills(this.serializeSkills());
-        console.log(profileobj);
-      }
-      // IPC.sendMessage('storage-save', { key: 'profile', value: this.serialize() });
-    });
+    this.on('skillAdded', ProfileEvents.Normal.skillAdded.bind(null, this));
+    this.on('onUpdates', ProfileEvents.Normal.onUpdates.bind(null, this));
   }
 
   override addSkillListeners(skill: Skill) {
