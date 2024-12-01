@@ -1,10 +1,10 @@
 import { APIMethods } from '../api/api';
 import { Authentication } from '../api/auth';
-import { Eventful } from '../event/events';
+import { Absorbable, Eventful } from '../event/events';
 import Identifiable from '../id/id';
 import { Log } from '../log/log';
 import IPC from '../renderer/ReactIPC';
-import Goal, { GoalProps } from './Goal';
+import Goal, { GoalEventMap, GoalProps } from './Goal';
 
 export type Metric =
   | 'units'
@@ -29,15 +29,13 @@ export type Metric =
 
 type EventMap = {
   levelUp: { skill: Skill; level: number };
-  experienceGained: { skill: Skill; experience: number } & Absorbable;
+  experienceGained: { skill: Skill; experience: number };
   experienceGainedFinal: { skill: Skill; experience: number };
   skillChanged: Skill;
   goalAdded: Goal;
-  goalCreated: { newGoal: Goal } & Absorbable;
-  goalCreatedFinal: { skills: Skill; newGoal: Goal };
+  goalCreated: { newGoal: Goal };
   goalUpdated: Goal;
-  goalProgressChanged: { amount: number; goal: Goal; } & Absorbable<{ progress: number, completed: boolean, target: number }>;
-  goalProgressChangedFinal: { amount: number; goal: Goal };
+  goalProgressChanged: { amount: number; goal: Goal; } & Absorbable;
   goalRemoved: Goal;
 };
 
@@ -80,31 +78,12 @@ export default class Skill extends Eventful<EventMap> {
     goal.on('completed', (goal) => {
       this.addExperience(goal.Reward);
     });
-    goal.on('goalProgressChangedFinal', async (args) => {
-      this.emit('goalProgressChangedFinal', args);
-    });
     goal.on('goalProgressChanged', async (args) => {
-      let absorbed = false;
-      const p = new Promise((resolve) => {
-        const fn = () => {
-          if (absorbed) {
-            resolve(false);
-            return;
-          }
-          const { amount, goal, revertCompletion } = args;
-          if (goal.Completed && !revertCompletion) {
-          } else if (revertCompletion) {
-            this.addExperience(-goal.Reward);
-          } else this.addExperience(amount * (goal.Reward * 0.05));
-          resolve(true);
-        };
-        this.emit('goalProgressChanged', {
-          goal: args.goal, optimisticValue: args.optimisticValue, amount: args.amount, absorb: () => {
-            absorbed = true;
-            args.absorb();
-          }
-        }, fn);
-      });
+      const { amount, goal, revertCompletion } = args;
+      if (goal.Completed && !revertCompletion) {
+      } else if (revertCompletion) {
+        this.addExperience(-goal.Reward);
+      } else this.addExperience(amount * (goal.Reward * 0.05));
     });
   }
 
@@ -131,44 +110,45 @@ export default class Skill extends Eventful<EventMap> {
       return;
     }
 
-    let absorbed = false;
-
-    const p = new Promise((resolve) => {
-      const fn = () => {
-        if (absorbed) {
-          resolve(false);
-          return;
+    const fn = () => {
+      this.currentExperience += experience;
+      this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
+      if (this.currentExperience >= this.experienceRequired) {
+        // check if we need to level up still
+        while (this.currentExperience >= this.experienceRequired) {
+          this.currentExperience -= this.experienceRequired;
+          this.levelUp();
         }
-        this.currentExperience += experience;
-        this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
-        if (this.currentExperience >= this.experienceRequired) {
-          // check if we need to level up still
-          while (this.currentExperience >= this.experienceRequired) {
-            this.currentExperience -= this.experienceRequired;
-            this.levelUp();
+      } else if (this.currentExperience < 0) {
+        // should give us the experience we need to get to the previous level
+        this.levelDown();
+        this.currentExperience = this.experienceRequired + this.currentExperience;
+        // check if we need to go down another level
+        while (this.currentExperience < 0) {
+          if (this.level <= 1) {
+            this.currentExperience = 0;
+            break;
           }
-        } else if (this.currentExperience < 0) {
-          // should give us the experience we need to get to the previous level
           this.levelDown();
-          this.currentExperience = this.experienceRequired + this.currentExperience;
-          // check if we need to go down another level
-          while (this.currentExperience < 0) {
-            if (this.level <= 1) {
-              this.currentExperience = 0;
-              break;
-            }
-            this.levelDown();
-            this.currentExperience =
-              this.experienceRequired + this.currentExperience;
-          }
+          this.currentExperience =
+            this.experienceRequired + this.currentExperience;
         }
-        resolve(true);
-        this.emit('experienceGainedFinal', { skill: this, experience });
       }
-      this.emit('experienceGained', { skill: this, experience, absorb: () => { absorbed = true } }, fn);
-    });
+    }
+    this.emit('experienceGained', { skill: this, experience }, fn);
 
-    return await p;
+  }
+
+  public listenToGoals<T extends keyof GoalEventMap>(event: T, listener: (t: GoalEventMap[T]) => void) {
+    this.goals.forEach((goal) => {
+      goal.on(event, listener);
+    });
+  }
+
+  public listenToGoalAbsorb<T extends keyof GoalEventMap>(event: T, listener: (t: GoalEventMap[T]) => Promise<boolean> | boolean) {
+    this.goals.forEach((goal) => {
+      goal.absorbableOn(event, listener);
+    });
   }
 
   public get Name() {
@@ -204,16 +184,9 @@ export default class Skill extends Eventful<EventMap> {
   /* add goals -- this function is absorbable */
   public async addGoal(goal: Goal, create: boolean = false) {
 
-    //have an outside variable to check if the event was absorbed
-    let absorbed = false;
 
-    //create a promise that will resolve if the event was absorbed
     const p = await new Promise((resolve) => {
       const fn = () => {
-        if (absorbed) {
-          resolve(false);
-          return;
-        }
         //push the goal and trigger the event
         this.goals.push(goal);
         this.listenToGoal(goal);
@@ -221,20 +194,15 @@ export default class Skill extends Eventful<EventMap> {
         if (create) {
           this.emit('goalCreatedFinal', { skills: this, newGoal: goal });
         }
-        resolve(true);
       }
       if (create) {
         this.emit('goalCreated', {
           newGoal: goal,
-          absorb: () => {
-            //if the event is absorbed, then we do not push the goal
-            absorbed = true;
-          }
         }, fn);
       } else {
-        fn();
-        this.emit('goalAdded', goal);
+        this.emit('goalAdded', goal, fn);
       }
+      resolve(true);
     });
     //allow this function to be awaited
     return p;
@@ -280,18 +248,14 @@ export default class Skill extends Eventful<EventMap> {
   }
 }
 
-export type Absorbable<T = any> = {
-  absorb: () => void;
-  optimisticValue?: T;
-};
 
 export type SkillEventMap = {
-  skillCreated: { newSkill: Skill } & Absorbable<SkillProps>;
+  skillCreated: { newSkill: Skill };
   skillCreatedFinal: { skills: Skill[]; newSkill: Skill };
   skillAdded: { skills: Skill[]; newSkill: Skill };
   skillChanged: Skill;
   onUpdates: { skills: Skill[] };
-  skillRemoved: { newSkill: Skill } & Absorbable<SkillProps>;
+  skillRemoved: { newSkill: Skill };
 };
 
 export abstract class SkillContainer<
@@ -363,36 +327,28 @@ export abstract class SkillContainer<
   //this function is absorable
   public async addSkill(skill: Skill, create: boolean = true) {
     const p = new Promise((resolve) => {
-      // lets abstract this to the API
-      let absorbed = false;
       // fn gets called after the event is emitted emit(obj, this function)
       const fn = () => {
-        if (absorbed) {
-          resolve(false);
-        } else {
-          this.skills.push(skill);
-          resolve(true);
-          this.emitUpdates();
-        }
+        this.skills.push(skill);
+        this.emitUpdates();
       };
+
       if (create) {
         //emit an event that can be absorbed
         this.emit(
           'skillCreated',
           {
             newSkill: skill,
-            absorb: () => {
-              absorbed = true;
-            },
           },
           fn,
         );
       } else {
-        fn();
-        this.emit('skillAdded', { skills: this.skills, newSkill: skill });
+        this.emit('skillAdded', { skills: this.skills, newSkill: skill }, fn);
       }
+      //make promise that has a timeout function
+      resolve(true);
     });
-    return p;
+    return await p;
   }
 
   public addSkillFromJSON(skill: SkillProps) {
@@ -434,20 +390,15 @@ export abstract class SkillContainer<
 
   public async removeSkill(skill: Skill) {
     const p = new Promise((resolve) => {
-      let absorbed = false;
       const fn = () => {
-        if (absorbed) {
-          resolve(false);
-          return;
-        }
         const index = this.skills.indexOf(skill);
         if (index !== -1) {
           this.skills.splice(index, 1);
           this.emitUpdates();
         }
-        resolve(true);
       };
-      this.emit('skillRemoved', { newSkill: skill, absorb: () => { absorbed = true } }, fn);
+      this.emit('skillRemoved', { newSkill: skill }, fn);
+      resolve(true);
     });
     return await p;
   }

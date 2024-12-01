@@ -1,15 +1,16 @@
 import { Eventful } from '../event/events';
-import { Absorbable } from './Skill';
 
 type EventMap = {
   goalProgressChanged: {
     goal: Goal;
     amount: number;
     revertCompletion?: boolean;
-  } & Absorbable<{ progress: number, completed: boolean, target: number }>;
+  };
   goalProgressChangedFinal: { amount: number; goal: Goal };
   completed: Goal;
 };
+
+export type GoalEventMap = EventMap;
 
 export type GoalProps = {
   id?: string;
@@ -39,16 +40,8 @@ export default class Goal extends Eventful<EventMap> {
   }
 
   public async incrementProgress(amount: number = 1) {
-
-    let absorbed = false
-
     const p = new Promise((resolve) => {
-
       const fn = () => {
-        if (absorbed) {
-          resolve(false);
-          return;
-        };
         if (this.completed) return;
         this.progress += amount;
         if (this.progress >= this.target) {
@@ -57,8 +50,7 @@ export default class Goal extends Eventful<EventMap> {
         }
         resolve(true);
       }
-
-      this.emit('goalProgressChanged', { goal: this, amount, absorb: () => absorbed = true }, fn);
+      this.emit('goalProgressChanged', { goal: this, amount }, fn);
     });
     return await p;
   }
@@ -71,10 +63,9 @@ export default class Goal extends Eventful<EventMap> {
         goal: this,
         amount: -1,
         revertCompletion: true,
-        absorb: () => { }
       });
     } else {
-      this.emit('goalProgressChanged', { goal: this, amount: -1, absorb: () => { } });
+      this.emit('goalProgressChanged', { goal: this, amount: -1 });
     }
     this.progress--;
   }

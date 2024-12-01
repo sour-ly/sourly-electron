@@ -574,7 +574,7 @@ export namespace APIMethods {
       // create the skill
       const r = await Online.addSkills(skills.name);
       if ('error' in r) {
-        return false;
+        return r;
       }
       return r.skill;
     } else if (onlineFlags === 'delete') {

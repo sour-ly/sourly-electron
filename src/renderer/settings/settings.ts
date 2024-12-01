@@ -28,8 +28,7 @@ type SettingsObjectEventMap = {
 
 class SettingsObject
   extends Eventful<SettingsObjectEventMap>
-  implements Settings
-{
+  implements Settings {
   notification: {
     enabled: boolean;
     duration: number;
@@ -48,11 +47,12 @@ class SettingsObject
     value: OmittableSettings[T],
   ) {
     if (key === 'Id') return;
-    const k = key as keyof Omit<SettingsObject, 'Id'>;
+    const k = key as keyof Omit<Omit<SettingsObject, 'Id'>, 'uid'>;
     if (this[k] === undefined) return;
     if (typeof this[k] === 'number') {
       if (isNaN(value as any)) return;
     }
+    if (key === 'uid') return;
     this[k] = value as any;
     this.save();
   }
@@ -60,10 +60,12 @@ class SettingsObject
   public setAll(props: OmittableSettings) {
     const props_mutated = RemoveNANFromObject(props);
     Object.keys(props_mutated).forEach((key) => {
-      const k = key as keyof Omit<SettingsObject, 'Id'>;
+      const k = key as keyof Omit<Omit<SettingsObject, 'Id'>, 'uid'>;
       if ((k as any) === 'listeners') return;
+      if ((k as any) === 'absorbListeners') return;
       if (this[k] === undefined) return;
       if (key === 'Id') return;
+      if (key === 'uid') return;
       this[k] = props_mutated[key as keyof Settings];
       if (k === 'theme') {
         adjustTheme();
