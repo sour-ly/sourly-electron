@@ -34,7 +34,7 @@ type EventMap = {
   skillChanged: { skill: Skill, newSkill: SkillProps };
   goalAdded: Goal;
   goalCreated: { newGoal: Goal };
-  goalUpdated: Goal;
+  goalUpdated: { goal: Goal, newGoal: Goal };
   goalProgressChanged: { amount: number; goal: Goal; } & Absorbable;
   goalRemoved: Goal;
 };
@@ -76,7 +76,7 @@ export default class Skill extends Eventful<EventMap> {
     return Math.floor(50 * level ** 2 - 150 * level + 200);
   }
 
-  private listenToGoal(goal: Goal) {
+  private listenToGoal({ goal }: { goal: Goal, newGoal: Goal }) {
     goal.on('completed', (goal) => {
       this.addExperience(goal.Reward);
     });
@@ -224,7 +224,7 @@ export default class Skill extends Eventful<EventMap> {
       const fn = () => {
         //push the goal and trigger the event
         this.goals.push(goal);
-        this.listenToGoal(goal);
+        this.listenToGoal({ goal, newGoal: goal });
         this.emit('goalAdded', goal);
       }
       if (create) {
@@ -250,11 +250,18 @@ export default class Skill extends Eventful<EventMap> {
 
   public updateGoal(goal_id: number, goal: Goal) {
     const index = this.goals.findIndex((goal) => goal.Id === goal_id);
-    if (index !== -1) {
-      this.goals[index] = goal;
-      this.emit('goalUpdated', goal);
-      this.listenToGoal(goal);
+    if (index === -1) {
+      Log.log('skillManager:updateGoal', 1, 'goal not found', goal_id);
+      return;
     }
+    goal.changeId(goal_id);
+    const fn = () => {
+      if (index !== -1) {
+        this.goals[index] = goal;
+        this.listenToGoal({ goal: this.goals[index], newGoal: goal });
+      }
+    }
+    this.emit('goalUpdated', { goal: this.goals[index], newGoal: goal }, fn);
   }
 
   /* get total xp */
@@ -334,7 +341,7 @@ export abstract class SkillContainer<
       this.emitUpdates();
     });
     skill.on('goalUpdated', (goal) => {
-      listenToGoals(goal);
+      listenToGoals(goal.goal);
       this.emitUpdates();
     });
     skill.on('goalRemoved', (goal) => {

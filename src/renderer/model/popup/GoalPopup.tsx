@@ -60,6 +60,7 @@ function AddPage({
   }, [goal]);
 
   useEffect(() => {
+
     Object.keys(goal_copy).forEach((key) => {
       if (goal_copy[key as keyof GoalProps] === undefined) {
         change(key as keyof GoalProps, '');
@@ -135,6 +136,14 @@ export function GoalPopUpWrapper({
     goalt?.toJSON() ?? { metric: 'Units' },
   );
   const change = useStateUtil(setGoal);
+
+
+  useEffect(() => {
+    if (goalt) {
+      setGoal({ ...goalt.toJSON() });
+    }
+  }, [goalt]);
+
 
   const saveGoal = useCallback(() => {
     props.onClick && props.onClick();

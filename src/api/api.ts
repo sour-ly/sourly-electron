@@ -469,6 +469,14 @@ namespace Online {
     return newSkill;
   }
 
+  export async function editGoal(skill_id: number, goal_id: number, goalProps: GoalProps) {
+    return await API.post<APITypes.Goal>(
+      `protected/skill/${skill_id}/goal/${goal_id}/edit`,
+      goalProps,
+      header(),
+    );
+  }
+
   //increment goal progress
   export async function incrementGoal(goal_id: number, skill_id: number) {
     return await API.get<APITypes.Skill>(
@@ -600,6 +608,13 @@ export namespace APIMethods {
     }
 
     return false;
+  }
+
+  export async function updateGoal(goal_id: number, skill_id: number, goalProps: GoalProps) {
+    if (Authentication.getOfflineMode()) {
+      return true;
+    }
+    return API.queueAndWait(() => Online.editGoal(skill_id, goal_id, goalProps), "updateGoal");
   }
 
   export async function removeSkill(skill_id: number) {

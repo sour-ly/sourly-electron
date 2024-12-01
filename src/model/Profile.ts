@@ -3,7 +3,7 @@ import { Authentication } from '../api/auth';
 import { Log } from '../log/log';
 import { profileobj, SourlyFlags } from '../renderer';
 import IPC from '../renderer/ReactIPC';
-import Goal from './Goal';
+import Goal, { GoalProps } from './Goal';
 import Skill, { SkillContainer, SkillEventMap, SkillProps } from './Skill';
 
 type SkillEventMapOverride = {
@@ -113,6 +113,7 @@ namespace ProfileEvents {
       }
     }
 
+    /* GOAL STUFF */
     export async function goalCreated(skill: Skill, { newGoal }: { newGoal: Goal }) {
       return await APIMethods.addGoal(skill.Id, newGoal.toJSON()).then((r) => {
         if (r === true) return false;
@@ -139,6 +140,39 @@ namespace ProfileEvents {
             1,
             'failed to add goal to online',
             newGoal.toJSON(),
+          );
+          // absorb the action so it doesn't actually get pushed to the frontend
+          return true;
+        }
+        return false;
+      });
+    }
+
+    export async function goalUpdated(skill: Skill, { goal, newGoal }: { goal: Goal; newGoal: GoalProps }) {
+      return await APIMethods.updateGoal(Number(newGoal.id) ?? 0, skill.Id, newGoal).then((r) => {
+        if (r === true) return false;
+        if ("error" in r) {
+          Log.log(
+            'Profile:addSkillListeners::updateGoal',
+            1,
+            'failed to update goal online - %s',
+            r.error,
+          );
+          return true;
+        }
+        if (r) {
+          Log.log(
+            'Profile:addSkillListeners::updateGoal',
+            0,
+            'updated goal online',
+            newGoal,
+          );
+        } else {
+          Log.log(
+            'Profile:addSkillListeners::updateGoal',
+            1,
+            'failed to update goal online',
+            newGoal,
           );
           // absorb the action so it doesn't actually get pushed to the frontend
           return true;
@@ -293,7 +327,10 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     /* Really limited to online stuff */
     //goalCreated
     skill.absorbableOn('goalCreated', ProfileEvents.Absorbable.goalCreated.bind(null, skill))
+    //goalRemoved
     skill.absorbableOn('goalRemoved', ProfileEvents.Absorbable.goalRemoved.bind(null, skill));
+    //goalUpdated
+    skill.absorbableOn('goalUpdated', ProfileEvents.Absorbable.goalUpdated.bind(null, skill));
     skill.listenToGoalAbsorb('goalProgressChanged', ProfileEvents.Absorbable.goalProgressChanged.bind(null, skill));
     skill.on('experienceGained', ProfileEvents.Normal.experienceGained.bind(null, this));
   }
