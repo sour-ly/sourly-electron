@@ -384,9 +384,9 @@ namespace Online {
     };
   }
 
-  export async function getProfile(): Promise<APITypes.User> {
+  export async function getProfile(uid: string | number): Promise<APITypes.User> {
     const r = await API.get<APITypes.User>(
-      `protected/user/profile?user_name=${Authentication.loginState.state().username}`,
+      `protected/user/${uid}/profile`,
       header(),
     );
     if ('error' in r) {
@@ -544,7 +544,8 @@ export namespace APIMethods {
         return;
       }
       const user = await API.queueAndWait(
-        async () => await Online.getProfile(),
+        //this is a self grab
+        async () => await Online.getProfile(Authentication.loginState.state().userid ?? 0),
         'getSkills::350',
       );
       Online.setProfile({ profileobj, flags }, user);
