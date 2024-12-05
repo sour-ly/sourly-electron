@@ -3,7 +3,7 @@ import { endpoint } from '../main/version';
 import { GoalProps } from '../model/Goal';
 import { Profile, ProfileProps } from '../model/Profile';
 import Skill, { SkillManager, SkillProps } from '../model/Skill';
-import { SourlyFlags } from '../renderer';
+import { profileobj, SourlyFlags } from '../renderer';
 import IPC from '../renderer/ReactIPC';
 import Queue from '../renderer/util/queue';
 import { Stateful } from '../renderer/util/state';
@@ -641,6 +641,13 @@ export namespace APIMethods {
       }
       return true;
     }
+  }
+
+  export async function getProfile(uid: string | number) {
+    if (Authentication.getOfflineMode()) {
+      return profileobj;
+    }
+    return await Online.getProfile(uid);
   }
 
   export async function saveProfile(profile: Partial<ProfileProps>, changed: ('all' | keyof ProfileProps) = "all") {

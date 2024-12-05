@@ -89,10 +89,10 @@ export function SkillView({
       <div className="skillview__title">
         <div className="skillview__icon" />
         <div className="skillview__title__header">
-          <h1 onClick={absorb}>
+          <h2 onClick={absorb}>
             {skill.Name} {toRomanNumerals(skill.Level)}:{' '}
             {truncateDecimal(skill.CurrentExperience, 1)} EXP
-          </h1>
+          </h2>
           <OptionDropdown
             options={options.current}
             className="skillview__dot_container"

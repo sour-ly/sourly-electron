@@ -55,6 +55,9 @@ function Navigator() {
         case '/signup':
           spot = 1;
           break;
+        case '/search':
+          spot = 2;
+          break;
         case '/profile':
           spot = 3;
           break;
@@ -88,9 +91,16 @@ function Navigator() {
           <div className="netscape-box disabled" datatype-order={1}>
             <span>N/A</span>
           </div>
-          <div className="netscape-box disabled" datatype-order={2}>
-            <span>N/A</span>
-          </div>
+
+          <Link href="/search">
+            <div className="netscape-box"
+              datatype-order={2}
+              onMouseEnter={handleHover}
+              onMouseLeave={handleExit}
+            >
+              <span>Search</span>
+            </div>
+          </Link>
           <Link href="/profile">
             <div
               className="netscape-box "

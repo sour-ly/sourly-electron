@@ -33,6 +33,7 @@ import { Login } from './views/Login';
 import { Authentication } from '../api/auth';
 import { APIMethods } from '../api/api';
 import { Signup } from './views/Signup';
+import UserSearch from './views/UserSearch';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -258,7 +259,7 @@ export default function App({ flags }: { flags: number }) {
 
   function clearNotification() {
     setNotification(null);
-    while (notification_queue.pop()) {}
+    while (notification_queue.pop()) { }
   }
 
   function openMessageScreen(ctx: MSContext) {
@@ -334,6 +335,7 @@ export default function App({ flags }: { flags: number }) {
               </div>
               <Navigator />
               <Routes>
+                <Route path="/search" element={<UserSearch />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route

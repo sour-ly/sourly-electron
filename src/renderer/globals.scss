@@ -115,6 +115,12 @@
   --navigation-bar-button-hover-color: var(--navigation-bar-button-hover-color-light);
   --navigation-bar-button-border-color: var(--navigation-bar-button-border-color-light);
 
+  //divider line
+  --divider-color-light: #e8e8e8;
+  --divider-color-dark: #333;
+  //defaults
+  --divider-color: var(--divider-color-light);
+
   //messagescreen
   --messagescreen-bg-color: #000000a0;
   --messagescreen-content-bg-color: #1f1e2c;
@@ -203,6 +209,9 @@
   --input-border: var(--input-border-dark);
   --input-text: var(--input-text-dark);
   --input-text-placeholder: var(--input-text-placeholder-dark);
+
+  //divider
+  --divider-color: var(--divider-color-dark);
 }
 
 .inter {

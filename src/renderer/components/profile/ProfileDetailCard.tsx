@@ -50,10 +50,12 @@ export function getLevelText(level: number): string {
 
 type ProductDetailCard = {
   profile_obj: ProfileSkeleton;
+  editable?: boolean;
 };
 
-function ProductDetailCard({ profile_obj }: ProductDetailCard) {
+function ProductDetailCard({ profile_obj, editable }: ProductDetailCard) {
   const profile = profileobj;
+
 
   return (
     <div className="profile-detail-card">
@@ -62,21 +64,23 @@ function ProductDetailCard({ profile_obj }: ProductDetailCard) {
         <div className="profile-detail-card__header__info">
           <div className="profile-detail-card__header__info__name">
             <h2>{profile_obj.name}</h2>
-            <EditUsernameWrapper profile={profile} />
+            {editable &&
+              <EditUsernameWrapper profile={profile} />
+            }
           </div>
           <div className="profile-detail-card__header__info__level">
             <span>
-              Level {profile.Level} : {getLevelText(profile.Level)}
+              Level {profile_obj.level} : {getLevelText(profile.Level)}
             </span>
           </div>
           <div className="profile-detail-card__header__info__progress">
             <ProgressBar
-              max={profile.calculateMaxExperience()}
-              value={profile.CurrentExperience}
+              max={Profile.calculateMaxExperience(profile_obj.level)}
+              value={profile_obj.currentExperience}
             />
             <span>
-              {profile.CurrentExperience} XP /{' '}
-              {profile.calculateMaxExperience()} XP
+              {profile_obj.currentExperience} XP /{' '}
+              {Profile.calculateMaxExperience(profile_obj.level)} XP
             </span>
           </div>
         </div>

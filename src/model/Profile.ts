@@ -366,18 +366,19 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     }
   }
 
-  public calculateMaxExperience() {
-    return 100 * this.level + (this.level - 1) ** 2 * 5;
+  public static calculateMaxExperience(level: number) {
+    return 100 * level + (level - 1) ** 2 * 5;
   }
+
 
   private addExperience(experience: number) {
     this.currentExperience += experience;
     this.currentExperience = Math.floor(this.currentExperience * 1000) / 1000;
-    while (this.currentExperience >= this.calculateMaxExperience()) {
+    while (this.currentExperience >= Profile.calculateMaxExperience(this.level)) {
       Log.log('Profile:addExperience', 0, 'leveling up', this.level);
       this.emit('profilelevelUp', { profile: this, level: this.level + 1 });
       this.level++;
-      this.currentExperience -= this.calculateMaxExperience();
+      this.currentExperience -= Profile.calculateMaxExperience(this.level);
     }
     if (this.currentExperience < 0) {
       this.currentExperience = Math.abs(this.currentExperience);
