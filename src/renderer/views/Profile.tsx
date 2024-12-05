@@ -52,7 +52,7 @@ function ProfilePage() {
 
   return (
     <main>
-      <h1 style={{ marginBottom: '1rem' }}>Profile</h1>
+      <h1 style={{ marginBottom: '1rem' }}>{!uid || uid === `${profileobj.Id}` ? 'Your' : `${profile_state.name}'s`} Profile</h1>
       <ProductDetailCard profile_obj={profile_state} editable={!uid || uid === `${profileobj.Id}`} />
     </main>
   );
