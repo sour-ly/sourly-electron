@@ -1,0 +1,13 @@
+.search {
+  &__container {
+    width: 100%;
+  }
+
+  &__results {
+    display: grid;
+    gap: .25rem .25rem;
+    grid-template-columns: repeat(auto-fill, minmax(calc(50% - .25rem), 1fr));
+    padding: 0;
+    margin-top: .4rem;
+  }
+}

@@ -14,7 +14,6 @@ import Home from './views/Home';
 import Queue from './util/queue';
 import Navigator from './navigation/Navigation';
 import Settings from './views/Settings';
-import Profile from './views/Profile';
 import ProfilePage from './views/Profile';
 import {
   MessageScreen,
@@ -26,7 +25,6 @@ import {
   WelcomePageSlideOneContext,
   WelcomePageSlideTwoContext,
 } from './messagescreen/pages/WelcomePage';
-import useSettings from './util/usesettings';
 import { adjustTheme } from './util/darkmode';
 import { ProtectedRoute } from './protected/ProtectedRoute';
 import { Login } from './views/Login';
@@ -366,7 +364,7 @@ export default function App({ flags }: { flags: number }) {
               <div
                 className="feedback"
                 style={{
-                  borderTop: '1px solid black',
+                  borderTop: '1px solid var(--divider-color)',
                   paddingTop: '10px',
                   marginTop: '25px',
                 }}
