@@ -25,8 +25,11 @@ namespace ProfileEvents {
   export namespace Absorbable {
 
     /* PROFILE STUFF */
-    export async function onNameChange({ profile, name }: { profile: Profile; name: string }) {
-      return true;
+    export async function onNameChange({ name }: { profile: Profile; name: string }) {
+      if (!name) return true;
+      //send the name to the API
+      const r = await APIMethods.saveProfile({ name }, 'name');
+      return "error" in r;
     }
 
 
@@ -288,6 +291,15 @@ namespace ProfileEvents {
 
 }
 
+export type ProfileProps = {
+  name: string;
+  level: number;
+  currentExperience: number;
+  version: string;
+  flags: SourlyFlags;
+  skills: SkillProps[];
+}
+
 export class Profile extends SkillContainer<SkillEventMapOverride> {
   private level: number = 1;
 
@@ -391,13 +403,13 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
   private changeName(name: string) {
     const fn = () => {
       this.name = name;
+      this.emitUpdates();
     }
     this.emit('onNameChange', { profile: this, name }, fn);
   }
 
   // this setter will be used to update the profile name, but do not ever call it directly when the API comes out
   set Name(name: string) {
-
     this.changeName(name);
     //create event
     this.emitUpdates();
@@ -466,3 +478,5 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     };
   }
 }
+
+

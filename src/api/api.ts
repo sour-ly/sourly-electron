@@ -1,7 +1,7 @@
 import { Log } from '../log/log';
 import { endpoint } from '../main/version';
 import { GoalProps } from '../model/Goal';
-import { Profile } from '../model/Profile';
+import { Profile, ProfileProps } from '../model/Profile';
 import Skill, { SkillManager, SkillProps } from '../model/Skill';
 import { SourlyFlags } from '../renderer';
 import IPC from '../renderer/ReactIPC';
@@ -32,7 +32,7 @@ export namespace APITypes {
     username: string;
     name: string;
     level: number;
-    current_exp: number;
+    currentExp: number;
     created_at: string;
   };
 
@@ -361,6 +361,14 @@ namespace Offline {
       IPC.sendMessage('storage-request', { key: 'skill', value: '' });
     });
   }
+
+  export async function saveSkillsOffline(skills: object): Promise<void> {
+    IPC.sendMessage('storage-save', { key: 'skill', value: skills });
+  }
+
+  export async function saveProfileOffline(profile: object): Promise<void> {
+    IPC.sendMessage('storage-save', { key: 'profile', value: profile });
+  }
 }
 
 type GetSkillProps = {
@@ -407,7 +415,7 @@ namespace Online {
     }
     profileobj.state.NameEventless = user_obj.name;
     profileobj.state.Level = user_obj.level;
-    profileobj.state.CurrentExperience = user_obj.current_exp;
+    profileobj.state.CurrentExperience = user_obj.currentExp;
     profileobj.state.Flags = flags & ~SourlyFlags.IGNORE;
   }
 
@@ -456,6 +464,7 @@ namespace Online {
     );
   }
 
+
   /* GOAL METHODS */
   export async function addGoal(skill_id: number, goalProps: GoalProps) {
     const newSkill = await API.post<{ skill: APITypes.Skill }>(
@@ -492,6 +501,16 @@ namespace Online {
     );
   }
 
+  //goal stuff
+
+  export async function editProfileName(name: string) {
+    return await API.post<APITypes.User>(
+      `protected/user/${Authentication.loginState.state().userid ?? -1}/editname`,
+      { name },
+      header(),
+    );
+  }
+
 
 }
 
@@ -516,13 +535,7 @@ export namespace APIMethods {
     });
   }
 
-  async function saveSkillsOffline(skills: object): Promise<void> {
-    IPC.sendMessage('storage-save', { key: 'skill', value: skills });
-  }
 
-  async function saveProfileOffline(profile: object): Promise<void> {
-    IPC.sendMessage('storage-save', { key: 'profile', value: profile });
-  }
 
   // online stuff
   //
@@ -590,7 +603,7 @@ export namespace APIMethods {
     onlineFlags: 'create' | 'update' | 'delete' = 'create',
   ) {
     if (Authentication.getOfflineMode()) {
-      await saveSkillsOffline(skills);
+      await Offline.saveSkillsOffline(skills);
       return true;
     }
     if (onlineFlags === 'create') {
@@ -630,10 +643,20 @@ export namespace APIMethods {
     }
   }
 
-  export async function saveProfile(profile: object): Promise<void> {
+  export async function saveProfile(profile: Partial<ProfileProps>, changed: ('all' | keyof ProfileProps) = "all") {
     if (Authentication.getOfflineMode()) {
-      await saveProfileOffline(profile);
+      await Offline.saveProfileOffline(profile);
+      return {};
     } else {
+      //if all is changed, we need to check all the fields, however we are just going to check the name for now
+      if (changed === 'all' || changed === 'name') {
+        if (!profile.name) {
+          return { error: 'no-name', message: 'No name provided' };
+        }
+        //the "" won't matter because of the check above --- pesky typescript linter
+        const r = await API.queueAndWait(() => Online.editProfileName(profile.name ?? ""), "saveProfile");
+        return r;
+      }
     }
   }
 
