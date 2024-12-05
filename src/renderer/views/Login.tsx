@@ -106,6 +106,9 @@ export function Login() {
           <Button type="solid" onClick={login}>
             Login
           </Button>
+          <Button type="solid" onClick={login}>
+            Login with Google
+          </Button>
           <Button type="outline" onClick={offlineMode}>
             Offline Mode
           </Button>

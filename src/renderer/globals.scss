@@ -143,10 +143,19 @@
   --card-border-dark: #212121;
   --card-inner-background-dark: #121212;
 
+  --card-grid-background-dark: #20202055;
+  --card-grid-background-light: #fafafa;
+  //dots color
+  --card-grid-dots-color-dark: #20202070;
+  --card-grid-dots-color-light: #f0f0f0;
+
+
   //card settings -- DO NOT CHANGE
   --card-background: var(--card-background-light);
   --card-border: var(--card-border-light);
   --card-inner-background: var(--card-background-light);
+  --card-grid-background: var(--card-grid-background-light);
+  --card-grid-dots-color: var(--card-grid-dots-color-light);
 
   //profile detail card
   --profile-detail-card-bg-light: #fff;
@@ -186,6 +195,8 @@
   --card-background: var(--card-background-dark);
   --card-border: var(--card-border-dark);
   --card-inner-background: var(--card-inner-background-dark);
+  --card-grid-background: var(--card-grid-background-dark);
+  --card-grid-dots-color: var(--card-grid-dots-color-dark);
   --text-color: #ffffff;
 
   //navigation

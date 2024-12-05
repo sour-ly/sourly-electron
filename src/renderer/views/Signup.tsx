@@ -19,13 +19,6 @@ export function Signup() {
     x();
   }, []);
 
-  // switch to offline mode
-  function offlineMode() {
-    Authentication.offlineMode(() => {
-      navigation('/');
-    });
-  }
-
   return (
     <main className="signup">
       <div className="signup__container card">
@@ -36,8 +29,11 @@ export function Signup() {
           <Input label="Password" placeholder="Password" type="password" />
         </div>
         <div className="signup__container__links">
-          <Button type="solid" onClick={() => {}}>
+          <Button type="solid" onClick={() => { }}>
             Sign Up
+          </Button>
+          <Button type="outline" onClick={() => { }}>
+            Sign Up with Google
           </Button>
         </div>
       </div>

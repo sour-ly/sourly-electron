@@ -85,11 +85,13 @@ export namespace API {
   export async function get<T>(
     url: string,
     header: HeadersInit,
+    signal?: AbortSignal
   ): Promise<T | APITypes.APIError> {
     return fetch(BASE_URL + url, {
       method: 'GET',
       headers: { ...headers, ...header },
       credentials: 'include',
+      signal: signal
     })
       .then((res) => {
         const r = res.json();
@@ -109,6 +111,7 @@ export namespace API {
     url: string,
     body: any,
     header: HeadersInit = {},
+    signal?: AbortSignal
   ): Promise<T | APITypes.APIError> {
     return fetch(BASE_URL + url, {
       method: 'POST',
@@ -118,6 +121,7 @@ export namespace API {
       },
       credentials: 'include',
       body: JSON.stringify(body),
+      signal: signal
     })
       .then((res) => {
         const r = res.json();
@@ -217,6 +221,7 @@ export namespace API {
   export const queueAndWait = queueObject.queueAndWait.bind(queueObject);
   // dequeue should be called by the main process...
   export const dequeue = queueObject.pop.bind(queueObject);
+
 }
 
 namespace Offline {
@@ -392,6 +397,7 @@ namespace Online {
     };
   }
 
+  /* PROFILE STUFF */
   export async function getProfile(uid: string | number): Promise<APITypes.User> {
     const r = await API.get<APITypes.User>(
       `protected/user/${uid}/profile`,
@@ -417,6 +423,13 @@ namespace Online {
     profileobj.state.Level = user_obj.level;
     profileobj.state.CurrentExperience = user_obj.currentExp;
     profileobj.state.Flags = flags & ~SourlyFlags.IGNORE;
+  }
+
+  // okay lets search for users
+  export function searchUser(username: string, callback: (users: APITypes.User[] | APITypes.APIError) => void) {
+    const signal = new AbortController();
+    const r = API.post<APITypes.User[]>(`protected/user/search?name=${username}`, {}, header(), signal.signal).then(callback);
+    return { abort: signal, promise: r };
   }
 
   export function refreshToken() {
@@ -536,7 +549,6 @@ export namespace APIMethods {
   }
 
 
-
   // online stuff
   //
 
@@ -648,6 +660,10 @@ export namespace APIMethods {
       return profileobj;
     }
     return await Online.getProfile(uid);
+  }
+
+  export function searchUser(username: string, callback: (users: APITypes.User[] | APITypes.APIError) => void) {
+    return Online.searchUser(username, callback);
   }
 
   export async function saveProfile(profile: Partial<ProfileProps>, changed: ('all' | keyof ProfileProps) = "all") {
