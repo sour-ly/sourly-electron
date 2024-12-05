@@ -405,7 +405,7 @@ namespace Online {
     if (!profileobj.state) {
       throw new Error('profile object is still undefined');
     }
-    profileobj.state.Name = user_obj.name;
+    profileobj.state.NameEventless = user_obj.name;
     profileobj.state.Level = user_obj.level;
     profileobj.state.CurrentExperience = user_obj.current_exp;
     profileobj.state.Flags = flags & ~SourlyFlags.IGNORE;

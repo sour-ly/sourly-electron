@@ -9,6 +9,7 @@ import Skill, { SkillContainer, SkillEventMap, SkillProps } from './Skill';
 type SkillEventMapOverride = {
   onUpdates: { profile: Profile; skills: Skill[] };
   profilelevelUp: { profile: Profile; level: number };
+  onNameChange: { profile: Profile; name: string };
 } & Omit<SkillEventMap, 'onUpdates'>;
 
 export interface ProfileSkeleton {
@@ -22,6 +23,14 @@ export interface ProfileSkeleton {
 
 namespace ProfileEvents {
   export namespace Absorbable {
+
+    /* PROFILE STUFF */
+    export async function onNameChange({ profile, name }: { profile: Profile; name: string }) {
+      return true;
+    }
+
+
+    /* SKILL STUFF */
     export async function skillCreated({ newSkill }: { newSkill: Skill }) {
       if (!newSkill || Authentication.getOfflineMode()) return false;
       const r = await APIMethods.saveSkills(newSkill.toJSON(), 'create');
@@ -148,8 +157,8 @@ namespace ProfileEvents {
       });
     }
 
-    export async function goalUpdated(skill: Skill, { goal, newGoal }: { goal: Goal; newGoal: GoalProps }) {
-      return await APIMethods.updateGoal(Number(newGoal.id) ?? 0, skill.Id, newGoal).then((r) => {
+    export async function goalUpdated(skill: Skill, { goal, newGoal }: { goal: Goal; newGoal: Goal }) {
+      return await APIMethods.updateGoal(Number(newGoal.Id) ?? 0, skill.Id, newGoal.toJSON()).then((r) => {
         if (r === true) return false;
         if ("error" in r) {
           Log.log(
@@ -305,6 +314,8 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     this.absorbableOn('skillCreated', ProfileEvents.Absorbable.skillCreated);
     this.absorbableOn('skillChanged', ProfileEvents.Absorbable.skillChanged);
     this.absorbableOn('skillRemoved', ProfileEvents.Absorbable.skillRemoved);
+    /* PROFILE ABSORBS */
+    this.absorbableOn('onNameChange', ProfileEvents.Absorbable.onNameChange);
 
     //skill added
     this.on('skillAdded', ProfileEvents.Normal.skillAdded.bind(null, this));
@@ -377,9 +388,18 @@ export class Profile extends SkillContainer<SkillEventMapOverride> {
     return this.version;
   }
 
+  private changeName(name: string) {
+    const fn = () => {
+      this.name = name;
+    }
+    this.emit('onNameChange', { profile: this, name }, fn);
+  }
+
   // this setter will be used to update the profile name, but do not ever call it directly when the API comes out
   set Name(name: string) {
-    this.name = name;
+
+    this.changeName(name);
+    //create event
     this.emitUpdates();
   }
 
