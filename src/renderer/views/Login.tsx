@@ -6,6 +6,8 @@ import './styles/login.scss';
 import { useNavigate } from 'react-router-dom';
 import { useWindow } from '../App';
 import { useStateUtil } from '../util/state';
+import { GoogleLogin } from '@react-oauth/google';
+import { Link } from '../util/link';
 
 export function OfflinePopup() {
   return (
@@ -106,8 +108,8 @@ export function Login() {
           <Button type="solid" onClick={login}>
             Login
           </Button>
-          <Button type="solid" onClick={login}>
-            Login with Google
+          <Button type="outline" onClick={() => Link.NewTab('http://localhost:3000/api/v1/auth/login/google')}>
+            Login using Google
           </Button>
           <Button type="outline" onClick={offlineMode}>
             Offline Mode

@@ -1,6 +1,7 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.scss';
 import React, { useEffect, useRef, useState } from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { refresh } from 'electron-debug';
 import PopUp, { _popup_types, PopUpWindow } from './popup/Popup';
 import { version } from '../main/version';
@@ -32,6 +33,8 @@ import { Authentication } from '../api/auth';
 import { APIMethods } from '../api/api';
 import { Signup } from './views/Signup';
 import UserSearch from './views/UserSearch';
+import { ipcRenderer } from 'electron';
+import IPC from './ReactIPC';
 
 export type WindowContextType = {
   popUp: WindowPopUp;
@@ -97,6 +100,26 @@ export default function App({ flags }: { flags: number }) {
 
   /* main init function for the application */
   useEffect(() => {
+
+    /* Deeplink listener */
+    IPC.on('deeplink', (e) => {
+      console.log('Deeplink:', e);
+      if (e.func === 'login') {
+        if (e.token && e.refresh_token && e.user_id) {
+          Authentication.absorbTokens(e.token, e.refresh_token, e.user_id).then(r => {
+            if ("error" in r) {
+              console.log(r.error);
+            } else {
+            }
+          });
+          //refresh
+        } else if (e.error && e.code && e.message) {
+          //error
+          notify(e.message);
+        }
+      }
+    });
+
     /* grab the user's login data */
     APIMethods.getLoginState().then(async (login) => {
       if (login.null) {
@@ -271,115 +294,119 @@ export default function App({ flags }: { flags: number }) {
   }
 
   return (
-    <WindowContext.Provider
-      value={{
-        msgScreen: {
-          open: (...ctx: MSCompatiableScreen[]) => {
-            openMessageScreen({
-              flags,
-              pages: [...ctx],
-              onClose: () => {
-                setMsgContext(null);
-              },
-            });
-            return true;
-          },
-          close: () => {
-            setMsgContext(null);
-            return true;
-          },
-          state: msg_context !== null,
-        },
-        notification: {
-          notify: (s: string | NotificationObject) => {
-            notify(s);
-          },
-          clear: () => {
-            clearNotification();
-          },
-        },
-        popUp: {
-          open: (ctx) => {
-            openPopUp(ctx);
-            return true;
-          },
-          close: () => {
-            setPopUpContext({ open: false, context: null });
-            return true;
-          },
-          state: ctx_open,
-          update: () => setUpdate(!update),
-        },
-      }}
+    <GoogleOAuthProvider
+      clientId="164867438656-ckgm464nnn23m939ek1h6n8uo0kclqnk.apps.googleusercontent.com"
     >
-      <div>
-        <Router>
-          {loading ? (
-            <div className="loading">Loading...</div>
-          ) : (
-            <>
-              {msg_context && <MessageScreen {...msg_context} />}
-              <PopUp open={ctx_open} context={ctx_content} />
-              <NotificationBanner
-                notification={{
-                  state: notification,
-                  setState: setNotification,
-                }}
-                amount={notification_amount}
-              />
-              <div className="version">
-                {environment.mode === 'development' && 'd.'}v
-                {environment.version}
-              </div>
-              <Navigator />
-              <Routes>
-                <Route path="/search" element={<UserSearch />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Home />
-                    </ProtectedRoute>
-                  }
+      <WindowContext.Provider
+        value={{
+          msgScreen: {
+            open: (...ctx: MSCompatiableScreen[]) => {
+              openMessageScreen({
+                flags,
+                pages: [...ctx],
+                onClose: () => {
+                  setMsgContext(null);
+                },
+              });
+              return true;
+            },
+            close: () => {
+              setMsgContext(null);
+              return true;
+            },
+            state: msg_context !== null,
+          },
+          notification: {
+            notify: (s: string | NotificationObject) => {
+              notify(s);
+            },
+            clear: () => {
+              clearNotification();
+            },
+          },
+          popUp: {
+            open: (ctx) => {
+              openPopUp(ctx);
+              return true;
+            },
+            close: () => {
+              setPopUpContext({ open: false, context: null });
+              return true;
+            },
+            state: ctx_open,
+            update: () => setUpdate(!update),
+          },
+        }}
+      >
+        <div>
+          <Router>
+            {loading ? (
+              <div className="loading">Loading...</div>
+            ) : (
+              <>
+                {msg_context && <MessageScreen {...msg_context} />}
+                <PopUp open={ctx_open} context={ctx_content} />
+                <NotificationBanner
+                  notification={{
+                    state: notification,
+                    setState: setNotification,
+                  }}
+                  amount={notification_amount}
                 />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <ProfilePage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings"
-                  element={
-                    <ProtectedRoute>
-                      <Settings />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-              <div
-                className="feedback"
-                style={{
-                  borderTop: '1px solid var(--divider-color)',
-                  paddingTop: '10px',
-                  marginTop: '25px',
-                }}
-              >
-                Please leave feedback on{' '}
-                <Anchor
-                  href="https://forms.gle/TQHj89A2EwuxytaMA"
-                  text="Google Forms"
-                />
-              </div>
-            </>
-          )}
-        </Router>
-      </div>
-    </WindowContext.Provider>
+                <div className="version">
+                  {environment.mode === 'development' && 'd.'}v
+                  {environment.version}
+                </div>
+                <Navigator />
+                <Routes>
+                  <Route path="/search" element={<UserSearch />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Home />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <Settings />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+                <div
+                  className="feedback"
+                  style={{
+                    borderTop: '1px solid var(--divider-color)',
+                    paddingTop: '10px',
+                    marginTop: '25px',
+                  }}
+                >
+                  Please leave feedback on{' '}
+                  <Anchor
+                    href="https://forms.gle/TQHj89A2EwuxytaMA"
+                    text="Google Forms"
+                  />
+                </div>
+              </>
+            )}
+          </Router>
+        </div>
+      </WindowContext.Provider>
+    </GoogleOAuthProvider>
   );
 }
 // @END

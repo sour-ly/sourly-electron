@@ -10,11 +10,14 @@ export type Channels =
   | 'storage-save'
   | 'open-link'
   | 'environment-request'
-  | 'environment-response';
+  | 'environment-response'
+  | 'deeplink';
 
 export type ChannelsMap = {
   [key in Channels]: any[];
 };
+
+type Optional<T> = T | undefined;
 
 export const IPC_map = {
   'ipc-example': [''],
@@ -23,6 +26,7 @@ export const IPC_map = {
   'open-link': [''],
   'environment-request': [''],
   'environment-response': [{} as EnvironmentVariables],
+  'deeplink': [{} as { func: string, token?: string, refresh_token?: string, user_id?: string, error?: string, code?: string, message?: string, [key: string]: Optional<string> }],
 };
 
 const electronHandler = {

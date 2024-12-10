@@ -10,7 +10,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, ipcRenderer, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -18,6 +18,7 @@ import { openInBrowser, resolveHtmlPath } from './util';
 import { SourlyStorage } from '../storage/storage';
 import { Log } from '../log/log';
 import { version } from './version';
+import { Deeplink } from 'electron-deeplink';
 
 class AppUpdater {
   constructor() {
@@ -28,6 +29,94 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+const PROTOCOL_ID = 'sourly';
+
+// remove so we can register each time as we run the app.
+app.removeAsDefaultProtocolClient(PROTOCOL_ID);
+
+// If we are running a non-packaged version of the app && on windows
+if (process.argv.length >= 2) {
+  app.setAsDefaultProtocolClient(PROTOCOL_ID, process.execPath, [
+    '-r',
+    path.join(
+      __dirname,
+      '..',
+      '..',
+      'node_modules',
+      'ts-node/register/transpile-only'
+    ),
+    path.join(__dirname, '..', '..'),
+  ]);
+} else {
+  app.setAsDefaultProtocolClient(PROTOCOL_ID);
+}
+
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+
+  const deeplinkHandler = (deeplink: `sourly://${string}`) => {
+    try {
+      if (!mainWindow) {
+        return;
+      }
+      if (!deeplink.startsWith('sourly://')) {
+        return;
+      }
+      const stripped = deeplink.replace('sourly://', '');
+      if (!stripped) {
+        return;
+      }
+      //sourly://function?param=1&param=2
+      const split = stripped.split('?');
+      const func = split[0];
+      type Params = { [key: string]: string };
+      let params: Params = {};
+      if (split.length > 1) {
+        params = split[1].split('&').reduce((acc: Params, curr) => {
+          const [key, value] = curr.split('=');
+          acc[key] = value.replace(/%20/g, ' ');;
+          return acc;
+        }, {});
+      }
+      mainWindow.webContents.send('deeplink', { func, ...params });
+    }
+    catch (e) {
+      console.error("Error:", e);
+    }
+  }
+
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
+    const uri = commandLine.find((arg) => arg.startsWith('sourly://')) as `sourly://${string}`;
+    if (uri) {
+      deeplinkHandler(uri);
+    }
+
+  })
+
+  // Create mainWindow, load the rest of the app, etc...
+  app.whenReady().then(() => {
+    if (process.argv.length > 1) {
+      const uri = process.argv.find((arg) => arg.startsWith('sourly://')) as `sourly://${string}`;
+      if (uri) {
+        deeplinkHandler(uri);
+      }
+    }
+  })
+
+  app.on('open-url', (event, url) => {
+    event.preventDefault();
+    dialog.showErrorBox('Welcome Back', `You arrived from: ${url}`)
+  })
+}
+
 
 const storage = SourlyStorage.getInstance();
 
@@ -99,6 +188,7 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
+
 const createWindow = async () => {
   if (isDebug) {
     await installExtensions();
@@ -118,11 +208,16 @@ const createWindow = async () => {
     height: 728,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
+
+  mainWindow.webContents.openDevTools()
+
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
@@ -135,6 +230,11 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
+  });
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'allow' };
   });
 
   mainWindow.on('closed', () => {

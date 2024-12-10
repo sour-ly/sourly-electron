@@ -25,7 +25,7 @@ function ProfilePage() {
         }
       };
     } else {
-      //handle the case where we are given a uid
+      //handle the case wherdasde we are given a uid
       APIMethods.getProfile(uid).then((profile) => {
         if (!profile) {
           navigator('/profile');

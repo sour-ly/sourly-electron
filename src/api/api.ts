@@ -397,6 +397,10 @@ namespace Online {
     };
   }
 
+  export async function signup(username: string, password: string, email: string, name: string): Promise<APITypes.User | APITypes.APIError> {
+    return await API.post<APITypes.User | APITypes.APIError>('auth/register', { username, password, email, name });
+  }
+
   /* PROFILE STUFF */
   export async function getProfile(uid: string | number): Promise<APITypes.User> {
     const r = await API.get<APITypes.User>(
@@ -551,6 +555,16 @@ export namespace APIMethods {
 
   // online stuff
   //
+
+  //signup
+  export async function signup(
+    username: string,
+    password: string,
+    email: string,
+    name: string,
+  ) {
+    return await Online.signup(username, password, email, name);
+  }
 
   export async function getSkills({
     profileobj,

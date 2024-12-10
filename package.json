@@ -44,7 +44,7 @@
     "lint:fix": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never && npm run build:dll",
     "package-win": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --win --x64 --publish never && npm run build:dll",
-    "package-debug": "cross-env DEBUG_PROD=true && ts-node ./.erb/scripts/clean.js dist && npm run build:debug && electron-builder build --publish never && npm run build:dll",
+    "package-debug": "cross-env DEBUG_PROD=true && ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never && npm run build:dll",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "prestart": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.dev.ts",
     "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run prestart && npm run start:renderer",
@@ -104,7 +104,9 @@
   },
   "dependencies": {
     "@electron/notarize": "^2.3.2",
+    "@react-oauth/google": "^0.12.1",
     "electron-debug": "^3.2.0",
+    "electron-deeplink": "^1.0.10",
     "electron-log": "^4.4.8",
     "electron-updater": "^6.1.4",
     "js-confetti": "^0.12.0",
@@ -183,6 +185,12 @@
     "appId": "org.sourly.sourly",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
+    "protocols": {
+      "name": "sourly",
+      "schemes": [
+        "sourly"
+      ]
+    },
     "files": [
       "dist",
       "node_modules",
@@ -225,9 +233,25 @@
     },
     "linux": {
       "target": [
-        "AppImage"
+        "AppImage",
+        "deb"
       ],
-      "category": "Development"
+      "mimeTypes": [
+        "x-scheme-handler/sourly"
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "executableName": "sourly",
+      "desktop": {
+        "Name": "Sourly",
+        "Terminal": "false"
+      },
+      "protocols": {
+        "name": "sourly",
+        "schemes": [
+          "sourly"
+        ]
+      },
+      "category": "Utility"
     },
     "directories": {
       "app": "release/app",

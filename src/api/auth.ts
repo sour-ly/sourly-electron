@@ -4,7 +4,7 @@ import { Profile } from '../model/Profile';
 import { profileobj, setProfile } from '../renderer';
 import IPC from '../renderer/ReactIPC';
 import { ReactlessState, Stateful } from '../renderer/util/state';
-import { API, APIMethods } from './api';
+import { API, APIMethods, APITypes } from './api';
 
 export type LoginState = {
   null: boolean;
@@ -75,14 +75,15 @@ export namespace Authentication {
       });
     }
 
-    public emit<K extends keyof EventMap>(event: K, args: EventMap[K]) {
+    //@ts-ignore
+    public emit<K extends keyof EventMap>(event: K, args: EventMap[K], callback?: () => void) {
       // @ts-ignore
-      super.emit(event, args);
+      super.emit(event, args, callback);
     }
 
     public set LoginState(state: LoginState) {
       this.loginState = state;
-      super.emit('loginStateChange', { state, callback: () => {} });
+      super.emit('loginStateChange', { state, callback: () => { } });
     }
 
     public LoginStateCallback(
@@ -301,6 +302,58 @@ export namespace Authentication {
       };
 
     return bLoggedIn;
+  }
+
+  /* SIGN UP */
+  export async function signup(
+    { username, password, email, name }: { username: string, password: string, email: string, name: string }
+  ): Promise<boolean> {
+    const resp = await API.queueAndWait(
+      async () => await APIMethods.signup(username, password, email, name),
+      'auth::signup::202',
+    );
+    if ('error' in resp) {
+      return false;
+    }
+    return true;
+  }
+
+  /* ABSORB deeplinks */
+  export async function absorbTokens(
+    token: string,
+    refresh_token: string,
+    user_id: string,
+  ) {
+    //we need to clear ALL cookies
+    document.cookie = '';
+    setCookie('access_token', token, 3600);
+    setCookie('refresh_token', refresh_token, 3600);
+    setCookie('user_id', user_id, 3600);
+
+    const r = await API.queueAndWait(() => API.post<APITypes.RefreshResponse>("auth/login/google/electron", {
+      access_token: token,
+      refresh_token: refresh_token,
+      user_id: user_id
+    }))
+    if ("error" in r) {
+      return r;
+    }
+
+    //r is basically a refresh request
+    loginState.setState({
+      null: false,
+      offline: false,
+      userid: parseInt(user_id),
+      username: '',
+      accessToken: r.accessToken,
+      refreshToken: r.refreshToken,
+    });
+
+    //let the app know we've logged in
+    bLoggedIn = true;
+
+    return r
+
   }
 
   export function getLoggedIn() {
