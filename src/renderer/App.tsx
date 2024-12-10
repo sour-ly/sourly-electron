@@ -1,4 +1,4 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import { MemoryRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import './App.scss';
 import React, { useEffect, useRef, useState } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -75,6 +75,7 @@ export const useWindow = () => {
 // @TITLE App Entry
 // @DESC This is the main entry point for the application. This is where the main routing is done and the main context is set up. This is basically the heart of the application
 export default function App({ flags }: { flags: number }) {
+
   /* placeholder for now but -- loading logic */
   const [loading, setLoading] = useState(true);
 
@@ -103,13 +104,13 @@ export default function App({ flags }: { flags: number }) {
 
     /* Deeplink listener */
     IPC.on('deeplink', (e) => {
-      console.log('Deeplink:', e);
       if (e.func === 'login') {
         if (e.token && e.refresh_token && e.user_id) {
           Authentication.absorbTokens(e.token, e.refresh_token, e.user_id).then(r => {
             if ("error" in r) {
               console.log(r.error);
             } else {
+              //just do nothing, let some component listen to us
             }
           });
           //refresh

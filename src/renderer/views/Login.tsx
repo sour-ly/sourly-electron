@@ -39,6 +39,19 @@ export function Login() {
       }
     };
     x();
+    const z = Authentication.on('loginStateChange', (state) => {
+      if (state.state.null) {
+        // logged out
+        navigation('/login');
+      } else {
+        // logged in
+        navigation('/');
+      }
+    });
+
+    return () => {
+      Authentication.off('loginStateChange', z);
+    };
   }, []);
 
   // switch to offline mode

@@ -18,7 +18,6 @@ import { openInBrowser, resolveHtmlPath } from './util';
 import { SourlyStorage } from '../storage/storage';
 import { Log } from '../log/log';
 import { version } from './version';
-import { Deeplink } from 'electron-deeplink';
 
 class AppUpdater {
   constructor() {
@@ -113,7 +112,10 @@ if (!gotTheLock) {
 
   app.on('open-url', (event, url) => {
     event.preventDefault();
-    dialog.showErrorBox('Welcome Back', `You arrived from: ${url}`)
+    if (url.startsWith('sourly://'))
+      if (url) {
+        deeplinkHandler(url as `sourly://${string}`);
+      }
   })
 }
 
