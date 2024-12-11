@@ -234,10 +234,40 @@
 }
 
 .card {
+  position: relative;
   border: 1px solid var(--card-border);
   background: var(--card-background);
   border-radius: var(--card-border-radius);
   box-shadow: var(--card-shadow);
+
+  &.card-loading {
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.3);
+      z-index: 100;
+      animation: pulse-fade 1.5s infinite;
+      animation-fill-mode: forwards;
+
+      @keyframes pulse-fade {
+        0% {
+          opacity: 0;
+        }
+
+        50% {
+          opacity: 1;
+        }
+
+        100% {
+          opacity: 0;
+        }
+      }
+    }
+  }
 }
 
 .scrollbar {

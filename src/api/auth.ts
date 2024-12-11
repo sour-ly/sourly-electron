@@ -307,15 +307,12 @@ export namespace Authentication {
   /* SIGN UP */
   export async function signup(
     { username, password, email, name }: { username: string, password: string, email: string, name: string }
-  ): Promise<boolean> {
+  ) {
     const resp = await API.queueAndWait(
       async () => await APIMethods.signup(username, password, email, name),
       'auth::signup::202',
     );
-    if ('error' in resp) {
-      return false;
-    }
-    return true;
+    return resp;
   }
 
   /* ABSORB deeplinks */

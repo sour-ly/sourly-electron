@@ -75,6 +75,20 @@ export function Login() {
   }
 
   function login() {
+
+    const content = {
+      'fetch-failed': "It seems that the backend server is down, please try again. We apologize for this inconvience.",
+      'invalid-credentials': "Invalid credentials, please try again.",
+      'username-password-bad': "Either the username or password is incorrect, please try again.",
+      'user-not-verified': "Your account has not been verified, please check your email for the verification link.",
+      'unknown': "An unknown error occured, please try again.",
+    }
+
+    function getErrorContent(error: string) {
+      console.log(error);
+      return content[error as keyof typeof content] ?? content['unknown'];
+    }
+
     Authentication.login(inputData.username, inputData.password)
       .then((z) => {
         if (typeof z === 'boolean') {
@@ -84,7 +98,7 @@ export function Login() {
           ctx.popUp.open({
             type: 'dialog',
             title: 'Login Error',
-            content: () => <p>{z === 'fetch-failed' ? "It seems that the backend server is down. We apologize for this inconvience." : z}</p>,
+            content: () => <p>{getErrorContent(z)}</p>,
             options: {
               onOkay: () => {
                 ctx.popUp.close();
