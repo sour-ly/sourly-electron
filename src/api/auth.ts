@@ -65,7 +65,7 @@ export namespace Authentication {
             callback({ loginState: state });
           }, false);
         }
-        storage.save('login', state);
+        IPC.sendMessage('storage-save', { key: 'login', value: state });
       });
       this.on('logout', () => {
         IPC.sendMessage('storage-save', {
@@ -115,7 +115,7 @@ export namespace Authentication {
     { state: LoginState; callback: StateChangeCallback } | LoginState
   > = {
     state: () => authEvents.LoginState,
-    setState: async (state) => {
+    setState: async (state: any) => {
       if ('callback' in state) {
         authEvents.LoginStateCallback(state.state, state.callback);
       } else if (typeof state === 'function') {

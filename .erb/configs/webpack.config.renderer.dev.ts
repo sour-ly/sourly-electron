@@ -51,6 +51,7 @@ const configuration: webpack.Configuration = {
     path.join(webpackPaths.srcRendererPath, 'index.tsx'),
   ],
 
+
   output: {
     path: webpackPaths.distRendererPath,
     publicPath: '/',
@@ -138,12 +139,12 @@ const configuration: webpack.Configuration = {
     ...(skipDLLs
       ? []
       : [
-          new webpack.DllReferencePlugin({
-            context: webpackPaths.dllPath,
-            manifest: require(manifest),
-            sourceType: 'var',
-          }),
-        ]),
+        new webpack.DllReferencePlugin({
+          context: webpackPaths.dllPath,
+          manifest: require(manifest),
+          sourceType: 'var',
+        }),
+      ]),
 
     new webpack.NoEmitOnErrorsPlugin(),
 
