@@ -65,7 +65,7 @@ export namespace Authentication {
             callback({ loginState: state });
           }, false);
         }
-        IPC.sendMessage('storage-save', { key: 'login', value: state });
+        storage.save('login', state);
       });
       this.on('logout', () => {
         IPC.sendMessage('storage-save', {
