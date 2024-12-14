@@ -5,7 +5,39 @@ import { createRoot } from 'react-dom/client';
 import SettingsObject, { Settings } from 'sourly-webcore/src/settings/settings';
 import IPC from './ReactIPC';
 import { Log } from '../log/log';
+import { Asset } from 'sourly-webcore/src/interface/iasset';
+import Assets from './asset';
+import IFlags from 'sourly-webcore/src/interface/iflag';
 
+function getFlags() {
+  return SourlyStorage.getInstance().getItem('flags') as number ?? 0;
+}
+function setFlags(flags: number) {
+  SourlyStorage.getInstance().setItem('flags', flags);
+  return getFlags();
+}
+
+const flags: IFlags = {
+  getFlags,
+  setFlags,
+  //ops
+  xor(flag: number) {
+    setFlags(getFlags() ^ flag);
+    return this;
+  },
+  or(flag: number) {
+    setFlags(getFlags() | flag);
+    return this;
+  },
+  and(flag: number) {
+    setFlags(getFlags() & flag);
+    return this;
+  },
+  not() {
+    setFlags(~getFlags());
+    return this;
+  },
+}
 
 
 AppInit(
@@ -31,16 +63,11 @@ AppInit(
         IPC.sendMessage('storage-request', { key: 'settings', value: '' });
       });
     },
-    getFlags: async () => {
-      return 0;
-    },
     getProfile: async () => {
       return {} as ProfileProps;
     },
-    setFlags: async (flags: number) => {
-
-    },
     systems: {
+      flags: flags,
       storage: {
         get: async (key: string) => {
           return await new Promise((resolve) => {
@@ -70,9 +97,17 @@ AppInit(
             IPC.sendMessage('storage-save', { key: key, value: val });
           });
         },
+      },
+      asset: {
+        getAsset: (asset: Asset) => {
+          return Assets[asset];
+        }
+      },
+      api: {
+        //check env for dev or prod
+        'endpoint': process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://api.sourly.com',
       }
     },
-    apiEndpoint: 'http://localhost:3000/api/v1/'
   }).then((App) => {
     const container = document.getElementById('root') as HTMLElement;
     const root = createRoot(container);
