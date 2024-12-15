@@ -8,32 +8,52 @@ import { Log } from '../log/log';
 import { Asset } from 'sourly-webcore/src/interface/iasset';
 import Assets from './asset';
 import IFlags from 'sourly-webcore/src/interface/iflag';
+import { EnvironmentVariables } from '../main/version';
 
 
+async function getFromSourlyStorage(key: string) {
+
+  return await new Promise((resolve) => {
+    const x = IPC.on('storage-request', (...arg) => {
+      const [_key, data] = arg;
+      const k = _key as unknown as string;
+      if (key !== k) return;
+      if (!data) {
+        Log.log('storage:request [storage]', 1, 'got a bad packet (or no entry exists)', data);
+        resolve(null);
+        x();
+      } else {
+        try {
+          Log.log('storage:request [storage]', 0, 'loaded %s from storage', key, data);
+          resolve(data as any);
+          x();
+        } catch (e) {
+          Log.log('storage:request [storage]', 1, 'failed to load %s from storage with error %s', key, e, data);
+          resolve(null);
+          x();
+        }
+      }
+    })
+    IPC.sendMessage('storage-request', { key: key, value: '' });
+  });
+
+}
 
 const x = new Promise(async (resolve) => {
 
-  let flag = 0;
+  let flag = await getFromSourlyStorage('flags') as number;
+  console.log(flag);
+
+  let environment: EnvironmentVariables | undefined = undefined;
   await new Promise((resolve) => {
-    IPC.once('storage-request', async (...arg) => {
+    IPC.once('environment-response', async (...arg) => {
       //this will be our settings object
       const [data] = arg;
-      const f = data as unknown as number;
-      if (!f || isNaN(f)) {
-        Log.log('storage:request [flags]', 1, 'got a bad packet (or no entry exists)', f);
-      } else {
-        try {
-          Log.log('storage:request [flags]', 0, 'loaded flags from storage', f);
-          flag = f;
-          console.log('flag', flag);
-          resolve(undefined);
-        } catch (e) {
-          Log.log('storage:request [flags]', 1, 'failed to load flags from storage with error %s', e, f);
-        }
-      }
+      const e = data;
+      environment = e;
       resolve(undefined);
     })
-    IPC.sendMessage('storage-request', { key: 'flags', value: '' });
+    IPC.sendMessage('environment-request', '');
   });
 
 
@@ -43,9 +63,7 @@ const x = new Promise(async (resolve) => {
   }
   function setFlags(flags: number) {
     flag = flags;
-
-    //IPC.sendMessage('storage-save', { key: 'flags', value: flags });
-
+    IPC.sendMessage('storage-save', { key: 'flags', value: flag });
     return getFlags();
   }
 
@@ -100,32 +118,13 @@ const x = new Promise(async (resolve) => {
       },
       systems: {
         flags: flags,
+        env: {
+          mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
+          platform: environment!.platform,
+          version: '0.1.0',
+        },
         storage: {
-          get: async (key: string) => {
-            return await new Promise((resolve) => {
-              const x = IPC.on('storage-request', (...arg) => {
-                const [_key, data] = arg;
-                const k = _key as unknown as string;
-                if (key !== k) return;
-                if (!data || Object.keys(data).length === 0) {
-                  Log.log('storage:request [storage]', 1, 'got a bad packet (or no entry exists)', data);
-                  resolve(null);
-                  x();
-                } else {
-                  try {
-                    Log.log('storage:request [storage]', 0, 'loaded %s from storage', key, data);
-                    resolve(data as any);
-                    x();
-                  } catch (e) {
-                    Log.log('storage:request [storage]', 1, 'failed to load %s from storage with error %s', key, e, data);
-                    resolve(null);
-                    x();
-                  }
-                }
-              })
-              IPC.sendMessage('storage-request', { key: key, value: '' });
-            });
-          },
+          get: getFromSourlyStorage,
           save: async (key, val) => {
             return await new Promise((resolve) => {
               IPC.once('storage-save', (...arg) => {
