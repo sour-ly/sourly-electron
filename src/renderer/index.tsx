@@ -141,7 +141,7 @@ const x = new Promise(async (resolve) => {
         },
         api: {
           //check env for dev or prod
-          'endpoint': process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://api.sourly.com',
+          'endpoint': process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://api.sourly.org',
         }
       },
     }).then((App) => {

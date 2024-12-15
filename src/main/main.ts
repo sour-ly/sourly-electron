@@ -122,6 +122,8 @@ if (!gotTheLock) {
 
 const storage = SourlyStorage.getInstance();
 
+ipcMain.setMaxListeners(100);
+
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
@@ -218,7 +220,7 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
