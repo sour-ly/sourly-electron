@@ -51,6 +51,7 @@ const configuration: webpack.Configuration = {
     path.join(webpackPaths.srcRendererPath, 'index.tsx'),
   ],
 
+
   output: {
     path: webpackPaths.distRendererPath,
     publicPath: '/',
@@ -69,7 +70,6 @@ const configuration: webpack.Configuration = {
           {
             loader: 'css-loader',
             options: {
-
               modules: true,
               sourceMap: true,
               silenceDeprecations: true,
@@ -81,24 +81,27 @@ const configuration: webpack.Configuration = {
 
             options: {
               sassOptions: {
-                quietDeps: true  // suppress warnings from dependencies
+                quietDeps: true, // suppress warnings from dependencies
               },
-            }
+            },
           },
         ],
         include: /\.module\.s?(c|a)ss$/,
       },
       {
         test: /\.s?css$/,
-        use: ['style-loader', 'css-loader',
+        use: [
+          'style-loader',
+          'css-loader',
           {
             loader: 'sass-loader',
             options: {
               sassOptions: {
-                quietDeps: true  // suppress warnings from dependencies
+                quietDeps: true, // suppress warnings from dependencies
               },
-            }
-          }],
+            },
+          },
+        ],
         exclude: /\.module\.s?(c|a)ss$/,
       },
       // Fonts

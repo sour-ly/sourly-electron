@@ -5,11 +5,11 @@ module.exports = {
       config: {
         repository: {
           owner: 'Identityofsine',
-          name: 'sourly-electron'
+          name: 'sourly-electron',
         },
         prerelease: false,
-        draft: true
-      }
-    }
-  ]
-}
+        draft: true,
+      },
+    },
+  ],
+};

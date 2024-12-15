@@ -1,5 +1,10 @@
 export namespace Log {
-  export function log(source: string, severity: 0 | 1 | 2, message: string, ...args: any[]) {
+  export function log(
+    source: string,
+    severity: 0 | 1 | 2,
+    message: string,
+    ...args: any[]
+  ) {
     let severityString = '';
     switch (severity) {
       case 0:
@@ -14,12 +19,20 @@ export namespace Log {
     }
 
     if (typeof console[severityString as keyof Console] === 'function') {
-      //@ts-ignore
-      console[severityString as keyof Console](`[${source}] ${message}`, ...args);
+      // @ts-ignore
+      console[severityString as keyof Console](
+        `[${source}] ${message}`,
+        ...args,
+      );
     }
   }
 
-  export function assert(condition: boolean, source: string, message: string, ...args: any[]) {
+  export function assert(
+    condition: boolean,
+    source: string,
+    message: string,
+    ...args: any[]
+  ) {
     console.assert(condition, `[${source}] ${message}`, ...args);
   }
 }
