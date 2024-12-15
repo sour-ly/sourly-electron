@@ -3,7 +3,7 @@ import { Channels, IPC_map } from '../main/preload';
 type arg<T extends Channels> = (typeof IPC_map)[T];
 
 interface IPCHandler {
-  on<T extends Channels>(channel: T, listener: (...args: arg<T>) => void): void;
+  on<T extends Channels>(channel: T, listener: (...args: arg<T>) => void): Function;
   once<T extends Channels>(
     channel: T,
     listener: (...args: arg<T>) => void,
@@ -15,9 +15,9 @@ const IPC: IPCHandler = {
   on: (channel, listener) => {
     if (!window.electron) {
       console.error('electron is not defined');
-      return;
+      return () => { };
     }
-    window.electron.ipcRenderer.on(channel, listener as any);
+    return window.electron.ipcRenderer.on(channel, listener as any);
   },
   once: (channel, listener) => {
     if (!window.electron) {

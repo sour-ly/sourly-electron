@@ -132,7 +132,7 @@ ipcMain.on('ipc-example', async (event, arg) => {
 ipcMain.on('storage-request', async (event, arg) => {
   const [data] = arg;
   Log.log('ipcMain:lambda:request', 0, 'Received storage request', data);
-  event.reply('storage-request', storage.getItem(data.key) ?? {});
+  event.reply('storage-request', data.key, storage.getItem(data.key) ?? {});
 });
 
 ipcMain.on('storage-save', async (event, arg) => {
