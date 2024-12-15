@@ -26,6 +26,16 @@ jobs:
           node-version: 18
           cache: npm
 
+      # Step to clone the sourly-webcore repo
+      - name: Clone sourly-webcore
+        run: |
+          git clone https://github.com/sour-ly/sourly-webcore.git ../sourly-webcore
+
+      # Step to link sourly-webcore
+      - name: Link sourly-webcore
+        run: |
+          npm link ../sourly-webcore
+
       - name: Install and build
         run: |
           npm install
