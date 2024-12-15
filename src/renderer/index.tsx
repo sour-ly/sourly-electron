@@ -1,6 +1,5 @@
 import AppInit from 'sourly-webcore/src'
 import { SourlyStorage } from '../storage/storage';
-import { ProfileProps } from '../model/Profile';
 import { createRoot } from 'react-dom/client';
 import SettingsObject, { Settings } from 'sourly-webcore/src/settings/settings';
 import IPC from './ReactIPC';
@@ -9,6 +8,7 @@ import { Asset } from 'sourly-webcore/src/interface/iasset';
 import Assets from './asset';
 import IFlags from 'sourly-webcore/src/interface/iflag';
 import { EnvironmentVariables } from '../main/version';
+import { ProfileProps } from 'sourly-webcore/src/object/Profile';
 
 
 async function getFromSourlyStorage(key: string) {
@@ -40,7 +40,6 @@ async function getFromSourlyStorage(key: string) {
 }
 
 const x = new Promise(async (resolve) => {
-
   let flag = await getFromSourlyStorage('flags') as number;
   console.log(flag);
 
@@ -154,3 +153,4 @@ const x = new Promise(async (resolve) => {
 
 Promise.all([x]).then(() => {
 });
+
