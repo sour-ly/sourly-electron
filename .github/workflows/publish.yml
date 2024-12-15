@@ -35,6 +35,9 @@ jobs:
 
       - name: Install and build
         run: |
+          cd ../sourly-webcore
+          npm install
+          cd ../sourly-electron
           npm install
           npm run postinstall
           npm link ../sourly-webcore
