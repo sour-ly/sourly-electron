@@ -31,15 +31,13 @@ jobs:
         run: |
           git clone https://github.com/sour-ly/sourly-webcore.git ../sourly-webcore
 
-      # Step to link sourly-webcore
-      - name: Link sourly-webcore
-        run: |
-          npm link ../sourly-webcore
+
 
       - name: Install and build
         run: |
           npm install
           npm run postinstall
+          npm link ../sourly-webcore
           npm run build
 
       - name: Publish releases
