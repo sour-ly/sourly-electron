@@ -5,6 +5,8 @@ import exit from '../../assets/ui/exit.svg';
 import next from '../../assets/ui/next.svg';
 import plus from '../../assets/ui/plus.svg';
 import pencil from '../../assets/ui/pencil.svg';
+import gear from '../../assets/ui/gears.svg';
+import user from '../../assets/ui/user.svg';
 /* IMAGES */
 import welcomeScreenAddGoal from '../../assets/images/welcome-screen-add-goal.png';
 import welcomeScreenAddGoalPopup from '../../assets/images/welcome-screen-add-goal-popup.png';
@@ -21,6 +23,8 @@ const Assets: AssetTree = {
   "ui/next": next,
   "ui/plus": plus,
   "ui/pencil": pencil,
+  "ui/gear": gear,
+  "ui/user": user,
   /* Images */
   "images/welcome-screen-add-goal": welcomeScreenAddGoal,
   "images/welcome-screen-add-goal-popup": welcomeScreenAddGoalPopup,

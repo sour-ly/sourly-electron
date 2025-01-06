@@ -120,7 +120,7 @@ const x = new Promise(async (resolve) => {
         env: {
           mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
           platform: environment!.platform,
-          version: '0.1.0',
+          version: '0.2.0',
         },
         storage: {
           get: getFromSourlyStorage,
